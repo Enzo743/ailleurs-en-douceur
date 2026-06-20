@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Gestion des articles
+
+model Article {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  excerpt     String?
+  content     String    @db.Text
+  coverImage  String?
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Gestion des images et des textes du site
+
+model SiteContent {
+  id        String      @id @default(cuid())
+  key       String      @unique
+  type      ContentType
+  value     String      @db.Text
+  updatedAt DateTime    @updatedAt
+}
+
+enum ContentType {
+  TEXT
+  RICHTEXT
+  IMAGE
+}
