@@ -1,12 +1,15 @@
+@use "variables" as *;
+@use "mixins" as *;
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #{$color-background};
+  --foreground: #{$color-foreground};
 }
 
-@media (prefers-color-scheme: dark) {
+@include dark-mode {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #{$color-background-dark};
+    --foreground: #{$color-foreground-dark};
   }
 }
 
@@ -26,7 +29,7 @@ body {
   flex-direction: column;
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: $font-family-base;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -42,7 +45,7 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
+@include dark-mode {
   html {
     color-scheme: dark;
   }
