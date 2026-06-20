@@ -1,14 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import {Libre_Baskerville, Lora, Sacramento} from "next/font/google";
 import "@/styles/globals.scss";
+import {NextFontWithVariable} from "next/dist/compiled/@next/font";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const libreBaskerville: NextFontWithVariable = Libre_Baskerville({
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-libre",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const lora: NextFontWithVariable = Lora({
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-lora",
+  subsets: ["latin"],
+});
+
+const sacramento: NextFontWithVariable = Sacramento({
+  weight: "400",
+  variable: "--font-sacramento",
   subsets: ["latin"],
 });
 
@@ -23,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="fr" className={`${lora.variable} ${libreBaskerville.variable} `}>
       <body>{children}</body>
     </html>
   );

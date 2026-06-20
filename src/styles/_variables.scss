@@ -3,9 +3,15 @@ $color-background: #ffffff;
 $color-foreground: #171717;
 $color-background-dark: #0a0a0a;
 $color-foreground-dark: #ededed;
+$color-creme: #fefaed;
+$color-caramel: #d4a373;
+$color-sauge: #b2ac88;
+$color-brun: #4a3f2f;
 
 // Typography
-$font-family-base: Arial, Helvetica, sans-serif;
+$font-family-base: var(--font-lora), Arial, Helvetica, sans-serif;
+$font-family-title: var(--font-libre), Arial, Helvetica, sans-serif;
+$font-family-secondary: var(--font-sacramento), Arial, Helvetica, sans-serif;
 
 // Breakpoints
 $breakpoint-sm: 600px;
