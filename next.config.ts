@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   sassOptions: {
     loadPaths: ["./src/styles"],
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "5mb",
+    },
+  },
 };
 
 export default nextConfig;

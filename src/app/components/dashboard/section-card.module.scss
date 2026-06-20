@@ -1,0 +1,181 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+// ── Carte ─────────────────────────────────────────────────────────────────────
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+// ── En-tête ───────────────────────────────────────────────────────────────────
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.875rem;
+  border-bottom: 2px solid $color-caramel;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  background-color: $color-caramel;
+  border-radius: 50%;
+}
+
+.title {
+  margin: 0;
+  font-family: $font-family-title;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: $color-brun;
+}
+
+// ── Bouton repère visuel ──────────────────────────────────────────────────────
+
+.previewButton {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.75rem;
+  font-family: $font-family-title;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $color-brun;
+  background-color: #fdf3e7;
+  border: 1.5px solid $color-caramel;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  @include hover-capable {
+    &:hover {
+      background-color: $color-caramel;
+      color: #ffffff;
+    }
+  }
+}
+
+.previewIcon {
+  font-size: 0.875rem;
+}
+
+// ── Champs ────────────────────────────────────────────────────────────────────
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+// ── Overlay ───────────────────────────────────────────────────────────────────
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  padding: 1.5rem;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+// ── Modale ────────────────────────────────────────────────────────────────────
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 820px;
+  max-height: 90dvh;
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: slideUp 0.18s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: #374151;
+
+  strong {
+    color: $color-brun;
+    font-family: $font-family-title;
+  }
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 0.9375rem;
+  color: #6b7280;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  @include hover-capable {
+    &:hover {
+      background-color: #fee2e2;
+      color: #dc2626;
+      border-color: #fca5a5;
+    }
+  }
+}
+
+.modalImageWrapper {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  max-height: calc(90dvh - 64px);
+  overflow: hidden;
+}
+
+.modalImage {
+  object-fit: contain;
+}
