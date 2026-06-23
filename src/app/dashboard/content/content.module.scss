@@ -2,7 +2,7 @@
 @use "mixins" as *;
 
 .page {
-  max-width: 1200px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -20,21 +20,10 @@
   color: #6b7280;
 }
 
-// ── Grille 2 colonnes ─────────────────────────────────────────────────────────
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  align-items: start; // chaque carte garde sa hauteur naturelle
-}
-
-// ── Responsive ────────────────────────────────────────────────────────────────
-
-@include respond-to(md) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 @include respond-to(sm) {

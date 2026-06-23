@@ -30,8 +30,7 @@ export default async function ContentPage() {
             <p className={styles.pageSubtitle}>
                 Modifiez les textes et les images affichés sur le site.
             </p>
-
-            <div className={styles.grid}>
+            <div className={styles.list}>
                 {Object.entries(sections).map(([section, items]) => (
                     <SectionCard
                         key={section}
