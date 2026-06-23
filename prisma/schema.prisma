@@ -20,6 +20,14 @@ model Article {
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  tags        Tag[]
+}
+
+model Tag {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  slug     String    @unique
+  articles Article[]
 }
 
 // Gestion des images et des textes du site

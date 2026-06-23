@@ -1,0 +1,105 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inputRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  min-height: 44px;
+  background-color: #f9fafb;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus-within {
+    border-color: $color-caramel;
+    box-shadow: 0 0 0 3px rgba($color-caramel, 0.15);
+    background-color: #ffffff;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: $color-brun;
+  background-color: #fdf3e7;
+  border: 1px solid $color-caramel;
+  border-radius: 999px;
+}
+
+.chipRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font-size: 0.875rem;
+  line-height: 1;
+  color: #6b7280;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+
+  @include hover-capable {
+    &:hover {
+      color: #dc2626;
+      background-color: rgba(#dc2626, 0.1);
+    }
+  }
+}
+
+.input {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.25rem 0;
+  font-family: $font-family-base;
+  font-size: 0.9375rem;
+  color: #111827;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.suggestion {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.8125rem;
+  color: #374151;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  @include hover-capable {
+    &:hover {
+      background-color: #fdf3e7;
+      border-color: $color-caramel;
+    }
+  }
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #9ca3af;
+}

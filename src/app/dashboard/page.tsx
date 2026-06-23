@@ -1,8 +1,11 @@
 import { verifySession } from '@/lib/auth';
+import { getArticleCount } from '@/app/actions/articles';
 import styles from './dashboard.module.scss';
 
 export default async function DashboardPage() {
     await verifySession();
+
+    const articleCount = await getArticleCount();
 
     return (
         <section className={styles.page}>
@@ -12,6 +15,10 @@ export default async function DashboardPage() {
             </p>
 
             <div className={styles.grid}>
+                <div className={styles.widget}>
+                    <h2 className={styles.widgetTitle}>Articles</h2>
+                    <p className={styles.widgetValue}>{articleCount}</p>
+                </div>
                 <div className={styles.widget}>
                     <h2 className={styles.widgetTitle}>Destinations</h2>
                     <p className={styles.widgetValue}>—</p>

@@ -1,0 +1,141 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 800px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-family: $font-family-title;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-family: $font-family-base;
+  font-size: 0.9375rem;
+  color: #111827;
+  background-color: #f9fafb;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus {
+    border-color: $color-caramel;
+    box-shadow: 0 0 0 3px rgba($color-caramel, 0.15);
+    background-color: #ffffff;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 96px;
+  line-height: 1.6;
+}
+
+.slugHint {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #9ca3af;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.875rem;
+  padding-top: 0.5rem;
+}
+
+.saveButton {
+  padding: 0.625rem 1.25rem;
+  font-family: $font-family-title;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #6b7280;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+
+  @include hover-capable {
+    &:hover:not(:disabled) {
+      background-color: #4b5563;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.publishButton {
+  padding: 0.625rem 1.25rem;
+  font-family: $font-family-title;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: $color-caramel;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+
+  @include hover-capable {
+    &:hover:not(:disabled) {
+      background-color: $color-brun;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.statusOk {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #059669;
+}
+
+.statusErr {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #dc2626;
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-decoration: none;
+
+  @include hover-capable {
+    &:hover {
+      color: $color-brun;
+    }
+  }
+}

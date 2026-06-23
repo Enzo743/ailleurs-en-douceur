@@ -1,0 +1,107 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: 0.5rem;
+  background-color: #f9fafb;
+  border: 1.5px solid #d1d5db;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+}
+
+.toolbarButton {
+  padding: 0.375rem 0.625rem;
+  font-family: $font-family-title;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #374151;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  @include hover-capable {
+    &:hover:not(:disabled) {
+      background-color: #fdf3e7;
+      border-color: $color-caramel;
+    }
+  }
+
+  &[data-active='true'] {
+    background-color: #fdf3e7;
+    border-color: $color-caramel;
+    color: $color-brun;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.editor {
+  min-height: 280px;
+  padding: 0.75rem 1rem;
+  font-family: $font-family-base;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: #111827;
+  background-color: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 0 0 8px 8px;
+  outline: none;
+
+  &:focus-within {
+    border-color: $color-caramel;
+    box-shadow: 0 0 0 3px rgba($color-caramel, 0.15);
+  }
+
+  :global(.tiptap) {
+    outline: none;
+    min-height: 240px;
+
+    p {
+      margin: 0 0 0.75rem;
+    }
+
+    ul,
+    ol {
+      margin: 0 0 0.75rem;
+      padding-left: 1.5rem;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin: 0.5rem 0;
+    }
+
+    p.is-editor-empty:first-child::before {
+      color: #9ca3af;
+      content: attr(data-placeholder);
+      float: left;
+      height: 0;
+      pointer-events: none;
+    }
+  }
+}
+
+.editorDisabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
