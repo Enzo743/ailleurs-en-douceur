@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { prisma } from "@/lib/prisma";
 
 interface ContactFormData {
   firstName: string;
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
     // Récupération des variables d'environnement
     const emailUser = process.env.EMAIL_USER;
     const emailPass = process.env.EMAIL_PASS;
+    const emailFrom = process.env.EMAIL_FROM;
     
     if (!emailUser || !emailPass) {
       return NextResponse.json(
@@ -62,6 +64,25 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+    
+    if (!emailFrom) {
+      return NextResponse.json(
+        { error: "L'adresse email de l'expéditeur (EMAIL_FROM) est requise" },
+        { status: 500 }
+      );
+    }
+
+    // Récupération des contenus personnalisés depuis la base de données
+    const emailSubjectContent = await prisma.siteContent.findUnique({
+      where: { key: 'contact-email/client-subject' },
+    });
+    const emailMessageContent = await prisma.siteContent.findUnique({
+      where: { key: 'contact-email/client-message' },
+    });
+
+    // Valeurs par défaut si non trouvées dans la base
+    const clientSubject = emailSubjectContent?.value || 'Confirmation de votre demande - Ailleurs en Douceur';
+    const customMessage = emailMessageContent?.value || 'Vous allez être recontacté prochainement pour obtenir plus d\'informations et convenir d\'un entretien en visioconférence.';
 
     // Validation basique
     if (!body.privacyAccepted) {
@@ -177,13 +198,100 @@ Ce message a été envoyé via le formulaire de contact du site Ailleurs en Douc
 Date: ${new Date().toLocaleString('fr-FR')}
     `;
 
-    // Envoi de l'email
+    // Envoi de l'email à la destinataire (votre cliente)
     await transporter.sendMail({
-      from: `"Ailleurs en Douceur" <${emailUser}>`, // L'email de l'expéditeur
+      from: `"Ailleurs en Douceur" <${emailFrom}>`, // L'email de l'expéditeur (doit être vérifié dans SendGrid)
       to: recipientEmail,
       subject: emailSubject,
       text: emailText,
       html: emailHtml,
+    });
+
+    // Préparation de l'email de confirmation pour le client
+    const clientEmailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #f4e4c1; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .header h1 { margin: 0; color: #4a3f2f; }
+            .content { background: #fff; padding: 20px; border-radius: 0 0 8px 8px; }
+            .field { margin-bottom: 15px; }
+            .field strong { display: inline-block; width: 150px; color: #4a3f2f; }
+            .message { background: #f9f9f9; padding: 15px; border-radius: 4px; margin-top: 15px; }
+            .confirmation { background: #e8f5e9; padding: 15px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #2e7d32; }
+            .footer { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Merci pour votre demande</h1>
+            </div>
+            <div class="content">
+              <p>Bonjour ${body.firstName},</p>
+              
+              <p>Nous avons bien reçu votre demande de contact. Voici un récapitulatif :</p>
+              
+              <div class="field"><strong>Nom:</strong> ${body.firstName} ${body.lastName}</div>
+              <div class="field"><strong>Email:</strong> ${body.email}</div>
+              <div class="field"><strong>Formule demandée:</strong> ${packageLabel}</div>
+              <div class="field"><strong>Nombre de nuits:</strong> ${nights} nuit${nights > 1 ? 's' : ''}</div>
+              <div class="field">
+                <strong>Votre message:</strong>
+                <div class="message">${body.message.replace(/\n/g, '<br>')}</div>
+              </div>
+              
+              <div class="confirmation">
+                <p><strong>${customMessage}</strong></p>
+              </div>
+              
+              <p>Nous vous répondrons dans les plus brefs délais pour discuter de votre projet.</p>
+              <p>À très bientôt,<br>L'équipe Ailleurs en Douceur</p>
+            </div>
+            <div class="footer">
+              <p>Ce message a été envoyé automatiquement via le formulaire de contact du site Ailleurs en Douceur.</p>
+              <p>Date: ${new Date().toLocaleString('fr-FR')}</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const clientEmailText = `
+${clientSubject}
+
+Bonjour ${body.firstName},
+
+Nous avons bien reçu votre demande de contact. Voici un récapitulatif :
+
+Nom: ${body.firstName} ${body.lastName}
+Email: ${body.email}
+Formule demandée: ${packageLabel}
+Nombre de nuits: ${nights} nuit${nights > 1 ? 's' : ''}
+
+Votre message:
+${body.message}
+
+${customMessage}
+
+À très bientôt,
+Nelly d'Ailleurs en Douceur
+
+Ce message a été envoyé automatiquement via le formulaire de contact du site Ailleurs en Douceur.
+Date: ${new Date().toLocaleString('fr-FR')}
+    `;
+
+    // Envoi de l'email de confirmation au client
+    await transporter.sendMail({
+      from: `"Ailleurs en Douceur" <${emailFrom}>`,
+      to: body.email,
+      subject: clientSubject,
+      text: clientEmailText,
+      html: clientEmailHtml,
     });
 
     // Réponse de succès
