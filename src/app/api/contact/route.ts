@@ -249,11 +249,11 @@ Date: ${new Date().toLocaleString('fr-FR')}
                 <p><strong>${customMessage}</strong></p>
               </div>
               
-              <p>Nous vous répondrons dans les plus brefs délais pour discuter de votre projet.</p>
-              <p>À très bientôt,<br>L'équipe Ailleurs en Douceur</p>
+              <p>À très bientôt,<br>Nelly d'Ailleurs en Douceur</p>
             </div>
             <div class="footer">
               <p>Ce message a été envoyé automatiquement via le formulaire de contact du site Ailleurs en Douceur.</p>
+              <p>Merci de ne pas répondre à ce mail, il a était envoyé par un robot.</p>
               <p>Date: ${new Date().toLocaleString('fr-FR')}</p>
             </div>
           </div>
@@ -282,6 +282,7 @@ ${customMessage}
 Nelly d'Ailleurs en Douceur
 
 Ce message a été envoyé automatiquement via le formulaire de contact du site Ailleurs en Douceur.
+Merci de ne pas répondre à ce mail, il a était envoyé par un robot.
 Date: ${new Date().toLocaleString('fr-FR')}
     `;
 
