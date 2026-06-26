@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { prisma } from "@/lib/prisma";
+import { generateContactRequestToken } from "@/lib/tokens";
 
 interface ContactFormData {
   firstName: string;
@@ -49,6 +50,12 @@ const createTransporter = () => {
   return transporter;
 };
 
+// Génère l'URL du formulaire personnalisé pour le client
+const getCustomFormUrl = (token: string): string => {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : process.env.DOMAIN);
+  return `${baseUrl}/custom-form/${token}`;
+};
+
 export async function POST(request: NextRequest) {
   try {
     const body: ContactFormData = await request.json();
@@ -82,7 +89,6 @@ export async function POST(request: NextRequest) {
 
     // Valeurs par défaut si non trouvées dans la base
     const clientSubject = emailSubjectContent?.value || 'Confirmation de votre demande - Ailleurs en Douceur';
-    const customMessage = emailMessageContent?.value || 'Vous allez être recontacté prochainement pour obtenir plus d\'informations et convenir d\'un entretien en visioconférence.';
 
     // Validation basique
     if (!body.privacyAccepted) {
@@ -131,6 +137,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const token = generateContactRequestToken();
+    
+    // Trouver le formulaire personnalisé associé à ce type d'offre
+    const customForm = await prisma.customForm.findFirst({
+      where: {
+        packageType: body.packageType,
+        isActive: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // Créer la demande de contact en base de données
+    const contactRequest = await prisma.contactRequest.create({
+      data: {
+        firstName: body.firstName,
+        lastName: body.lastName,
+        email: body.email,
+        packageType: body.packageType,
+        nights: nights,
+        message: body.message,
+        token: token,
+        formId: customForm?.id,
+        status: 'PENDING',
+      },
+    });
+
+    // Générer l'URL du formulaire personnalisé
+    const customFormUrl = getCustomFormUrl(token);
+
     // Création du transporteur
     const transporter = createTransporter();
 
@@ -138,7 +175,9 @@ export async function POST(request: NextRequest) {
     const packageLabel = getPackageLabel(body.packageType);
     
     const emailSubject = `Nouvelle demande de contact - Ailleurs en Douceur`;
-    
+
+    const hasCustomForm = customForm !== null;
+
     const emailHtml = `
       <!DOCTYPE html>
       <html>
@@ -153,6 +192,8 @@ export async function POST(request: NextRequest) {
             .field { margin-bottom: 15px; }
             .field strong { display: inline-block; width: 150px; color: #4a3f2f; }
             .message { background: #f9f9f9; padding: 15px; border-radius: 4px; margin-top: 15px; }
+            .cta-button { display: inline-block; background: #4a3f2f; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 15px 0; font-weight: bold; }
+            .info-box { background: #e3f2fd; padding: 15px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #2196f3; }
             .footer { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
           </style>
         </head>
@@ -170,7 +211,8 @@ export async function POST(request: NextRequest) {
                 <strong>Message:</strong>
                 <div class="message">${body.message.replace(/\n/g, '<br>')}</div>
               </div>
-              <div class="field"><strong>Politique acceptée:</strong> ${body.privacyAccepted ? 'Oui' : 'Non'}</div>
+              <div class="field"><strong>Politique de confidentialité acceptée:</strong> ${body.privacyAccepted ? 'Oui' : 'Non'}</div>
+              <p><strong>Token de la demande :</strong> ${token}</p>
             </div>
             <div class="footer">
               <p>Ce message a été envoyé via le formulaire de contact du site Ailleurs en Douceur.</p>
@@ -193,6 +235,9 @@ Message:
 ${body.message}
 
 Politique de confidentialité acceptée: ${body.privacyAccepted ? 'Oui' : 'Non'}
+
+Token de la demande : ${token}
+}
 
 Ce message a été envoyé via le formulaire de contact du site Ailleurs en Douceur.
 Date: ${new Date().toLocaleString('fr-FR')}
@@ -223,6 +268,8 @@ Date: ${new Date().toLocaleString('fr-FR')}
             .field strong { display: inline-block; width: 150px; color: #4a3f2f; }
             .message { background: #f9f9f9; padding: 15px; border-radius: 4px; margin-top: 15px; }
             .confirmation { background: #e8f5e9; padding: 15px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #2e7d32; }
+            .cta-button { display: inline-block; background: #4a3f2f; color: #fff; padding: 15px 30px; text-decoration: none; border-radius: 4px; margin: 15px 0; font-weight: bold; text-align: center; }
+            .info-box { background: #fff3e0; padding: 15px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #ff9800; }
             .footer { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
           </style>
         </head>
@@ -245,9 +292,21 @@ Date: ${new Date().toLocaleString('fr-FR')}
                 <div class="message">${body.message.replace(/\n/g, '<br>')}</div>
               </div>
               
-              <div class="confirmation">
-                <p><strong>${customMessage}</strong></p>
-              </div>
+              ${hasCustomForm 
+                ? `
+                <div class="info-box">
+                  <p style="margin: 0 0 10px 0;"><strong>Pour aller plus loin :</strong></p>
+                  <p style="margin: 0 0 15px 0;">Nous vous invitons à compléter notre formulaire personnalisé pour nous aider à mieux préparer votre projet.</p>
+                  <a href="${customFormUrl}" class="cta-button">Compléter le formulaire</a>
+                  <p style="margin: 10px 0 0 0; font-size: 12px;">Lien : ${customFormUrl}</p>
+                </div>
+                `
+                : `
+                <div class="info-box">
+                  <p style="margin: 0;">Vous allez être recontacté prochainement pour convenir d'un rendez-vous personnalisé.</p>
+                </div>
+                `
+              }
               
               <p>À très bientôt,<br>Nelly d'Ailleurs en Douceur</p>
             </div>
@@ -276,7 +335,16 @@ Nombre de nuits: ${nights} nuit${nights > 1 ? 's' : ''}
 Votre message:
 ${body.message}
 
-${customMessage}
+${hasCustomForm 
+  ? `
+Pour aller plus loin, nous vous invitons à compléter notre formulaire personnalisé :
+${customFormUrl}
+
+Cette étape nous aidera à mieux préparer votre projet.
+`
+  :` Vous allez être recontacté prochainement pour convenir d'un rendez-vous personnalisé.
+`
+}
 
 À très bientôt,
 Nelly d'Ailleurs en Douceur

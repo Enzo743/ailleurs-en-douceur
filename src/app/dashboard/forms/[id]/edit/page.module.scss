@@ -1,0 +1,61 @@
+@import '/Users/enzo/Documents/Code Perso/ailleurs-en-douceur/src/app/dashboard/forms/new/page.module.scss';
+
+// Les styles sont les mêmes que pour la page new, on les import simplement
+// On peut ajouter des styles spécifiques ici si nécessaire
+
+.error-box {
+  text-align: center;
+  padding: 40px;
+  background: #ffebee;
+  border-radius: 12px;
+  border: 2px solid #d32f2f;
+
+  p {
+    margin: 0 0 20px 0;
+    color: #b71c1c;
+    font-size: 16px;
+  }
+
+  .back-button {
+    background: #4a3f2f;
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+
+    &:hover {
+      background: #3a3228;
+    }
+  }
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+
+  p {
+    margin: 20px 0 0 0;
+    color: #888;
+  }
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4a3f2f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

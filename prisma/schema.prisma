@@ -45,3 +45,130 @@ enum ContentType {
   RICHTEXT
   IMAGE
 }
+
+// ============================================
+// Workflow de contact personnalisé
+// ============================================
+
+enum FieldType {
+  TEXT
+  TEXTAREA
+  NUMBER
+  EMAIL
+  SELECT
+  MULTISELECT
+  CHECKBOX
+  DATE
+}
+
+enum ContactRequestStatus {
+  PENDING
+  FORM_SENT
+  COMPLETED
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model ContactRequest {
+  id            String               @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String
+  packageType   String
+  nights        Int
+  message       String               @db.Text
+  token         String               @unique
+  formId        String?
+  form          CustomForm?          @relation(fields: [formId], references: [id])
+  status        ContactRequestStatus @default(PENDING)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  formResponses FormResponse[]
+  appointment  Appointment?
+
+  @@index([packageType])
+  @@index([status])
+  @@index([token])
+}
+
+model CustomForm {
+  id            String    @id @default(cuid())
+  name          String
+  packageType   String?
+  description   String?   @db.Text
+  successMessage String   @db.Text
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  fields        FormField[]
+  responses     FormResponse[]
+  contactRequests ContactRequest[]
+
+  @@index([packageType])
+}
+
+model FormField {
+  id            String   @id @default(cuid())
+  formId        String
+  form          CustomForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  label         String
+  key           String
+  type          FieldType
+  placeholder   String?
+  required      Boolean  @default(false)
+  options       String[] @default([])
+  defaultValue  String?
+  order         Int      @default(0)
+
+  @@unique([formId, key])
+  @@index([formId, order])
+}
+
+model FormResponse {
+  id              String           @id @default(cuid())
+  contactRequestId String
+  contactRequest   ContactRequest @relation(fields: [contactRequestId], references: [id], onDelete: Cascade)
+  formId          String
+  form            CustomForm       @relation(fields: [formId], references: [id])
+  values          Json             // { fieldKey: value }
+  createdAt       DateTime         @default(now())
+
+  @@index([contactRequestId])
+  @@index([formId])
+}
+
+model AppointmentSlot {
+  id            String        @id @default(cuid())
+  date          DateTime
+  startTime     String        // "09:00"
+  endTime       String        // "10:00"
+  duration      Int           // en minutes
+  isAvailable   Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+
+  appointment   Appointment?
+
+  @@index([date, startTime])
+}
+
+model Appointment {
+  id              String           @id @default(cuid())
+  contactRequestId String          @unique
+  contactRequest   ContactRequest @relation(fields: [contactRequestId], references: [id], onDelete: Cascade)
+  slotId          String           @unique
+  slot            AppointmentSlot @relation(fields: [slotId], references: [id])
+  googleEventId   String?
+  meetLink        String?
+  status          AppointmentStatus @default(CONFIRMED)
+  createdAt       DateTime         @default(now())
+
+  @@index([contactRequestId])
+  @@index([slotId])
+  @@index([status])
+}

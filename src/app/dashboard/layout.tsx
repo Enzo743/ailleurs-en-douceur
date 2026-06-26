@@ -27,6 +27,15 @@ export default async function DashboardLayout({
                     <a href="/dashboard/articles" className={styles.navLink}>
                         Articles
                     </a>
+                    <a href="/dashboard/contact-requests" className={styles.navLink}>
+                        Demandes
+                    </a>
+                    <a href="/dashboard/forms" className={styles.navLink}>
+                        Formulaires
+                    </a>
+                    <a href="/dashboard/schedule" className={styles.navLink}>
+                        Planning
+                    </a>
                 </nav>
                 <form action={logout}>
                     <button type="submit" className={styles.logoutButton}>

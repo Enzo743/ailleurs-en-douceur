@@ -25,10 +25,6 @@ const initialContent: {
     // ── Footer ────────────────────────────────────────────
     { key: 'footer/copyright', type: ContentType.TEXT,     value: '© 2026 Ailleurs en douceur' },
     { key: 'footer/tagline',   type: ContentType.TEXT,     value: 'Fait avec passion, pour les âmes voyageuses' },
-
-    // ── Email de confirmation client ────────────────────
-    { key: 'contact-email/client-subject', type: ContentType.TEXT, value: 'Confirmation de votre demande - Ailleurs en Douceur' },
-    { key: 'contact-email/client-message', type: ContentType.RICHTEXT, value: 'Vous allez être recontacté prochainement pour obtenir plus d\'informations et convenir d\'un entretien en visioconférence.' },
 ];
 
 async function main(): Promise<void> {
