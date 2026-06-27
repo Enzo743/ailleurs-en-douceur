@@ -1,6 +1,7 @@
 import { verifySession } from '@/lib/auth';
 import { logout } from '@/app/actions/auth';
 import styles from './dashboard.module.scss';
+import '@/styles/dashboard-global.css';
 
 export const metadata = {
     title: 'Dashboard — Administration',

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { verifySession } from '@/lib/auth';
 import { getArticle } from '@/app/actions/articles';
-import ArticleForm from '@/app/components/dashboard/ArticleForm';
+import { ArticleForm } from '@/components/dashboard';
 import styles from '../../articles.module.scss';
 
 export const metadata = { title: 'Modifier l\'article — Administration' };

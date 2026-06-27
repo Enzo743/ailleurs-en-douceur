@@ -3,19 +3,11 @@
 import { useState, FormEvent, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { PACKAGE_TYPE_OPTIONS } from '@/lib/constants';
+import { FormField as FormFieldType } from '@/lib/form-constants';
+import { useFormFields } from '@/hooks/useFormFields';
+import { FormField } from '@/components/dashboard';
 import styles from './page.module.scss';
-
-interface FormField {
-  id: string;
-  label: string;
-  key: string;
-  type: 'TEXT' | 'TEXTAREA' | 'NUMBER' | 'EMAIL' | 'SELECT' | 'MULTISELECT' | 'CHECKBOX' | 'DATE';
-  placeholder?: string;
-  required: boolean;
-  options: string[];
-  defaultValue?: string;
-  order: number;
-}
 
 interface CustomForm {
   id: string;
@@ -24,66 +16,58 @@ interface CustomForm {
   description?: string;
   successMessage: string;
   isActive: boolean;
-  fields: FormField[];
+  fields: FormFieldType[];
 }
 
-// Types de champs disponibles
-const fieldTypes = [
-  { value: 'TEXT', label: 'Texte court' },
-  { value: 'TEXTAREA', label: 'Texte long' },
-  { value: 'NUMBER', label: 'Nombre' },
-  { value: 'EMAIL', label: 'Email' },
-  { value: 'SELECT', label: 'Sélection unique' },
-  { value: 'MULTISELECT', label: 'Sélection multiple' },
-  { value: 'CHECKBOX', label: 'Case à cocher' },
-  { value: 'DATE', label: 'Date' },
-];
-
-// Types de formule
-const packageTypes = [
-  { value: '', label: 'Toutes les offres' },
-  { value: 'escapade-en-douceur', label: 'Escapade en douceur' },
-  { value: 'voyage-sur-mesure', label: 'Voyage sur-mesure' },
-  { value: 'voyage-de-noces', label: 'Voyage de noces' },
-];
-
-// Formulaire par défaut
-const defaultField: Omit<FormField, 'id' | 'order'> = {
-  label: '',
-  key: '',
-  type: 'TEXT',
-  placeholder: '',
-  required: false,
-  options: [],
-  defaultValue: '',
-};
+interface FormData {
+  name: string;
+  packageType: string;
+  description: string;
+  successMessage: string;
+  isActive: boolean;
+}
 
 export default function EditFormPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  
+
   // États
   const [isLoading, setIsLoading] = useState(true);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     packageType: '',
     description: '',
     successMessage: '',
     isActive: true,
   });
-  const [fields, setFields] = useState<FormField[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ success?: boolean; message: string } | null>(null);
   const [notFound, setNotFound] = useState(false);
+
+  // Utiliser le hook pour gérer les champs
+  const {
+    fields,
+    fieldErrors,
+    setFields,
+    handleFieldChange,
+    addField,
+    removeField: removeFieldFromHook,
+    addOption,
+    removeOption,
+    updateOption,
+    moveFieldUp,
+    moveFieldDown,
+    validateFields,
+    setFieldErrors,
+  } = useFormFields();
 
   // Charger les données du formulaire
   useEffect(() => {
     const fetchForm = async () => {
       try {
         setIsLoading(true);
-        
+
         const response = await fetch(`/api/forms/${id}`);
         const data = await response.json();
 
@@ -93,7 +77,7 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
         }
 
         const form: CustomForm = data.data;
-        
+
         setFormData({
           name: form.name,
           packageType: form.packageType || '',
@@ -102,8 +86,9 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
           isActive: form.isActive,
         });
 
+        // Initialiser les champs avec les données du formulaire
         setFields(form.fields);
-        
+
       } catch (error) {
         console.error('Error fetching form:', error);
         setNotFound(true);
@@ -113,20 +98,20 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
     };
 
     fetchForm();
-  }, [id]);
+  }, [id, setFields]);
 
   // Mettre à jour un champ du formulaire
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
 
     if (errors[name]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[name];
         return newErrors;
@@ -134,38 +119,7 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
     }
   };
 
-  // Mettre à jour un champ du formulaire personnalisé
-  const handleFieldChange = (
-    fieldId: string,
-    property: keyof FormField,
-    value: string | string[] | boolean | number
-  ) => {
-    setFields(prev =>
-      prev.map(field =>
-        field.id === fieldId ? { ...field, [property]: value } : field
-      )
-    );
-
-    if (fieldErrors[`${fieldId}-${property}`]) {
-      setFieldErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[`${fieldId}-${property}`];
-        return newErrors;
-      });
-    }
-  };
-
-  // Ajouter un nouveau champ
-  const addField = () => {
-    const newField: FormField = {
-      ...defaultField,
-      id: `new-${Date.now()}`,
-      order: fields.length,
-    };
-    setFields(prev => [...prev, newField]);
-  };
-
-  // Supprimer un champ
+  // Supprimer un champ avec confirmation pour les champs existants
   const removeField = (fieldId: string) => {
     // Ne pas supprimer si c'est le dernier champ
     if (fields.length <= 1) {
@@ -175,85 +129,20 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
       });
       return;
     }
-    
+
     // Si c'est un champ existant (avec un vrai ID), demander confirmation
     if (!fieldId.startsWith('new-')) {
       if (!confirm('Êtes-vous sûr de vouloir supprimer ce champ ? Cette action est irréversible.')) {
         return;
       }
     }
-    
-    setFields(prev => {
-      const newFields = prev.filter(field => field.id !== fieldId);
-      return newFields.map((field, index) => ({ ...field, order: index }));
-    });
-  };
 
-  // Ajouter une option
-  const addOption = (fieldId: string) => {
-    setFields(prev =>
-      prev.map(field =>
-        field.id === fieldId
-          ? { ...field, options: [...field.options, `Option ${field.options.length + 1}`] }
-          : field
-      )
-    );
-  };
-
-  // Supprimer une option
-  const removeOption = (fieldId: string, optionIndex: number) => {
-    setFields(prev =>
-      prev.map(field =>
-        field.id === fieldId
-          ? { ...field, options: field.options.filter((_, i) => i !== optionIndex) }
-          : field
-      )
-    );
-  };
-
-  // Mettre à jour une option
-  const updateOption = (fieldId: string, optionIndex: number, newValue: string) => {
-    setFields(prev =>
-      prev.map(field =>
-        field.id === fieldId
-          ? {
-              ...field,
-              options: field.options.map((opt, i) =>
-                i === optionIndex ? newValue : opt
-              )
-            }
-          : field
-      )
-    );
-  };
-
-  // Déplacer un champ
-  const moveFieldUp = (fieldId: string) => {
-    setFields(prev => {
-      const index = prev.findIndex(f => f.id === fieldId);
-      if (index <= 0) return prev;
-      
-      const newFields = [...prev];
-      [newFields[index], newFields[index - 1]] = [newFields[index - 1], newFields[index]];
-      return newFields.map((field, i) => ({ ...field, order: i }));
-    });
-  };
-
-  const moveFieldDown = (fieldId: string) => {
-    setFields(prev => {
-      const index = prev.findIndex(f => f.id === fieldId);
-      if (index >= prev.length - 1) return prev;
-      
-      const newFields = [...prev];
-      [newFields[index], newFields[index + 1]] = [newFields[index + 1], newFields[index]];
-      return newFields.map((field, i) => ({ ...field, order: i }));
-    });
+    removeFieldFromHook(fieldId, 1);
   };
 
   // Valider le formulaire
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-    const newFieldErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
       newErrors.name = 'Le nom du formulaire est requis';
@@ -263,33 +152,12 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
       newErrors.successMessage = 'Le message de confirmation est requis';
     }
 
-    fields.forEach((field, index) => {
-      if (!field.label.trim()) {
-        newFieldErrors[`${field.id}-label`] = `Le libellé du champ ${index + 1} est requis`;
-      }
-      
-      if (!field.key.trim()) {
-        newFieldErrors[`${field.id}-key`] = `La clé du champ ${index + 1} est requise`;
-      }
-      
-      // Vérifier que la clé est unique (sauf pour les nouveaux champs non enregistrés)
-      if (field.key.trim()) {
-        const keyCount = fields.filter(f => f.key === field.key.trim() && f.id !== field.id).length;
-        if (keyCount > 0) {
-          newFieldErrors[`${field.id}-key`] = 'Cette clé est déjà utilisée';
-        }
-      }
-
-      // Pour les SELECT et MULTISELECT
-      if ((field.type === 'SELECT' || field.type === 'MULTISELECT') && field.options.length === 0) {
-        newFieldErrors[`${field.id}-options`] = 'Ajoutez au moins une option';
-      }
-    });
+    // Valider les champs personnalisés
+    const isFieldsValid = validateFields();
 
     setErrors(newErrors);
-    setFieldErrors(newFieldErrors);
-    
-    return Object.keys(newErrors).length === 0 && Object.keys(newFieldErrors).length === 0;
+
+    return Object.keys(newErrors).length === 0 && isFieldsValid;
   };
 
   // Soumettre le formulaire
@@ -309,14 +177,14 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
 
     try {
       // Séparer les champs existants et nouveaux
-      const existingFields = fields.filter(f => !f.id.startsWith('new-'));
-      const newFields = fields.filter(f => f.id.startsWith('new-'));
+      const existingFields = fields.filter((f) => !f.id.startsWith('new-'));
+      const newFields = fields.filter((f) => f.id.startsWith('new-'));
 
       // Préparer les données
       const dataToSend = {
         ...formData,
         fieldsToAdd: newFields.map(({ id, ...rest }) => rest),
-        fieldsToUpdate: existingFields.map(field => field),
+        fieldsToUpdate: existingFields.map((field) => field),
       };
 
       const response = await fetch(`/api/forms/${id}`, {
@@ -334,7 +202,7 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
           success: true,
           message: 'Formulaire mis à jour avec succès !'
         });
-        
+
         setTimeout(() => {
           router.push('/dashboard/forms');
         }, 2000);
@@ -355,6 +223,11 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Trouver l'erreur pour un champ spécifique
+  const getFieldError = (fieldId: string, property: string): string | undefined => {
+    return fieldErrors[`${fieldId}-${property}`];
   };
 
   // Si chargement
@@ -424,7 +297,7 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
         {/* Informations du formulaire */}
         <div className={styles['form-section']}>
           <h2 className={styles['section-title']}>Informations du formulaire</h2>
-          
+
           <div className={styles['form-grid']}>
             <div className={`${styles['form-group']} ${errors.name ? styles['has-error'] : ''}`}>
               <label htmlFor="name">Nom du formulaire *</label>
@@ -447,7 +320,7 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
                 value={formData.packageType}
                 onChange={handleFormChange}
               >
-                {packageTypes.map((pt) => (
+                {PACKAGE_TYPE_OPTIONS.map((pt) => (
                   <option key={pt.value} value={pt.value}>
                     {pt.label}
                   </option>
@@ -507,160 +380,22 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
 
           <div className={styles['fields-container']}>
             {fields.map((field, index) => (
-              <div key={field.id} className={styles['field-card']}>
-                <div className={styles['field-header']}>
-                  <h4 className={styles['field-title']}>
-                    Champ {index + 1}
-                    {field.required && <span className={styles.required}>*</span>}
-                  </h4>
-                  <div className={styles['field-actions']}>
-                    {index > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => moveFieldUp(field.id)}
-                        className={styles['move-button']}
-                        title="Monter"
-                      >
-                        ↑
-                      </button>
-                    )}
-                    {index < fields.length - 1 && (
-                      <button
-                        type="button"
-                        onClick={() => moveFieldDown(field.id)}
-                        className={styles['move-button']}
-                        title="Descendre"
-                      >
-                        ↓
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => removeField(field.id)}
-                      className={styles['remove-button']}
-                      title="Supprimer"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-
-                <div className={styles['field-grid']}>
-                  <div className={`${styles['form-group']} ${fieldErrors[`${field.id}-label`] ? styles['has-error'] : ''}`}>
-                    <label htmlFor={`label-${field.id}`}>Libellé *</label>
-                    <input
-                      type="text"
-                      id={`label-${field.id}`}
-                      value={field.label}
-                      onChange={(e) => handleFieldChange(field.id, 'label', e.target.value)}
-                      placeholder="Ex: Quelle est votre date préférée ?"
-                    />
-                    {fieldErrors[`${field.id}-label`] && (
-                      <span className={styles['error-message']}>{fieldErrors[`${field.id}-label`]}</span>
-                    )}
-                  </div>
-
-                  <div className={`${styles['form-group']} ${fieldErrors[`${field.id}-key`] ? styles['has-error'] : ''}`}>
-                    <label htmlFor={`key-${field.id}`}>Clé * (identifiant unique)</label>
-                    <input
-                      type="text"
-                      id={`key-${field.id}`}
-                      value={field.key}
-                      onChange={(e) => handleFieldChange(field.id, 'key', e.target.value)}
-                      placeholder="Ex: preferred-date"
-                    />
-                    {fieldErrors[`${field.id}-key`] && (
-                      <span className={styles['error-message']}>{fieldErrors[`${field.id}-key`]}</span>
-                    )}
-                  </div>
-
-                  <div className={styles['form-group']}>
-                    <label htmlFor={`type-${field.id}`}>Type de champ *</label>
-                    <select
-                      id={`type-${field.id}`}
-                      value={field.type}
-                      onChange={(e) => handleFieldChange(field.id, 'type', e.target.value as FormField['type'])}
-                    >
-                      {fieldTypes.map((ft) => (
-                        <option key={ft.value} value={ft.value}>
-                          {ft.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className={styles['form-group']}>
-                    <label htmlFor={`required-${field.id}`}>
-                      <input
-                        type="checkbox"
-                        id={`required-${field.id}`}
-                        checked={field.required}
-                        onChange={(e) => handleFieldChange(field.id, 'required', e.target.checked)}
-                      />
-                      Champ obligatoire
-                    </label>
-                  </div>
-                </div>
-
-                {(field.type === 'SELECT' || field.type === 'MULTISELECT') && (
-                  <div className={styles['options-section']}>
-                    <label>Options</label>
-                    {field.options.map((option, optIndex) => (
-                      <div key={optIndex} className={styles['option-row']}>
-                        <input
-                          type="text"
-                          value={option}
-                          onChange={(e) => updateOption(field.id, optIndex, e.target.value)}
-                          placeholder={`Option ${optIndex + 1}`}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeOption(field.id, optIndex)}
-                          className={styles['remove-option-button']}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                    {fieldErrors[`${field.id}-options`] && (
-                      <span className={styles['error-message']}>{fieldErrors[`${field.id}-options`]}</span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => addOption(field.id)}
-                      className={styles['add-option-button']}
-                    >
-                      + Ajouter une option
-                    </button>
-                  </div>
-                )}
-
-                {field.type === 'TEXT' && (
-                  <div className={styles['form-group']}>
-                    <label htmlFor={`placeholder-${field.id}`}>Placeholder (optionnel)</label>
-                    <input
-                      type="text"
-                      id={`placeholder-${field.id}`}
-                      value={field.placeholder || ''}
-                      onChange={(e) => handleFieldChange(field.id, 'placeholder', e.target.value)}
-                      placeholder="Texte d'aide"
-                    />
-                  </div>
-                )}
-
-                {field.type !== 'CHECKBOX' && field.type !== 'SELECT' && field.type !== 'MULTISELECT' && (
-                  <div className={styles['form-group']}>
-                    <label htmlFor={`defaultValue-${field.id}`}>Valeur par défaut (optionnelle)</label>
-                    <input
-                      type="text"
-                      id={`defaultValue-${field.id}`}
-                      value={field.defaultValue || ''}
-                      onChange={(e) => handleFieldChange(field.id, 'defaultValue', e.target.value)}
-                      placeholder="Valeur par défaut"
-                    />
-                  </div>
-                )}
-              </div>
+              <FormField
+                key={field.id}
+                field={field}
+                fieldIndex={index}
+                error={getFieldError(field.id, 'label') || getFieldError(field.id, 'key') || getFieldError(field.id, 'options')}
+                onChange={(property, value) => handleFieldChange(field.id, property, value)}
+                onAddOption={() => addOption(field.id)}
+                onRemoveOption={(optIndex) => removeOption(field.id, optIndex)}
+                onUpdateOption={(optIndex, newValue) => updateOption(field.id, optIndex, newValue)}
+                onMoveUp={() => moveFieldUp(field.id)}
+                onMoveDown={() => moveFieldDown(field.id)}
+                onRemove={() => removeField(field.id)}
+                canMoveUp={index > 0}
+                canMoveDown={index < fields.length - 1}
+                showActions={true}
+              />
             ))}
           </div>
         </div>

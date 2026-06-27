@@ -1,16 +1,18 @@
+@use "../../../styles/_variables" as *;
+
 .page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #faf8f5;
+  background-color: $color-background-light;
   padding: 40px 20px;
 }
 
 .container {
   max-width: 900px;
   width: 100%;
-  background: #fff;
+  background: $color-background;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: 40px;
@@ -22,14 +24,14 @@
   h1 {
     font-size: 28px;
     font-weight: 600;
-    color: #4a3f2f;
+    color: $color-brun;
     margin: 0 0 10px 0;
     text-align: center;
   }
 
   .subtitle {
     font-size: 16px;
-    color: #666;
+    color: $color-text-secondary;
     text-align: center;
     line-height: 1.6;
     margin: 0;
@@ -40,8 +42,8 @@
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #4a3f2f;
+  border: 4px solid $color-background-light;
+  border-top: 4px solid $color-brun;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 20px;
@@ -69,7 +71,7 @@
 
 .warning-button {
   background: #ff9800;
-  color: #fff;
+  color: $color-background;
   border: none;
   padding: 10px 20px;
   font-size: 14px;
@@ -92,7 +94,7 @@
 }
 
 .date-group {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid $color-border-light;
   padding-bottom: 25px;
 
   &:last-child {
@@ -105,10 +107,10 @@
 .date-title {
   font-size: 18px;
   font-weight: 600;
-  color: #4a3f2f;
+  color: $color-brun;
   margin: 0 0 15px 0;
   padding-bottom: 10px;
-  border-bottom: 2px solid #4a3f2f;
+  border-bottom: 2px solid $color-brun;
 }
 
 .slots-grid {
@@ -118,8 +120,8 @@
 }
 
 .slot-card {
-  background: #fff;
-  border: 2px solid #e0e0e0;
+  background: $color-background;
+  border: 2px solid $color-border-light;
   border-radius: 8px;
   padding: 16px 20px;
   cursor: pointer;
@@ -129,19 +131,19 @@
   overflow: hidden;
 
   &:hover {
-    border-color: #4a3f2f;
+    border-color: $color-brun;
     box-shadow: 0 2px 10px rgba(74, 63, 47, 0.1);
   }
 
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    background: #f5f5f5;
+    background: $color-background-medium;
   }
 
   &.selected {
-    border-color: #4a3f2f;
-    background: #f5f1eb;
+    border-color: $color-brun;
+    background: $color-background-medium;
     box-shadow: 0 0 0 3px rgba(74, 63, 47, 0.1);
   }
 }
@@ -149,7 +151,7 @@
 .slot-time {
   font-size: 16px;
   font-weight: 600;
-  color: #4a3f2f;
+  color: $color-brun;
   margin-bottom: 4px;
   display: flex;
   justify-content: center;
@@ -159,7 +161,7 @@
 
 .slot-duration {
   font-size: 13px;
-  color: #888;
+  color: $color-text-muted;
   display: flex;
   justify-content: center;
 }
@@ -169,8 +171,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: #4a3f2f;
-  color: #fff;
+  background: $color-brun;
+  color: $color-background;
   padding: 8px 0;
   font-size: 12px;
   font-weight: 500;
@@ -178,8 +180,8 @@
 
 // Selection panel
 .selection-panel {
-  background: #f5f1eb;
-  border: 2px solid #4a3f2f;
+  background: $color-background-medium;
+  border: 2px solid $color-brun;
   border-radius: 12px;
   padding: 25px;
   margin-bottom: 30px;
@@ -192,7 +194,7 @@
   p {
     margin: 0;
     font-size: 16px;
-    color: #4a3f2f;
+    color: $color-brun;
     line-height: 1.6;
   }
 }
@@ -205,8 +207,8 @@
 }
 
 .confirm-button {
-  background: #4a3f2f;
-  color: #fff;
+  background: $color-brun;
+  color: $color-background;
   border: none;
   padding: 12px 30px;
   font-size: 15px;
@@ -224,7 +226,7 @@
   }
 
   &:disabled {
-    background: #ccc;
+    background: $color-border-dark;
     cursor: not-allowed;
     transform: none;
   }
@@ -232,8 +234,8 @@
 
 .cancel-button {
   background: transparent;
-  color: #4a3f2f;
-  border: 2px solid #4a3f2f;
+  color: $color-brun;
+  border: 2px solid $color-brun;
   padding: 12px 30px;
   font-size: 15px;
   font-weight: 600;
@@ -242,8 +244,8 @@
   transition: all 0.2s ease;
 
   &:hover {
-    background: #4a3f2f;
-    color: #fff;
+    background: $color-brun;
+    color: $color-background;
   }
 
   &:disabled {
@@ -255,7 +257,7 @@
 .no-selection {
   text-align: center;
   padding: 20px;
-  color: #888;
+  color: $color-text-muted;
 
   p {
     margin: 0;
@@ -266,11 +268,11 @@
 .footer {
   margin-top: 30px;
   padding-top: 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid $color-border-light;
   text-align: center;
 
   p {
-    color: #888;
+    color: $color-text-muted;
     font-size: 14px;
     margin: 0;
     line-height: 1.6;
@@ -297,7 +299,7 @@
 }
 
 .appointment-details {
-  background: #fff;
+  background: $color-background;
   border-radius: 12px;
   padding: 30px;
   margin-bottom: 30px;
@@ -309,29 +311,29 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid $color-border-light;
 
   &:last-child {
     border-bottom: none;
   }
 
   strong {
-    color: #4a3f2f;
+    color: $color-brun;
     margin-right: 15px;
   }
 
   span {
-    color: #555;
+    color: $color-text-secondary;
   }
 
   a {
-    color: #4a3f2f;
+    color: $color-brun;
     word-break: break-all;
   }
 }
 
 .meet-link {
-  color: #4a3f2f;
+  color: $color-brun;
   text-decoration: underline;
   word-break: break-all;
 
@@ -349,8 +351,8 @@
 }
 
 .primary-button {
-  background: #4a3f2f;
-  color: #fff;
+  background: $color-brun;
+  color: $color-background;
   border: none;
   padding: 14px 30px;
   font-size: 16px;
@@ -372,8 +374,8 @@
 
 .secondary-button {
   background: transparent;
-  color: #4a3f2f;
-  border: 2px solid #4a3f2f;
+  color: $color-brun;
+  border: 2px solid $color-brun;
   padding: 14px 30px;
   font-size: 16px;
   font-weight: 600;
@@ -382,14 +384,14 @@
   transition: all 0.2s ease;
 
   &:hover {
-    background: #4a3f2f;
-    color: #fff;
+    background: $color-brun;
+    color: $color-background;
   }
 }
 
 .note {
   font-size: 14px;
-  color: #666;
+  color: $color-text-secondary;
   margin: 0;
   line-height: 1.6;
   font-style: italic;
@@ -416,8 +418,8 @@
   }
 
   .back-button {
-    background: #4a3f2f;
-    color: #fff;
+    background: $color-brun;
+    color: $color-background;
     border: none;
     padding: 12px 30px;
     font-size: 15px;

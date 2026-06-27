@@ -52,32 +52,6 @@ export function getEmailConfig(): EmailConfig {
 }
 
 /**
- * Crée un transporteur Nodemailer simple (sans lever d'erreur)
- * Utile pour les cas où on veut gérer les erreurs manuellement
- */
-export function createTransporter(): nodemailer.Transporter {
-  const emailUser = process.env.EMAIL_USER;
-  const emailPass = process.env.EMAIL_PASS;
-  const emailHost = process.env.EMAIL_HOST || 'smtp.gmail.com';
-  const emailPort = parseInt(process.env.EMAIL_PORT || '587');
-  const emailSecure = process.env.EMAIL_SECURE === 'true';
-
-  if (!emailUser || !emailPass) {
-    throw new Error('Les variables d\'environnement EMAIL_USER et EMAIL_PASS sont requises');
-  }
-
-  return nodemailer.createTransport({
-    host: emailHost,
-    port: emailPort,
-    secure: emailSecure,
-    auth: {
-      user: emailUser,
-      pass: emailPass,
-    },
-  });
-}
-
-/**
  * Récupère l'email de l'expéditeur
  */
 export function getEmailFrom(): string {
@@ -128,55 +102,8 @@ export function getScheduleUrl(token: string): string {
 // ============================================================================
 
 /**
- * Mapper les valeurs du formulaire vers des libellés lisibles
- */
-export function getPackageLabel(value: string): string {
-  const labels: Record<string, string> = {
-    'escapade-en-douceur': 'Escapade en douceur',
-    'voyage-sur-mesure': 'Voyage sur-mesure',
-    'voyage-de-noces': 'Voyage de noces',
-  };
-  return labels[value] || value;
-}
-
-/**
  * Formate le nombre de nuits avec le bon pluriel
  */
 export function formatNights(nights: number): string {
   return `${nights} nuit${nights > 1 ? 's' : ''}`;
-}
-
-/**
- * Formate une date en français
- */
-export function formatDateFr(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
-  const dateObj = date instanceof Date ? date : new Date(date);
-  return dateObj.toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    ...options,
-  });
-}
-
-/**
- * Formate une date pour l'affichage avec heure
- */
-export function formatDateForDisplay(date: Date | string, includeTime: boolean = false): string {
-  const dateObj = date instanceof Date ? date : new Date(date);
-  
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  };
-  
-  if (includeTime) {
-    options.hour = '2-digit';
-    options.minute = '2-digit';
-  }
-  
-  return dateObj.toLocaleDateString('fr-FR', options);
 }

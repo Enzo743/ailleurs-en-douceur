@@ -72,6 +72,8 @@
 
 // ── Page placeholder ─────────────────────────────────────────────────────────
 
+// Ces styles sont maintenant dans dashboard-global.css
+// Gardés ici pour compatibilité avec d'autres pages qui pourraient les utiliser
 .page, .dashboard-page {
   max-width: 1200px;
   margin: 0 auto;
@@ -88,33 +90,4 @@
   margin: 0 0 2rem;
   font-size: 1rem;
   color: #6b7280;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.25rem;
-}
-
-.widget {
-  padding: 1.5rem;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-}
-
-.widgetTitle {
-  margin: 0 0 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.widgetValue {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #111827;
 }

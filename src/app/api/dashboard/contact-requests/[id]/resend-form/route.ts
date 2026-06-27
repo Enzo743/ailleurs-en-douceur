@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { getEmailConfig, getCustomFormUrl, getPackageLabel, formatNights } from '@/lib/email';
+import { getEmailConfig, getCustomFormUrl, formatNights } from '@/lib/email';
+import { getPackageLabel } from '@/lib/constants';
 
 /**
  * POST /api/dashboard/contact-requests/[id]/resend-form

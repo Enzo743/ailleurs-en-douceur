@@ -55,13 +55,6 @@ export function revalidateAppointmentSlotPaths(): void {
 }
 
 /**
- * Revalide tous les paths liés aux rendez-vous
- */
-export function revalidateAppointmentPaths(): void {
-  revalidatePath('/dashboard/contact-requests');
-}
-
-/**
  * Revalide tous les paths du dashboard
  */
 export function revalidateDashboardPaths(): void {
@@ -112,44 +105,4 @@ export function revalidateEntityPaths(entityType: string, entityId?: string): vo
 
   const paths = pathMap[entityType]?.(entityId) || [];
   revalidateMultiplePaths(paths);
-}
-
-// ============================================================================
-// Cache Management Types
-// ============================================================================
-
-export interface CacheRevalidationResult {
-  success: boolean;
-  paths: string[];
-  error?: string;
-}
-
-/**
- * Revalide avec gestion d'erreur et logging
- * @param paths - Paths à revalider
- * @returns Résultat de la revalidation
- */
-export function safeRevalidatePaths(paths: string | string[]): CacheRevalidationResult {
-  try {
-    const pathArray = Array.isArray(paths) ? paths : [paths];
-    
-    for (const path of pathArray) {
-      try {
-        revalidatePath(path);
-      } catch (error) {
-        console.warn(`Failed to revalidate path: ${path}`, error);
-      }
-    }
-    
-    return {
-      success: true,
-      paths: pathArray,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      paths: [],
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
 }

@@ -1,4 +1,4 @@
-@use "variables" as *;
+@use "../styles/_variables" as *;
 
 .main {
   display: flex;
@@ -6,7 +6,7 @@
   justify-content: center;
   min-height: 100dvh;
   padding: 1.5rem;
-  background-color: #f5f5f5;
+  background-color: $color-background-medium;
 }
 
 .card {
@@ -93,7 +93,7 @@
   transition: background-color 0.15s ease, opacity 0.15s ease;
 
   &:hover:not(:disabled) {
-    background-color: darken($color-caramel, 10%);
+    background-color: #b88650;
   }
 
   &:disabled {

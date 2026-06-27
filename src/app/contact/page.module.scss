@@ -96,7 +96,7 @@
   select,
   textarea {
     padding: $spacing-sm;
-    border: 1px solid #ddd;
+    border: 1px solid $color-border-medium;
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
@@ -192,7 +192,7 @@
   align-self: flex-start;
 
   &:hover:not(:disabled) {
-    background-color: darken($color-caramel, 10%);
+    background-color: #b88650;
   }
 
   &:active:not(:disabled) {
@@ -200,7 +200,7 @@
   }
 
   &:disabled {
-    background-color: #ccc;
+    background-color: $color-border-dark;
     cursor: not-allowed;
     opacity: 0.8;
   }

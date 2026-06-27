@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './page.module.scss';
+import { EmptyState } from '@/components/dashboard';
 import { getPackageLabel } from '@/lib/constants';
 
 interface ContactRequest {
@@ -191,14 +192,12 @@ export default function AssignFormPage({ params }: { params: Promise<{ id: strin
           </Link>
           <h1 className={styles.pageTitle}>Associer un formulaire</h1>
         </div>
-        <div className={styles['error-box']}>
-          <p>Aucun formulaire actif disponible.</p>
-          <p>
-            <Link href="/dashboard/forms/new" className={styles['create-button']}>
-              Créez un formulaire d'abord
-            </Link>
-          </p>
-        </div>
+        <EmptyState
+          message="Aucun formulaire actif disponible."
+          description="Créez un formulaire d'abord"
+          action={{ label: 'Créer un formulaire', href: '/dashboard/forms/new' }}
+          className="dashboard-empty-state"
+        />
       </section>
     );
   }

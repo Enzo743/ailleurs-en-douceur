@@ -5,9 +5,9 @@ import { generateContactRequestToken } from '@/lib/tokens';
 import {
   getEmailConfig,
   getCustomFormUrl,
-  getPackageLabel,
   formatNights,
 } from '@/lib/email';
+import { getPackageLabel } from '@/lib/constants';
 import { validateContactForm, type ContactFormData } from '@/lib/validation';
 
 /**

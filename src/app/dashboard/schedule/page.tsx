@@ -4,6 +4,14 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './page.module.scss';
+import { DashboardHeader, EmptyState } from '@/components/dashboard';
+import {
+  formatLongDate,
+  formatShortDate,
+  formatTimeString as formatTime,
+  calculateEndTime,
+  generateTempId
+} from '@/lib/time';
 
 interface AppointmentSlot {
   id: string;
@@ -23,48 +31,6 @@ interface AppointmentSlot {
     };
   };
 }
-
-// Formater la date en français
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString + 'T00:00:00');
-  return date.toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
-
-// Formater la date courte
-const formatShortDate = (dateString: string): string => {
-  const date = new Date(dateString + 'T00:00:00');
-  return date.toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-};
-
-// Formater l'heure
-const formatTime = (timeString: string): string => {
-  const [hours, minutes] = timeString.split(':');
-  return `${hours}:${minutes}`;
-};
-
-// Calculer l'heure de fin à partir de l'heure de début et de la durée
-const calculateEndTime = (startTime: string, duration: number): string => {
-  const [hours, minutes] = startTime.split(':').map(Number);
-  const totalMinutes = hours * 60 + minutes + duration;
-  const endHours = Math.floor(totalMinutes / 60) % 24;
-  const endMins = totalMinutes % 60;
-  return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
-};
-
-// Générer un ID temporaire pour les nouveaux créneaux
-let tempIdCounter = 0;
-const generateTempId = (): string => {
-  return `temp-${Date.now()}-${++tempIdCounter}`;
-};
 
 // Créneau par défaut
 const defaultSlot: Omit<AppointmentSlot, 'id' | 'createdAt' | 'appointment'> = {
@@ -478,20 +444,15 @@ export default function SchedulePage() {
   };
 
   return (
-    <section className={styles.page}>
-      <div className={styles.header}>
-        <div className={styles['header-left']}>
-          <h1 className={styles.pageTitle}>Gestion des créneaux</h1>
-          <p className={styles.pageSubtitle}>
-            Configurez vos disponibilités pour les rendez-vous
-          </p>
-        </div>
-        <div className={styles['header-right']}>
-          <button onClick={() => setShowBatchModal(true)} className={styles['create-button']}>
-            + Créer plusieurs créneaux
-          </button>
-        </div>
-      </div>
+    <section className="dashboard-page">
+      <DashboardHeader
+        title="Gestion des créneaux"
+        subtitle="Configurez vos disponibilités pour les rendez-vous"
+        actionButton={{
+          label: '+ Créer plusieurs créneaux',
+          onClick: () => setShowBatchModal(true)
+        }}
+      />
 
       {submitStatus && (
         <div className={`${styles['status-message']} ${submitStatus.success ? styles.success : styles.error}`}>
@@ -500,95 +461,95 @@ export default function SchedulePage() {
       )}
 
       {isLoading ? (
-        <div className={styles.loading}>
-          <div className={styles['loading-spinner']}></div>
+        <div className="dashboard-loading">
+          <div className="dashboard-loading-spinner"></div>
           <p>Chargement des créneaux...</p>
         </div>
       ) : (
         <>
           {/* Statistiques */}
-          <div className={styles.stats}>
-            <div className={styles['stats-grid']}>
-              <div className={styles['stat-card']}>
-                <h3 className={styles['stat-value']}>{slots.length}</h3>
-                <p className={styles['stat-label']}>Total des créneaux</p>
+          <div className="dashboard-stats">
+            <div className="dashboard-stats-grid">
+              <div className="dashboard-stat-card">
+                <h3 className="dashboard-stat-value">{slots.length}</h3>
+                <p className="dashboard-stat-label">Total des créneaux</p>
               </div>
-              <div className={styles['stat-card']}>
-                <h3 className={styles['stat-value']}>
+              <div className="dashboard-stat-card">
+                <h3 className="dashboard-stat-value">
                   {slots.filter(s => s.isAvailable).length}
                 </h3>
-                <p className={styles['stat-label']}>Créneaux disponibles</p>
+                <p className="dashboard-stat-label">Créneaux disponibles</p>
               </div>
-              <div className={styles['stat-card']}>
-                <h3 className={styles['stat-value']}>
+              <div className="dashboard-stat-card">
+                <h3 className="dashboard-stat-value">
                   {slots.filter(s => !s.isAvailable).length}
                 </h3>
-                <p className={styles['stat-label']}>Créneaux réservés</p>
+                <p className="dashboard-stat-label">Créneaux réservés</p>
               </div>
             </div>
           </div>
 
           {/* Formulaire de création simple */}
-          <div className={styles['create-section']}>
-            <h2 className={styles['section-title']}>Ajouter un nouveau créneau</h2>
+          <div className="dashboard-create-section">
+            <h2 className="dashboard-section-title">Ajouter un nouveau créneau</h2>
             
-            <form onSubmit={handleSubmitSingle} className={styles.form}>
+            <form onSubmit={handleSubmitSingle} className="dashboard-schedule-form">
               <div className={styles['form-grid']}>
-                <div className={styles['form-group']}>
-                  <label htmlFor="date">Date *</label>
-                  <input
-                    type="date"
-                    id="date"
-                    value={newSlots[0]?.date || ''}
-                    onChange={(e) => updateNewSlot(0, 'date', e.target.value)}
-                    placeholder="YYYY-MM-DD"
-                    min={new Date().toISOString().split('T')[0]}
-                  />
-                </div>
+                  <div className={styles['form-group']}>
+                    <label htmlFor="date">Date *</label>
+                    <input
+                      type="date"
+                      id="date"
+                      value={newSlots[0]?.date || ''}
+                      onChange={(e) => updateNewSlot(0, 'date', e.target.value)}
+                      placeholder="YYYY-MM-DD"
+                      min={new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
 
-                <div className={styles['form-group']}>
-                  <label htmlFor="startTime">Heure de début *</label>
-                  <input
-                    type="time"
-                    id="startTime"
-                    value={newSlots[0]?.startTime || ''}
-                    onChange={(e) => updateNewSlot(0, 'startTime', e.target.value)}
-                    placeholder="HH:MM"
-                  />
-                </div>
+                  <div className={styles['form-group']}>
+                    <label htmlFor="startTime">Heure de début *</label>
+                    <input
+                      type="time"
+                      id="startTime"
+                      value={newSlots[0]?.startTime || ''}
+                      onChange={(e) => updateNewSlot(0, 'startTime', e.target.value)}
+                      placeholder="HH:MM"
+                    />
+                  </div>
 
-                <div className={styles['form-group']}>
-                  <label htmlFor="endTime">Heure de fin *</label>
-                  <input
-                    type="time"
-                    id="endTime"
-                    value={newSlots[0]?.endTime || ''}
-                    readOnly
-                    className={styles['readonly-field']}
-                  />
-                </div>
+                  <div className={styles['form-group']}>
+                    <label htmlFor="endTime">Heure de fin *</label>
+                    <input
+                      type="time"
+                      id="endTime"
+                      value={newSlots[0]?.endTime || ''}
+                      readOnly
+                      className={styles['readonly-field']}
+                    />
+                  </div>
 
-                <div className={styles['form-group']}>
-                  <label htmlFor="duration">Durée (minutes)</label>
-                  <input
-                    type="number"
-                    id="duration"
-                    value={newSlots[0]?.duration === 0 ? '' : newSlots[0]?.duration ?? ''}
-                    placeholder="60"
-                    onChange={(e) => {
-                      const numericValue = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
-                      updateNewSlot(0, 'duration', numericValue);
-                    }}
-                    min="15"
-                    max="480"
-                  />
-                </div>
+                  <div className={styles['form-group']}>
+                    <label htmlFor="duration">Durée (minutes)</label>
+                    <input
+                      type="number"
+                      id="duration"
+                      value={newSlots[0]?.duration === 0 ? '' : newSlots[0]?.duration ?? ''}
+                      placeholder="60"
+                      onChange={(e) => {
+                        const numericValue = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
+                        updateNewSlot(0, 'duration', numericValue);
+                      }}
+                      min="15"
+                      max="480"
+                    />
+                  </div>
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting || newSlots.length === 0}
-                className={styles['submit-button']}
+                className="dashboard-submit-button"
               >
                 {isSubmitting ? 'Création en cours...' : 'Créer le créneau'}
               </button>
@@ -596,16 +557,16 @@ export default function SchedulePage() {
           </div>
 
           {/* Liste des créneaux */}
-          <div className={styles['slots-container']}>
-            <h2 className={styles['section-title']}>
+          <div className="dashboard-slots-container">
+            <h2 className="dashboard-section-title">
               Créneaux existants
             </h2>
 
             {sortedDates.length === 0 ? (
-              <div className={styles['empty-state']}>
-                <p>Aucun créneau configuré.</p>
-                <p>Ajoutez des créneaux pour permettre à vos clients de réserver des rendez-vous.</p>
-              </div>
+              <EmptyState
+                message="Aucun créneau configuré."
+                description="Ajoutez des créneaux pour permettre à vos clients de réserver des rendez-vous."
+              />
             ) : (
               sortedDates.map((date) => {
                 const dateSlots = groupSlotsByDate()[date];
@@ -613,13 +574,13 @@ export default function SchedulePage() {
                 const isPast = dateObj < new Date(new Date().setHours(0, 0, 0, 0));
                 
                 return (
-                  <div key={date} className={styles['date-group']}>
-                    <h3 className={styles['date-title']}>
-                      {formatDate(date)}
-                      {isPast && <span className={styles['past-badge']}>Passé</span>}
+                  <div key={date} className="dashboard-date-group">
+                    <h3 className="dashboard-date-title">
+                      {formatLongDate(date)}
+                      {isPast && <span className="dashboard-past-badge">Passé</span>}
                     </h3>
                     
-                    <div className={styles['slots-grid']}>
+                    <div className="dashboard-slots-grid">
                       {dateSlots.map((slot) => {
                         const isNew = slot.id.startsWith('temp-');
                         const isReserved = !slot.isAvailable;
@@ -627,17 +588,17 @@ export default function SchedulePage() {
 
                         return (
                           <div key={slot.id} className={`${styles['slot-card']} ${isReserved ? styles.reserved : ''}`}>
-                            <div className={styles['slot-info']}>
-                              <span className={styles['slot-time']}>
+                            <div className="dashboard-slot-info">
+                              <span className="dashboard-slot-time">
                                 {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
                               </span>
-                              <span className={styles['slot-duration']}>
+                              <span className="dashboard-slot-duration">
                                 {slot.duration} min
                               </span>
                             </div>
                             
                             {isReserved && hasAppointment && slot.appointment && (
-                              <div className={styles['slot-appointment']}>
+                              <div className="dashboard-slot-appointment">
                                 Réservé par: {slot.appointment.contactRequest.firstName} {slot.appointment.contactRequest.lastName}
                               </div>
                             )}
@@ -646,7 +607,7 @@ export default function SchedulePage() {
                               <button
                                 type="button"
                                 onClick={() => removeNewSlot(dateSlots.indexOf(slot))}
-                                className={styles['remove-new-button']}
+                                className="dashboard-remove-new-button"
                               >
                                 ×
                               </button>
@@ -655,7 +616,7 @@ export default function SchedulePage() {
                                 <button
                                   type="button"
                                   onClick={() => deleteSlot(slot.id)}
-                                  className={styles['remove-button']}
+                                  className="dashboard-remove-button"
                                 >
                                   ×
                                 </button>
@@ -675,16 +636,16 @@ export default function SchedulePage() {
 
       {/* Modal de création batch */}
       {showBatchModal && (
-        <div className={styles['modal-overlay']} onClick={() => setShowBatchModal(false)}>
-          <div className={styles['modal-content']} onClick={(e) => e.stopPropagation()}>
-            <div className={styles['modal-header']}>
+        <div className="dashboard-modal-overlay" onClick={() => setShowBatchModal(false)}>
+          <div className="dashboard-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="dashboard-modal-header">
               <h3>Créer plusieurs créneaux</h3>
-              <button onClick={() => setShowBatchModal(false)} className={styles['modal-close']}>
+              <button onClick={() => setShowBatchModal(false)} className="dashboard-modal-close">
                 ×
               </button>
             </div>
             
-            <form onSubmit={handleSubmitBatch} className={styles['modal-form']}>
+            <form onSubmit={handleSubmitBatch} className="dashboard-modal-form">
               <div className={styles['form-group']}>
                 <label htmlFor="batch-startDate">Date de début *</label>
                 <input
@@ -775,18 +736,18 @@ export default function SchedulePage() {
                 </div>
               </div>
 
-              <div className={styles['modal-actions']}>
+              <div className="dashboard-modal-actions">
                 <button
                   type="button"
                   onClick={() => setShowBatchModal(false)}
-                  className={styles['cancel-button']}
+                  className="dashboard-cancel-button"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={styles['submit-button']}
+                  className="dashboard-submit-button"
                 >
                   {isSubmitting ? 'Création en cours...' : `Créer les créneaux`}
                 </button>

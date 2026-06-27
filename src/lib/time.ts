@@ -1,8 +1,14 @@
-import 'server-only';
+// import 'server-only';
 
 // ============================================================================
 // Time Slot Overlap Detection
 // ============================================================================
+
+declare global {
+  interface Window {
+    __tempIdCounter?: number;
+  }
+}
 
 interface TimeSlot {
   date: string | Date;
@@ -207,6 +213,104 @@ export function formatDateForDisplay(date: Date | string, includeTime: boolean =
   }
   
   return dateObj.toLocaleDateString('fr-FR', options);
+}
+
+/**
+ * Formate une date en français
+ * @param date - Date à formater
+ * @param options - Options de formatage (par défaut : format court JJ MMM AAAA)
+ * @returns Date formatée en français
+ */
+export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
+  const d = new Date(date);
+  return d.toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    ...options,
+  });
+}
+
+/**
+ * Formate une heure en français (format HH:MM)
+ * @param date - Date/heure à formater
+ * @returns Heure formatée en français
+ */
+export function formatTime(date: Date | string): string {
+  const d = new Date(date);
+  return d.toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+/**
+ * Formate une date complète en français avec jour de la semaine
+ * @param dateString - Date à formater (format YYYY-MM-DD)
+ * @returns Date formatée (ex: "lundi 15 juin 2026")
+ */
+export function formatLongDate(dateString: string): string {
+  const date = new Date(dateString + 'T00:00:00');
+  return date.toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+/**
+ * Formate une date courte en français
+ * @param dateString - Date à formater (format YYYY-MM-DD)
+ * @returns Date formatée (ex: "15 juin 2026")
+ */
+export function formatShortDate(dateString: string): string {
+  const date = new Date(dateString + 'T00:00:00');
+  return date.toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+/**
+ * Formate une heure HH:MM (sans conversion de Date)
+ * @param timeString - Heure à formater (format HH:MM)
+ * @returns Heure formatée HH:MM
+ */
+export function formatTimeString(timeString: string): string {
+  const [hours, minutes] = timeString.split(':');
+  return `${hours}:${minutes}`;
+}
+
+/**
+ * Calcule l'heure de fin à partir de l'heure de début et de la durée
+ * @param startTime - Heure de début (format HH:MM)
+ * @param duration - Durée en minutes
+ * @returns Heure de fin (format HH:MM)
+ */
+export function calculateEndTime(startTime: string, duration: number): string {
+  const [hours, minutes] = startTime.split(':').map(Number);
+  const totalMinutes = hours * 60 + minutes + duration;
+  const endHours = Math.floor(totalMinutes / 60) % 24;
+  const endMins = totalMinutes % 60;
+  return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+}
+
+/**
+ * Génère un ID temporaire unique
+ * @returns ID temporaire unique
+ */
+export function generateTempId(): string {
+  // Utiliser un compteur local pour éviter les collisions dans la même milliseconde
+  if (typeof window !== 'undefined') {
+    if (!window.__tempIdCounter) {
+      window.__tempIdCounter = 0;
+    }
+    return `temp-${Date.now()}-${++window.__tempIdCounter}`;
+  }
+  // Version serveur (moins fiable mais fonctionne)
+  return `temp-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 }
 
 // ============================================================================

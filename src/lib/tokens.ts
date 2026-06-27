@@ -26,35 +26,6 @@ export const generateShortToken = (length: number = 16): string => {
 };
 
 /**
- * Génère un token avec préfixe pour mieux identifier son usage
- */
-export const generatePrefixedToken = (prefix: string, length: number = 24): string => {
-  const randomPart = generateShortToken(length - prefix.length - 1);
-  return `${prefix}-${randomPart}`;
-};
-
-/**
- * Hash un token pour stockage sécurisé (si nécessaire)
- * Note: Dans notre cas, les tokens sont stockés en clair en base
- * mais on peut les hasher pour plus de sécurité
- */
-export const hashToken = async (token: string): Promise<string> => {
-  const crypto = await import('crypto');
-  const hash = crypto.createHash('sha256');
-  hash.update(token);
-  hash.update(process.env.JWT_SECRET || '');
-  return hash.digest('hex');
-};
-
-/**
- * Vérifie qu'un token a un format valide (UUID v4)
- */
-export const isValidUUID = (token: string): boolean => {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(token);
-};
-
-/**
  * Génère un token pour une ContactRequest
  * Format: cr-{uuid} pour ContactRequest
  */
@@ -69,30 +40,3 @@ export const generateContactRequestToken = (): string => {
 export const generateAppointmentToken = (): string => {
   return `ap-${generateToken()}`;
 };
-
-/**
- * Génère un token pour un FormResponse
- * Format: fr-{uuid} pour FormResponse
- */
-export const generateFormResponseToken = (): string => {
-  return `fr-${generateToken()}`;
-};
-
-/**
- * Extrait le type de token à partir de son préfixe
- */
-export const getTokenType = (token: string): 'contact-request' | 'appointment' | 'form-response' | 'unknown' => {
-  if (token.startsWith('cr-')) return 'contact-request';
-  if (token.startsWith('ap-')) return 'appointment';
-  if (token.startsWith('fr-')) return 'form-response';
-  return 'unknown';
-};
-
-/**
- * Génère un secret pour une session
- */
-export const generateSessionSecret = (): string => {
-  return generateShortToken(32);
-};
-
-

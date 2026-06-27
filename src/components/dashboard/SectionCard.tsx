@@ -4,10 +4,10 @@ import { useState, useTransition } from 'react';
 import Image from 'next/image';
 import ContentTextRow from './ContentTextRow';
 import ContentImageRow from './ContentImageRow';
+import RichTextEditor from './RichTextEditor';
 import type { SiteContent } from '@prisma/client';
 import styles from './section-card.module.scss';
 import contentRowStyles from './content-row.module.scss';
-import RichTextEditor from "@/app/components/dashboard/RichTextEditor";
 import { updateText } from '@/app/actions/content';
 
 type Props = {

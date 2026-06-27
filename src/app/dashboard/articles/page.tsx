@@ -1,17 +1,10 @@
 import { verifySession } from '@/lib/auth';
 import { getArticles } from '@/app/actions/articles';
-import DeleteArticleButton from '@/app/components/dashboard/DeleteArticleButton';
+import { DashboardHeader, DeleteArticleButton, EmptyState, StatusBadge, Tag } from '@/components/dashboard';
+import { formatDate } from '@/lib/time';
 import styles from './articles.module.scss';
 
 export const metadata = { title: 'Articles — Administration' };
-
-function formatDate(date: Date): string {
-    return new Intl.DateTimeFormat('fr-FR', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-    }).format(date);
-}
 
 export default async function ArticlesPage() {
     await verifySession();
@@ -19,27 +12,24 @@ export default async function ArticlesPage() {
     const articles = await getArticles();
 
     return (
-        <section className={styles.page}>
-            <div className={styles.pageHeader}>
-                <div>
-                    <h1 className={styles.pageTitle}>Articles</h1>
-                    <p className={styles.pageSubtitle}>
-                        Gérez les articles du blog.
-                    </p>
-                </div>
-                <a href="/dashboard/articles/new" className={styles.newButton}>
-                    Nouvel article
-                </a>
-            </div>
+        <section className="dashboard-page">
+            <DashboardHeader
+                title="Articles"
+                subtitle="Gérez les articles du blog."
+                actionButton={{
+                    label: 'Nouvel article',
+                    href: '/dashboard/articles/new'
+                }}
+            />
 
-            <div className={styles.tableWrapper}>
+            <div className="dashboard-tableContainer">
                 {articles.length === 0 ? (
-                    <p className={styles.empty}>
-                        Aucun article pour le moment.{' '}
-                        <a href="/dashboard/articles/new">Créer le premier</a>
-                    </p>
+                    <EmptyState
+                        message="Aucun article pour le moment."
+                        action={{ label: 'Créer le premier', href: '/dashboard/articles/new' }}
+                    />
                 ) : (
-                    <table className={styles.table}>
+                    <table className="dashboard-table">
                         <thead>
                             <tr>
                                 <th>Titre</th>
@@ -54,34 +44,27 @@ export default async function ArticlesPage() {
                                 <tr key={article.id}>
                                     <td className={styles.titleCell}>{article.title}</td>
                                     <td>
-                                        <span
-                                            className={styles.badge}
-                                            data-status={article.published ? 'published' : 'draft'}
-                                        >
-                                            {article.published ? 'Publié' : 'Brouillon'}
-                                        </span>
+                                        <StatusBadge status={article.published ? 'published' : 'draft'} type="article" />
                                     </td>
                                     <td>
                                         {article.tags.length > 0 ? (
-                                            <div className={styles.tags}>
+                                            <div className="dashboard-tags">
                                                 {article.tags.map((tag) => (
-                                                    <span key={tag.id} className={styles.tag}>
-                                                        {tag.name}
-                                                    </span>
+                                                    <Tag key={tag.id} name={tag.name} />
                                                 ))}
                                             </div>
                                         ) : (
-                                            <span className={styles.noTags}>—</span>
+                                            <span className="dashboard-no-tags">—</span>
                                         )}
                                     </td>
                                     <td className={styles.date}>
                                         {formatDate(article.updatedAt)}
                                     </td>
                                     <td>
-                                        <div className={styles.actions}>
+                                        <div className="dashboard-actions">
                                             <a
                                                 href={`/dashboard/articles/${article.id}/edit`}
-                                                className={styles.actionLink}
+                                                className="dashboard-action-button"
                                             >
                                                 Modifier
                                             </a>

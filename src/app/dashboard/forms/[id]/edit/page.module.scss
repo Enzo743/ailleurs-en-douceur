@@ -1,4 +1,4 @@
-@import '/Users/enzo/Documents/Code Perso/ailleurs-en-douceur/src/app/dashboard/forms/new/page.module.scss';
+@forward '../../new/page.module.scss';
 
 // Les styles sont les mêmes que pour la page new, on les import simplement
 // On peut ajouter des styles spécifiques ici si nécessaire
@@ -6,19 +6,19 @@
 .error-box {
   text-align: center;
   padding: 40px;
-  background: #ffebee;
+  background: var(--dashboard-color-cancelled-bg);
   border-radius: 12px;
-  border: 2px solid #d32f2f;
+  border: 2px solid var(--dashboard-color-cancelled);
 
   p {
     margin: 0 0 20px 0;
-    color: #b71c1c;
+    color: var(--dashboard-color-cancelled);
     font-size: 16px;
   }
 
   .back-button {
-    background: #4a3f2f;
-    color: #fff;
+    background: var(--dashboard-color-primary);
+    color: var(--dashboard-color-background);
     border: none;
     padding: 12px 30px;
     border-radius: 8px;
@@ -30,7 +30,7 @@
     display: inline-block;
 
     &:hover {
-      background: #3a3228;
+      background: color-mix(in srgb, var(--dashboard-color-primary) 80%, black);
     }
   }
 }
@@ -41,15 +41,15 @@
 
   p {
     margin: 20px 0 0 0;
-    color: #888;
+    color: var(--dashboard-color-text-muted);
   }
 }
 
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #4a3f2f;
+  border: 4px solid var(--dashboard-color-background-light);
+  border-top: 4px solid var(--dashboard-color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto;

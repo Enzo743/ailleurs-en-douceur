@@ -1,8 +1,4 @@
-@import '../../../dashboard.module.scss';
-
-.page {
-  @extend .dashboard-page;
-}
+// Utilise les classes globales du dashboard directement
 
 .header {
   margin-bottom: 2rem;
@@ -12,7 +8,7 @@
 
 .back-link {
   display: inline-block;
-  color: #4a3f2f;
+  color: var(--dashboard-color-primary);
   text-decoration: none;
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
@@ -25,7 +21,7 @@
 .pageTitle {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #4a3f2f;
+  color: var(--dashboard-color-primary);
   margin: 0 0 0.5rem 0;
 }
 
@@ -60,7 +56,7 @@
 
 .back-button {
   display: inline-block;
-  background: #4a3f2f;
+  background: var(--dashboard-color-primary);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -116,7 +112,7 @@
 .section-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #4a3f2f;
+  color: var(--dashboard-color-primary);
   margin: 0 0 1rem 0;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #eee;
@@ -136,7 +132,7 @@
 
   label {
     font-weight: 500;
-    color: #4a3f2f;
+    color: var(--dashboard-color-primary);
     font-size: 0.85rem;
   }
 
@@ -154,7 +150,7 @@
 
     &:focus {
       outline: none;
-      border-color: #4a3f2f;
+      border-color: var(--dashboard-color-primary);
     }
   }
 
@@ -181,7 +177,7 @@
 }
 
 .submit-button {
-  background: #4a3f2f;
+  background: var(--dashboard-color-primary);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -239,7 +235,7 @@
 
 .info-label {
   font-weight: 500;
-  color: #4a3f2f;
+  color: var(--dashboard-color-primary);
   font-size: 0.85rem;
 }
 
@@ -254,7 +250,7 @@
   border-radius: 4px;
   font-family: monospace;
   font-size: 0.8rem;
-  color: #4a3f2f;
+  color: var(--dashboard-color-primary);
 }
 
 .info-note {
@@ -274,12 +270,12 @@
   }
 
   strong {
-    color: #4a3f2f;
+    color: var(--dashboard-color-primary);
   }
 }
 
 .info-link {
-  color: #4a3f2f;
+  color: var(--dashboard-color-primary);
   text-decoration: none;
   font-family: monospace;
   font-size: 0.85rem;

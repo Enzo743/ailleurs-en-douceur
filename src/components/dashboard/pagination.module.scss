@@ -1,0 +1,61 @@
+@use "../../styles/_variables" as *;
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 16px 0;
+  border-top: 1px solid var(--dashboard-color-border);
+}
+
+.pagination-info {
+  color: var(--dashboard-color-text-secondary);
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--dashboard-color-border);
+  border-radius: 4px;
+  background-color: var(--dashboard-color-background);
+  color: var(--dashboard-color-text-primary);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--dashboard-color-background-medium);
+    border-color: var(--dashboard-color-border-dark);
+  }
+
+  &.active {
+    background-color: var(--dashboard-color-secondary);
+    border-color: var(--dashboard-color-secondary);
+    color: var(--dashboard-color-background);
+    font-weight: bold;
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--dashboard-color-secondary) 80%, black);
+      border-color: color-mix(in srgb, var(--dashboard-color-secondary) 80%, black);
+    }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

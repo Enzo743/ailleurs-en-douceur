@@ -4,34 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import styles from './page.module.scss';
 import { getPackageLabel } from '@/lib/constants';
-import { CONTACT_REQUEST_STATUS_LABELS } from '@/lib/constants';
-
-// Mapper les statuts
-const statusLabels: Record<string, { label: string; className: string }> = {
-  PENDING: { label: CONTACT_REQUEST_STATUS_LABELS.PENDING, className: 'pending' },
-  FORM_SENT: { label: CONTACT_REQUEST_STATUS_LABELS.FORM_SENT, className: 'form-sent' },
-  COMPLETED: { label: CONTACT_REQUEST_STATUS_LABELS.COMPLETED, className: 'completed' },
-  CANCELLED: { label: CONTACT_REQUEST_STATUS_LABELS.CANCELLED, className: 'cancelled' },
-};
-
-// Formater la date
-const formatDate = (date: Date | string): string => {
-  const d = new Date(date);
-  return d.toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
-
-// Formater l'heure
-const formatTime = (date: Date | string): string => {
-  const d = new Date(date);
-  return d.toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
+import { formatDate } from '@/lib/time';
+import { StatusBadge } from '@/components/dashboard';
 
 // Formater les valeurs JSON pour affichage
 const formatValue = (value: any): string => {
@@ -112,11 +86,7 @@ export default async function ContactRequestDetailPage({
           </h1>
         </div>
         <div className={styles['header-right']}>
-          <span
-            className={`${styles['status-badge']} ${styles[contactRequest.status.toLowerCase().replace('_', '-')]}`}
-          >
-            {statusLabels[contactRequest.status]?.label || contactRequest.status}
-          </span>
+          <StatusBadge status={contactRequest.status} />
         </div>
       </div>
 
@@ -151,7 +121,7 @@ export default async function ContactRequestDetailPage({
           <div className={styles['info-item']}>
             <div className={styles['info-label']}>Date de création:</div>
             <div className={styles['info-value']}>
-              {formatDate(contactRequest.createdAt)}
+              {formatDate(contactRequest.createdAt, { month: 'long' })}
             </div>
           </div>
           <div className={styles['info-item']}>
@@ -245,7 +215,7 @@ export default async function ContactRequestDetailPage({
                   Réponse #{index + 1}
                 </h3>
                 <span className={styles['response-date']}>
-                  {formatDate(formResponse.createdAt)}
+                  {formatDate(formResponse.createdAt, { month: 'long' })}
                 </span>
               </div>
               
@@ -279,18 +249,14 @@ export default async function ContactRequestDetailPage({
             <>
               <div className={styles['appointment-header']}>
                 <h3 className={styles['appointment-title']}>Rendez-vous confirmé</h3>
-                <span
-                  className={`${styles['appointment-status']} ${styles[contactRequest.appointment.status.toLowerCase()]}`}
-                >
-                  {statusLabels[contactRequest.appointment.status]?.label || contactRequest.appointment.status}
-                </span>
+                <StatusBadge status={contactRequest.appointment.status} />
               </div>
               
               <div className={styles['appointment-details']}>
                 <div className={styles['appointment-detail']}>
                   <span className={styles['detail-label']}>Date:</span>
                   <span className={styles['detail-value']}>
-                    {formatDate(contactRequest.appointment.slot.date)}
+                    {formatDate(contactRequest.appointment.slot.date, { month: 'long' })}
                   </span>
                 </div>
                 <div className={styles['appointment-detail']}>

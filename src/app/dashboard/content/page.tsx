@@ -1,6 +1,6 @@
 import { verifySession } from '@/lib/auth';
 import { getAllContent } from '@/app/actions/content';
-import SectionCard from '@/app/components/dashboard/SectionCard';
+import { DashboardHeader, SectionCard } from '@/components/dashboard';
 import type { SiteContent } from '@prisma/client';
 import styles from './content.module.scss';
 
@@ -25,12 +25,12 @@ export default async function ContentPage() {
     }, {});
 
     return (
-        <section className={styles.page}>
-            <h1 className={styles.pageTitle}>Gestion du contenu</h1>
-            <p className={styles.pageSubtitle}>
-                Modifiez les textes et les images affichés sur le site.
-            </p>
-            <div className={styles.list}>
+        <section className="dashboard-page">
+            <DashboardHeader
+                title="Gestion du contenu"
+                subtitle="Modifiez les textes et les images affichés sur le site."
+            />
+            <div className="dashboard-content-list">
                 {Object.entries(sections).map(([section, items]) => (
                     <SectionCard
                         key={section}

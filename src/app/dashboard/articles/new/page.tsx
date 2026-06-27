@@ -1,5 +1,5 @@
 import { verifySession } from '@/lib/auth';
-import ArticleForm from '@/app/components/dashboard/ArticleForm';
+import { ArticleForm } from '@/components/dashboard';
 import styles from '../articles.module.scss';
 
 export const metadata = { title: 'Nouvel article — Administration' };

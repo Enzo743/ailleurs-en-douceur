@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import styles from './page.module.scss';
 import { getPackageLabel } from '@/lib/constants';
-import { CONTACT_REQUEST_STATUS_LABELS } from '@/lib/constants';
+import { CONTACT_REQUEST_STATUS_LABELS } from '@/lib/client-constants';
 
 // Mapper les statuts
 const statusLabels: Record<string, { label: string; className: string }> = {

@@ -53,43 +53,6 @@ export const getCalendarClient = async (tokens?: GoogleTokens) => {
 };
 
 /**
- * Génère l'URL d'autorisation pour OAuth2
- */
-export const getGoogleAuthUrl = () => {
-  const oauth2Client = getOAuth2Client();
-  const scopes = ['https://www.googleapis.com/auth/calendar'];
-  
-  return oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: scopes,
-    prompt: 'consent', // Force le refresh token
-  });
-};
-
-/**
- * Échange le code d'autorisation contre des tokens
- */
-export const exchangeCodeForTokens = async (code: string): Promise<GoogleTokens> => {
-  const oauth2Client = getOAuth2Client();
-  
-  const { tokens } = await oauth2Client.getToken(code);
-  
-  if (!tokens.access_token || !tokens.refresh_token) {
-    throw new Error('Missing tokens in Google OAuth response');
-  }
-
-  const expiryDate = tokens.expiry_date 
-    ? tokens.expiry_date 
-    : Date.now() + ((tokens as any).expires_in || 3600) * 1000;
-
-  return {
-    access_token: tokens.access_token,
-    refresh_token: tokens.refresh_token,
-    expiry_date: expiryDate,
-  };
-};
-
-/**
  * Crée un événement Google Calendar avec Google Meet
  */
 export interface CreateMeetEventParams {

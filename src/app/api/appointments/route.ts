@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createMeetEvent, cancelCalendarEvent } from '@/lib/google';
-import { getEmailConfig, getPackageLabel } from '@/lib/email';
+import { getEmailConfig } from '@/lib/email';
+import { getPackageLabel } from '@/lib/constants';
 import { doSlotsOverlap, calculateDuration, formatDateForDisplay } from '@/lib/time';
 import { validateAppointmentSlot, type AppointmentSlotData } from '@/lib/validation';
 
