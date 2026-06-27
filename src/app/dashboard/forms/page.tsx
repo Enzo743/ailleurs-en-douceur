@@ -2,17 +2,7 @@ import { verifySession } from '@/lib/auth';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import styles from './page.module.scss';
-
-// Mapper les types de formule
-const packageLabels: Record<string, string> = {
-  'escapade-en-douceur': 'Escapade en douceur',
-  'voyage-sur-mesure': 'Voyage sur-mesure',
-  'voyage-de-noces': 'Voyage de noces',
-};
-
-const getPackageLabel = (value: string): string => {
-  return packageLabels[value] || value;
-};
+import { getPackageLabel } from '@/lib/constants';
 
 // Mapper les types de champs
 const fieldTypeLabels: Record<string, string> = {

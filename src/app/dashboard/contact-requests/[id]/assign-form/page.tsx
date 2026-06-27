@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './page.module.scss';
+import { getPackageLabel } from '@/lib/constants';
 
 interface ContactRequest {
   id: string;
@@ -25,17 +26,6 @@ interface Form {
   description: string | null;
   isActive: boolean;
 }
-
-// Mapper les types de formule
-const packageLabels: Record<string, string> = {
-  'escapade-en-douceur': 'Escapade en douceur',
-  'voyage-sur-mesure': 'Voyage sur-mesure',
-  'voyage-de-noces': 'Voyage de noces',
-};
-
-const getPackageLabel = (value: string): string => {
-  return packageLabels[value] || value;
-};
 
 export default function AssignFormPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);

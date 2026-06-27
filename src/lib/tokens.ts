@@ -95,15 +95,4 @@ export const generateSessionSecret = (): string => {
   return generateShortToken(32);
 };
 
-export default {
-  generateToken,
-  generateShortToken,
-  generatePrefixedToken,
-  hashToken,
-  isValidUUID,
-  generateContactRequestToken,
-  generateAppointmentToken,
-  generateFormResponseToken,
-  getTokenType,
-  generateSessionSecret,
-};
+

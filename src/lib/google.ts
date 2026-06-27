@@ -278,13 +278,4 @@ export const getCalendarEvent = async (eventId: string, tokens?: GoogleTokens): 
   }
 };
 
-export default {
-  getCalendarClient,
-  getGoogleAuthUrl,
-  exchangeCodeForTokens,
-  createMeetEvent,
-  checkTimeSlotAvailability,
-  cancelCalendarEvent,
-  updateCalendarEvent,
-  getCalendarEvent,
-};
+

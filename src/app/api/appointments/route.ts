@@ -1,19 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createMeetEvent, cancelCalendarEvent } from "@/lib/google";
-import nodemailer from "nodemailer";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { createMeetEvent, cancelCalendarEvent } from '@/lib/google';
+import { getEmailConfig, getPackageLabel } from '@/lib/email';
+import { doSlotsOverlap, calculateDuration, formatDateForDisplay } from '@/lib/time';
+import { validateAppointmentSlot, type AppointmentSlotData } from '@/lib/validation';
 
-// Mapper les libellés des types de formule
-const getPackageLabel = (value: string): string => {
-  const labels: Record<string, string> = {
-    'escapade-en-douceur': 'Escapade en douceur',
-    'voyage-sur-mesure': 'Voyage sur-mesure',
-    'voyage-de-noces': 'Voyage de noces',
-  };
-  return labels[value] || value;
-};
-
+// ============================================================================
 // Types
+// ============================================================================
+
 interface CreateAppointmentData {
   contactRequestId: string;
   slotId: string;
@@ -24,46 +19,24 @@ interface ApiResponse {
   data?: any;
   error?: string;
   message?: string;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
-// Configuration du transporteur Nodemailer
-const createTransporter = () => {
-  const emailUser = process.env.EMAIL_USER;
-  const emailPass = process.env.EMAIL_PASS;
-  const emailHost = process.env.EMAIL_HOST || "smtp.gmail.com";
-  const emailPort = parseInt(process.env.EMAIL_PORT || "587");
-  const emailSecure = process.env.EMAIL_SECURE === "true";
-  const emailFrom = process.env.EMAIL_FROM;
-
-  if (!emailUser || !emailPass) {
-    throw new Error("Les variables d'environnement EMAIL_USER et EMAIL_PASS sont requises");
-  }
-
-  return {
-    transporter: nodemailer.createTransport({
-      host: emailHost,
-      port: emailPort,
-      secure: emailSecure,
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-    }),
-    emailFrom,
-    emailUser,
-  };
-};
+// ============================================================================
+// GET /api/appointments
+// ============================================================================
 
 /**
- * GET /api/appointments
  * Liste tous les rendez-vous avec pagination et filtres
  * Accessible uniquement avec une session valide (dashboard)
  */
 export async function GET(request: NextRequest) {
   try {
-    // Note: La vérification de session peut être ajoutée ici
-    // await verifySession();
-
     const { searchParams } = new URL(request.url);
     const contactRequestId = searchParams.get('contactRequestId') || undefined;
     const slotId = searchParams.get('slotId') || undefined;
@@ -87,7 +60,7 @@ export async function GET(request: NextRequest) {
       where.status = status;
     }
 
-    // Récupérer les rendez-vous avec leurs relations
+    // Recuperer les rendez-vous avec leurs relations
     const [appointments, total] = await Promise.all([
       prisma.appointment.findMany({
         where,
@@ -121,7 +94,7 @@ export async function GET(request: NextRequest) {
 
     const totalPages = Math.ceil(total / limit);
 
-    // Formater les données
+    // Formater les donnees
     const formattedData = appointments.map((appointment) => ({
       id: appointment.id,
       contactRequestId: appointment.contactRequestId,
@@ -161,7 +134,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Une erreur est survenue lors de la récupération des rendez-vous',
+        error: 'Une erreur est survenue lors de la recuperation des rendez-vous',
         message: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
@@ -169,11 +142,14 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// ============================================================================
+// POST /api/appointments
+// ============================================================================
+
 /**
- * POST /api/appointments
- * Crée un nouveau rendez-vous
+ * Cree un nouveau rendez-vous
  * Cette route est PUBLIQUE - accessible sans session
- * Mais nécessite un contactRequestId et slotId valides
+ * Mais necessite un contactRequestId et slotId valides
  */
 export async function POST(request: NextRequest) {
   const { contactRequestId, slotId }: CreateAppointmentData = await request.json();
@@ -194,50 +170,50 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Vérifier que la demande de contact existe
+    // Verifier que la demande de contact existe
     const contactRequest = await prisma.contactRequest.findUnique({
       where: { id: contactRequestId },
     });
 
     if (!contactRequest) {
       return NextResponse.json(
-        { success: false, error: 'Demande de contact non trouvée' },
+        { success: false, error: 'Demande de contact non trouvee' },
         { status: 404 }
       );
     }
 
-    // Vérifier que le créneau existe et est disponible
+    // Verifier que le createau existe et est disponible
     const slot = await prisma.appointmentSlot.findUnique({
       where: { id: slotId },
     });
 
     if (!slot) {
       return NextResponse.json(
-        { success: false, error: 'Créneau non trouvé' },
+        { success: false, error: 'Createau non trouve' },
         { status: 404 }
       );
     }
 
     if (!slot.isAvailable) {
       return NextResponse.json(
-        { success: false, error: 'Ce créneau n\'est plus disponible' },
+        { success: false, error: 'Ce createau n\'est plus disponible' },
         { status: 400 }
       );
     }
 
-    // Vérifier qu'il n'y a pas déjà un rendez-vous sur ce créneau
+    // Verifier qu'il n'y a pas deja un rendez-vous sur ce createau
     const existingAppointment = await prisma.appointment.findUnique({
       where: { slotId: slotId },
     });
 
     if (existingAppointment) {
       return NextResponse.json(
-        { success: false, error: 'Ce créneau est déjà réservé' },
+        { success: false, error: 'Ce createau est deja reserve' },
         { status: 400 }
       );
     }
 
-    // Créer les DateTime pour Google Calendar
+    // Creer les DateTime pour Google Calendar
     const date = new Date(slot.date);
     const [startHours, startMinutes] = slot.startTime.split(':').map(Number);
     const [endHours, endMinutes] = slot.endTime.split(':').map(Number);
@@ -248,7 +224,7 @@ export async function POST(request: NextRequest) {
     const endDateTime = new Date(date);
     endDateTime.setHours(endHours, endMinutes, 0, 0);
 
-    // Créer l'événement Google Calendar avec Meet
+    // Creer l'evenement Google Calendar avec Meet
     const meetResult = await createMeetEvent({
       summary: `Rendez-vous avec ${contactRequest.firstName} ${contactRequest.lastName} - ${contactRequest.packageType}`,
       description: `Rendez-vous pour discuter du projet: ${contactRequest.message?.substring(0, 200) || ''}
@@ -263,7 +239,7 @@ Nombre de nuits: ${contactRequest.nights}`,
       attendeeName: `${contactRequest.firstName} ${contactRequest.lastName}`,
     });
 
-    // Créer le rendez-vous en base de données
+    // Creer le rendez-vous en base de donnees
     const appointment = await prisma.appointment.create({
       data: {
         contactRequestId: contactRequestId,
@@ -278,13 +254,13 @@ Nombre de nuits: ${contactRequest.nights}`,
       },
     });
 
-    // Marquer le créneau comme non disponible
+    // Marquer le createau comme non disponible
     await prisma.appointmentSlot.update({
       where: { id: slotId },
       data: { isAvailable: false },
     });
 
-    // Mettre à jour le statut de la demande de contact
+    // Mettre a jour le statut de la demande de contact
     await prisma.contactRequest.update({
       where: { id: contactRequestId },
       data: { status: 'COMPLETED' },
@@ -292,10 +268,11 @@ Nombre de nuits: ${contactRequest.nights}`,
 
     // Envoyer un email de confirmation au client
     try {
-      const { transporter, emailFrom } = createTransporter();
+      const { transporter, emailFrom } = getEmailConfig();
       
       const emailSubject = `Confirmation de votre rendez-vous - Ailleurs en Douceur`;
-      
+      const packageLabel = getPackageLabel(contactRequest.packageType);
+
       const emailHtml = `
         <!DOCTYPE html>
         <html>
@@ -317,29 +294,29 @@ Nombre de nuits: ${contactRequest.nights}`,
           <body>
             <div class="container">
               <div class="header">
-                <h1>Rendez-vous confirmé</h1>
+                <h1>Rendez-vous confirme</h1>
               </div>
               <div class="content">
                 <p>Bonjour ${contactRequest.firstName},</p>
                 
-                <p>Votre rendez-vous a été confirmé. Voici les détails :</p>
+                <p>Votre rendez-vous a ete confirme. Voici les details :</p>
                 
-                <div class="field"><strong>Date:</strong> ${slot.date.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                <div class="field"><strong>Date:</strong> ${formatDateForDisplay(slot.date, true)}</div>
                 <div class="field"><strong>Heure:</strong> ${slot.startTime} - ${slot.endTime}</div>
-                <div class="field"><strong>Durée:</strong> ${slot.duration} minutes</div>
+                <div class="field"><strong>Duree:</strong> ${slot.duration} minutes</div>
                 
                 <div class="info-box">
                   <p style="margin: 0 0 15px 0;"><strong>Lien Google Meet :</strong></p>
-                  <a href="${meetResult.meetLink}" class="cta-button">Rejoindre la visioconférence</a>
+                  <a href="${meetResult.meetLink}" class="cta-button">Rejoindre la visioconference</a>
                   <p style="margin: 10px 0 0 0; font-size: 12px;">Lien : ${meetResult.meetLink}</p>
                 </div>
                 
-                <p>Un rappel sera envoyé 24h avant le rendez-vous avec le lien de visioconférence.</p>
+                <p>Un rappel sera envoye 24h avant le rendez-vous avec le lien de visioconference.</p>
                 
-                <p>À très bientôt,<br>Nelly d'Ailleurs en Douceur</p>
+                <p>A tres bientot,<br>Nelly d'Ailleurs en Douceur</p>
               </div>
               <div class="footer">
-                <p>Ce message a été envoyé automatiquement.</p>
+                <p>Ce message a ete envoye automatiquement.</p>
                 <p>Date: ${new Date().toLocaleString('fr-FR')}</p>
               </div>
             </div>
@@ -352,17 +329,17 @@ ${emailSubject}
 
 Bonjour ${contactRequest.firstName},
 
-Votre rendez-vous a été confirmé. Voici les détails :
+Votre rendez-vous a ete confirme. Voici les details :
 
-Date: ${slot.date.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+Date: ${formatDateForDisplay(slot.date, true)}
 Heure: ${slot.startTime} - ${slot.endTime}
-Durée: ${slot.duration} minutes
+Duree: ${slot.duration} minutes
 
 Lien Google Meet : ${meetResult.meetLink}
 
-Un rappel sera envoyé 24h avant le rendez-vous avec le lien de visioconférence.
+Un rappel sera envoye automatiquement 24h avant le rendez-vous avec le lien de visioconference.
 
-À très bientôt,
+A tres bientot,
 Nelly d'Ailleurs en Douceur
 
 Date: ${new Date().toLocaleString('fr-FR')}
@@ -376,7 +353,7 @@ Date: ${new Date().toLocaleString('fr-FR')}
         html: emailHtml,
       });
 
-      // Envoyer aussi à la cliente (Nelly)
+      // Envoyer aussi a la cliente (Nelly)
       const recipientEmail = process.env.CONTACT_RECIPIENT_EMAIL || process.env.EMAIL_USER;
       if (recipientEmail && recipientEmail !== emailFrom) {
         const clientFullName = `${contactRequest.firstName} ${contactRequest.lastName}`;
@@ -384,7 +361,7 @@ Date: ${new Date().toLocaleString('fr-FR')}
         await transporter.sendMail({
           from: `"Ailleurs en Douceur" <${emailFrom}>`,
           to: recipientEmail,
-          subject: `📅 NOUVEAU RENDEZ-VOUS: ${clientFullName} - ${getPackageLabel(contactRequest.packageType)}`,
+          subject: `NOUVEAU RENDEZ-VOUS: ${clientFullName} - ${packageLabel}`,
           
           html: `
             <!DOCTYPE html>
@@ -406,23 +383,23 @@ Date: ${new Date().toLocaleString('fr-FR')}
               <body>
                 <div style="border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
                   <div class="header">
-                    <h1>📅 Nouveau Rendez-Vous</h1>
+                    <h1>Nouveau Rendez-Vous</h1>
                   </div>
                   <div class="content">
                     <p><strong>Bonjour Nelly,</strong></p>
-                    <p>Un nouveau rendez-vous a été confirmé par <strong>${clientFullName}</strong>.</p>
+                    <p>Un nouveau rendez-vous a ete confirme par <strong>${clientFullName}</strong>.</p>
 
                     <div class="field"><strong>Email:</strong> ${contactRequest.email}</div>
-                    <div class="field"><strong>Formule:</strong> ${getPackageLabel(contactRequest.packageType)}</div>
+                    <div class="field"><strong>Formule:</strong> ${packageLabel}</div>
                     ${contactRequest.nights ? `<div class="field"><strong>Nombre de nuits:</strong> ${contactRequest.nights}</div>` : ''}
                     
                     <div class="highlight">
-                      <div class="field"><strong>Date:</strong> ${new Date(slot.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                      <div class="field"><strong>Date:</strong> ${formatDateForDisplay(slot.date, true)}</div>
                       <div class="field"><strong>Heure:</strong> ${slot.startTime} - ${slot.endTime} (${slot.duration} min)</div>
                     </div>
 
                     <p style="margin: 20px 0 10px 0;"><strong>Lien Google Meet :</strong></p>
-                    <a href="${meetResult.meetLink}" class="meet-link">🔗 Rejoindre la visioconférence</a>
+                    <a href="${meetResult.meetLink}" class="meet-link">Rejoindre la visioconference</a>
                     <div style="font-size: 12px; color: #666; margin-top: 5px;">${meetResult.meetLink}</div>
 
                     ${contactRequest.message ? `
@@ -432,11 +409,10 @@ Date: ${new Date().toLocaleString('fr-FR')}
                     </div>
                     ` : ''}
 
-                    <p style="margin: 25px 0 5px 0;">Vous pouvez rejoindre le rendez-vous en cliquant sur le lien ci-dessus.</p>
-                    <p>Un rappel sera envoyé automatiquement au client 24h avant.</p>
+                    <p style="margin: 25px 0 5px 0;">Un rappel sera envoye automatiquement au client 24h avant.</p>
                   </div>
                   <div class="footer">
-                    <p>Ce message a été généré automatiquement.</p>
+                    <p>Ce message a ete genere automatiquement.</p>
                     <p>Date: ${new Date().toLocaleString('fr-FR')}</p>
                   </div>
                 </div>
@@ -449,10 +425,10 @@ Nouveau Rendez-Vous avec ${clientFullName}
 
 Client: ${contactRequest.firstName} ${contactRequest.lastName}
 Email: ${contactRequest.email}
-Formule: ${getPackageLabel(contactRequest.packageType)}
+Formule: ${packageLabel}
 ${contactRequest.nights ? `Nombre de nuits: ${contactRequest.nights}` : ''}
 
-Date: ${new Date(slot.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+Date: ${formatDateForDisplay(slot.date, true)}
 Heure: ${slot.startTime} - ${slot.endTime}
 
 Lien Google Meet: ${meetResult.meetLink}
@@ -471,7 +447,7 @@ ${contactRequest.message}` : ''}
     return NextResponse.json(
       {
         success: true,
-        message: 'Rendez-vous confirmé avec succès',
+        message: 'Rendez-vous confirme avec succes',
         data: {
           id: appointment.id,
           contactRequestId: appointment.contactRequestId,
@@ -494,7 +470,7 @@ ${contactRequest.message}` : ''}
   } catch (error: any) {
     console.error('Error creating appointment:', error);
     
-    // En cas d'erreur, essayer de remettre le créneau comme disponible
+    // En cas d'erreur, essayer de remettre le createau comme disponible
     try {
       await prisma.appointmentSlot.update({
         where: { id: slotId },
@@ -515,15 +491,15 @@ ${contactRequest.message}` : ''}
   }
 }
 
+// ============================================================================
+// DELETE /api/appointments/:id
+// ============================================================================
+
 /**
- * DELETE /api/appointments/:id
  * Annule un rendez-vous
  */
 export async function DELETE(request: NextRequest) {
   try {
-    // Note: La vérification de session peut être ajoutée ici
-    // await verifySession();
-
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -534,7 +510,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Vérifier que le rendez-vous existe
+    // Verifier que le rendez-vous existe
     const appointment = await prisma.appointment.findUnique({
       where: { id },
       include: { slot: true },
@@ -542,12 +518,12 @@ export async function DELETE(request: NextRequest) {
 
     if (!appointment) {
       return NextResponse.json(
-        { success: false, error: 'Rendez-vous non trouvé' },
+        { success: false, error: 'Rendez-vous non trouve' },
         { status: 404 }
       );
     }
 
-    // Annuler l'événement Google Calendar
+    // Annuler l'evenement Google Calendar
     if (appointment.googleEventId) {
       try {
         await cancelCalendarEvent(appointment.googleEventId);
@@ -556,7 +532,7 @@ export async function DELETE(request: NextRequest) {
       }
     }
 
-    // Marquer le créneau comme disponible à nouveau
+    // Marquer le createau comme disponible a nouveau
     await prisma.appointmentSlot.update({
       where: { id: appointment.slotId },
       data: { isAvailable: true },
@@ -567,16 +543,16 @@ export async function DELETE(request: NextRequest) {
       where: { id },
     });
 
-    // Mettre à jour le statut de la demande de contact
+    // Mettre a jour le statut de la demande de contact
     await prisma.contactRequest.update({
       where: { id: appointment.contactRequestId },
-      data: { status: 'FORM_SENT' }, // Retour au statut précédent
+      data: { status: 'FORM_SENT' }, // Retour au statut precedent
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: 'Rendez-vous annulé avec succès',
+        message: 'Rendez-vous annule avec succes',
       },
       { status: 200 }
     );
@@ -595,9 +571,12 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
+// ============================================================================
+// GET /api/appointments/:id
+// ============================================================================
+
 /**
- * GET /api/appointments/:id
- * Récupère un rendez-vous spécifique
+ * Recupere un rendez-vous specifique
  */
 export async function GET_BY_ID(request: NextRequest) {
   try {
@@ -637,7 +616,7 @@ export async function GET_BY_ID(request: NextRequest) {
 
     if (!appointment) {
       return NextResponse.json(
-        { success: false, error: 'Rendez-vous non trouvé' },
+        { success: false, error: 'Rendez-vous non trouve' },
         { status: 404 }
       );
     }
@@ -672,7 +651,7 @@ export async function GET_BY_ID(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Une erreur est survenue lors de la récupération du rendez-vous',
+        error: 'Une erreur est survenue lors de la recuperation du rendez-vous',
         message: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
@@ -680,31 +659,34 @@ export async function GET_BY_ID(request: NextRequest) {
   }
 }
 
-// Pour les autres méthodes HTTP
+// ============================================================================
+// Autres methodes HTTP
+// ============================================================================
+
 export async function PUT() {
   return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée. Utilisez PATCH pour les mises à jour.' },
+    { success: false, error: 'Methode non autorisee. Utilisez PATCH pour les mises a jour.' },
     { status: 405 }
   );
 }
 
 export async function PATCH() {
   return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée' },
+    { success: false, error: 'Methode non autorisee' },
     { status: 405 }
   );
 }
 
 export async function HEAD() {
   return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée' },
+    { success: false, error: 'Methode non autorisee' },
     { status: 405 }
   );
 }
 
 export async function OPTIONS() {
   return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée' },
+    { success: false, error: 'Methode non autorisee' },
     { status: 405 }
   );
 }

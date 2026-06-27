@@ -1,22 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifySession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { checkTimeSlotAvailability, createMeetEvent, cancelCalendarEvent } from "@/lib/google";
-import nodemailer from "nodemailer";
+import { NextRequest, NextResponse } from 'next/server';
+import { verifySession } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { doSlotsOverlap, cleanupExpiredSlots, getTodayAtMidnight, calculateDuration, isValidTimeFormat } from '@/lib/time';
+import { getEmailConfig, getScheduleUrl } from '@/lib/email';
+import { validateAppointmentSlot, type AppointmentSlotData } from '@/lib/validation';
 
+// ============================================================================
 // Types
+// ============================================================================
+
 interface AppointmentSlotQueryParams {
   date?: string;
   isAvailable?: string;
   page?: string;
   limit?: string;
-}
-
-interface CreateAppointmentSlotData {
-  date: string | Date;
-  startTime: string;
-  endTime: string;
-  duration?: number;
 }
 
 interface ApiResponse {
@@ -32,70 +29,13 @@ interface ApiResponse {
   };
 }
 
-// Configuration du transporteur Nodemailer
-const createTransporter = () => {
-  const emailUser = process.env.EMAIL_USER;
-  const emailPass = process.env.EMAIL_PASS;
-  const emailHost = process.env.EMAIL_HOST || "smtp.gmail.com";
-  const emailPort = parseInt(process.env.EMAIL_PORT || "587");
-  const emailSecure = process.env.EMAIL_SECURE === "true";
-
-  if (!emailUser || !emailPass) {
-    throw new Error("Les variables d'environnement EMAIL_USER et EMAIL_PASS sont requises");
-  }
-
-  return nodemailer.createTransport({
-    host: emailHost,
-    port: emailPort,
-    secure: emailSecure,
-    auth: {
-      user: emailUser,
-      pass: emailPass,
-    },
-  });
-};
-
-// Génère l'URL du planning pour le client
-const getScheduleUrl = (token: string): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://votre-domaine.com');
-  return `${baseUrl}/schedule/${token}`;
-};
-
-// Vérifie si deux créneaux se chevauchent
-function doSlotsOverlap(
-  date1: string | Date,
-  startTime1: string,
-  endTime1: string,
-  date2: string | Date,
-  startTime2: string,
-  endTime2: string
-): boolean {
-  // Convertir les dates en string YYYY-MM-DD pour comparaison
-  const date1Str = date1 instanceof Date ? date1.toISOString().split('T')[0] : date1;
-  const date2Str = date2 instanceof Date ? date2.toISOString().split('T')[0] : date2;
-  
-  // Si dates différentes, pas de chevauchement
-  if (date1Str !== date2Str) return false;
-  
-  // Convertir les heures en minutes
-  const [h1, m1] = startTime1.split(':').map(Number);
-  const [h2, m2] = startTime2.split(':').map(Number);
-  const [eh1, em1] = endTime1.split(':').map(Number);
-  const [eh2, em2] = endTime2.split(':').map(Number);
-  
-  const start1 = h1 * 60 + m1;
-  const end1 = eh1 * 60 + em1;
-  const start2 = h2 * 60 + m2;
-  const end2 = eh2 * 60 + em2;
-  
-  // Chevauchement si : slot1 commence avant que slot2 ne finisse ET slot1 finit après que slot2 ne commence
-  return start1 < end2 && end1 > start2;
-}
+// ============================================================================
+// GET /api/appointment-slots
+// ============================================================================
 
 /**
- * GET /api/appointment-slots
- * Liste tous les créneaux disponibles avec pagination et filtres
- * Accessible publiquement pour afficher les créneaux dans le formulaire client
+ * Liste tous les createaux disponibles avec pagination et filtres
+ * Accessible publiquement pour afficher les createaux dans le formulaire client
  */
 export async function GET(request: NextRequest) {
   try {
@@ -130,10 +70,10 @@ export async function GET(request: NextRequest) {
       where.isAvailable = query.isAvailable === 'true';
     }
     
-    // Ne montrer que les créneaux disponibles par défaut
+    // Ne montrer que les createaux disponibles par defaut
     where.isAvailable = true;
 
-    // Récupérer les créneaux avec leurs rendez-vous
+    // Recuperer les createaux avec leurs rendez-vous
     const [slots, total] = await Promise.all([
       prisma.appointmentSlot.findMany({
         where,
@@ -159,7 +99,7 @@ export async function GET(request: NextRequest) {
 
     const totalPages = Math.ceil(total / limit);
 
-    // Formater les données
+    // Formater les donnees
     const formattedData = slots.map((slot) => ({
       id: slot.id,
       date: slot.date.toISOString().split('T')[0], // Format YYYY-MM-DD
@@ -195,7 +135,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Une erreur est survenue lors de la récupération des créneaux',
+        error: 'Une erreur est survenue lors de la recuperation des createaux',
         message: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
@@ -203,57 +143,48 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// ============================================================================
+// POST /api/appointment-slots
+// ============================================================================
+
 /**
- * POST /api/appointment-slots
- * Crée un nouveau créneau de rendez-vous
- * Nécessite une session valide
+ * Cree un nouveau createau de rendez-vous
+ * Necessite une session valide
  */
 export async function POST(request: NextRequest) {
   try {
-    // Vérification de la session
+    // Verification de la session
     await verifySession();
 
-    const body: CreateAppointmentSlotData = await request.json();
+    const body: AppointmentSlotData = await request.json();
 
-    // Validation
-    if (!body.date) {
+    // Validation complete
+    const validation = validateAppointmentSlot(body);
+    if (!validation.valid) {
       return NextResponse.json(
-        { success: false, error: 'La date est requise' },
+        { 
+          success: false, 
+          error: validation.errors[0]?.error || 'Donnees invalides',
+          errors: validation.errors 
+        },
         { status: 400 }
       );
     }
 
-    if (!body.startTime) {
+    // Validation du format des heures
+    if (!isValidTimeFormat(body.startTime) || !isValidTimeFormat(body.endTime)) {
       return NextResponse.json(
-        { success: false, error: 'L\'heure de début est requise' },
+        { success: false, error: 'Les heures doivent etre au format HH:MM' },
         { status: 400 }
       );
     }
 
-    if (!body.endTime) {
-      return NextResponse.json(
-        { success: false, error: 'L\'heure de fin est requise' },
-        { status: 400 }
-      );
-    }
-
-    // Valider le format des heures (HH:MM)
-    const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    if (!timeRegex.test(body.startTime) || !timeRegex.test(body.endTime)) {
-      return NextResponse.json(
-        { success: false, error: 'Les heures doivent être au format HH:MM' },
-        { status: 400 }
-      );
-    }
-
-    // Calculer la durée en minutes
-    const startMinutes = parseInt(body.startTime.split(':')[0]) * 60 + parseInt(body.startTime.split(':')[1]);
-    const endMinutes = parseInt(body.endTime.split(':')[0]) * 60 + parseInt(body.endTime.split(':')[1]);
-    const duration = endMinutes - startMinutes;
+    // Calculer la duree en minutes
+    const duration = calculateDuration(body.startTime, body.endTime);
 
     if (duration <= 0) {
       return NextResponse.json(
-        { success: false, error: 'L\'heure de fin doit être postérieure à l\'heure de début' },
+        { success: false, error: 'L\'heure de fin doit etre posterieure a l\'heure de debut' },
         { status: 400 }
       );
     }
@@ -261,7 +192,7 @@ export async function POST(request: NextRequest) {
     // Convertir la date au format Date
     const dateObj = body.date instanceof Date ? body.date : new Date(body.date);
 
-    // Vérifier qu'il n'y a pas déjà un créneau qui se chevauche
+    // Verifier qu'il n'y a pas deja un createau qui se chevauche
     const existingSlots = await prisma.appointmentSlot.findMany({
       where: {
         date: dateObj,
@@ -278,13 +209,13 @@ export async function POST(request: NextRequest) {
         existingSlot.endTime
       )) {
         return NextResponse.json(
-          { success: false, error: 'Un créneau existe déjà à cette heure ou se chevauche avec un créneau existant' },
+          { success: false, error: 'Un createau existe deja a cette heure ou se chevauche avec un createau existant' },
           { status: 400 }
         );
       }
     }
 
-    // Vérifier la disponibilité dans Google Calendar
+    // Verifier la disponibilite dans Google Calendar
     const dateTimeStart = new Date(dateObj);
     dateTimeStart.setHours(
       parseInt(body.startTime.split(':')[0]),
@@ -301,7 +232,7 @@ export async function POST(request: NextRequest) {
       0
     );
 
-    // Créer le créneau
+    // Creer le createau
     const slot = await prisma.appointmentSlot.create({
       data: {
         date: dateObj,
@@ -312,36 +243,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Nettoyer automatiquement les créneaux passés non réservés (basé sur heure de début)
-    const now = new Date();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const currentTime = now.toTimeString().split(' ')[0]; // Format HH:MM:SS
-    
-    await prisma.appointmentSlot.deleteMany({
-      where: {
-        OR: [
-          {
-            date: {
-              lt: today,
-            },
-          },
-          {
-            date: today,
-            startTime: {
-              lt: currentTime,
-            },
-          },
-        ],
-        isAvailable: true,
-        appointment: null,
-      },
-    });
+    // Nettoyer automatiquement les createaux passes non reserves
+    await cleanupExpiredSlots(prisma);
 
     return NextResponse.json(
       {
         success: true,
-        message: 'Créneau créé avec succès',
+        message: 'Createau cree avec succes',
         data: {
           id: slot.id,
           date: slot.date.toISOString().split('T')[0],
@@ -361,7 +269,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Une erreur est survenue lors de la création du créneau',
+        error: 'Une erreur est survenue lors de la creation du createau',
         message: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
@@ -369,16 +277,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-
+// ============================================================================
+// DELETE /api/appointment-slots/:id
+// ============================================================================
 
 /**
- * DELETE /api/appointment-slots/:id
- * Supprime un créneau de rendez-vous
- * Nécessite une session valide
+ * Supprime un createau de rendez-vous
+ * Necessite une session valide
  */
 export async function DELETE(request: NextRequest) {
   try {
-    // Vérification de la session
+    // Verification de la session
     await verifySession();
 
     const { searchParams } = new URL(request.url);
@@ -386,12 +295,12 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { success: false, error: 'L\'ID du créneau est requis' },
+        { success: false, error: 'L\'ID du createau est requis' },
         { status: 400 }
       );
     }
 
-    // Vérifier que le créneau existe
+    // Verifier que le createau existe
     const existingSlot = await prisma.appointmentSlot.findUnique({
       where: { id },
       include: { appointment: true },
@@ -399,16 +308,17 @@ export async function DELETE(request: NextRequest) {
 
     if (!existingSlot) {
       return NextResponse.json(
-        { success: false, error: 'Créneau non trouvé' },
+        { success: false, error: 'Createau non trouve' },
         { status: 404 }
       );
     }
 
-    // Vérifier qu'il n'y a pas de rendez-vous associé
+    // Verifier qu'il n'y a pas de rendez-vous associe
     if (existingSlot.appointment) {
-      // Annuler l'événement Google Calendar si nécessaire
+      // Annuler l'evenement Google Calendar si necessaire
       if (existingSlot.appointment.googleEventId) {
         try {
+          const { cancelCalendarEvent } = await import('@/lib/google');
           await cancelCalendarEvent(existingSlot.appointment.googleEventId);
         } catch (error) {
           console.error('Error canceling Google Calendar event:', error);
@@ -421,41 +331,18 @@ export async function DELETE(request: NextRequest) {
       });
     }
 
-    // Supprimer le créneau
+    // Supprimer le createau
     await prisma.appointmentSlot.delete({
       where: { id },
     });
 
-    // Nettoyer automatiquement les créneaux passés non réservés (basé sur heure de début)
-    const now = new Date();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const currentTime = now.toTimeString().split(' ')[0]; // Format HH:MM:SS
-    
-    await prisma.appointmentSlot.deleteMany({
-      where: {
-        OR: [
-          {
-            date: {
-              lt: today,
-            },
-          },
-          {
-            date: today,
-            startTime: {
-              lt: currentTime,
-            },
-          },
-        ],
-        isAvailable: true,
-        appointment: null,
-      },
-    });
+    // Nettoyer automatiquement les createaux passes non reserves
+    await cleanupExpiredSlots(prisma);
 
     return NextResponse.json(
       {
         success: true,
-        message: 'Créneau supprimé avec succès',
+        message: 'Createau supprime avec succes',
       },
       { status: 200 }
     );
@@ -466,7 +353,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Une erreur est survenue lors de la suppression du créneau',
+        error: 'Une erreur est survenue lors de la suppression du createau',
         message: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
@@ -474,31 +361,34 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-// Pour les autres méthodes HTTP
+// ============================================================================
+// Autres methodes HTTP
+// ============================================================================
+
 export async function PUT() {
   return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée. Utilisez PATCH pour les mises à jour.' },
+    { success: false, error: 'Methode non autorisee. Utilisez PATCH pour les mises a jour.' },
     { status: 405 }
   );
 }
 
 export async function PATCH() {
   return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée' },
+    { success: false, error: 'Methode non autorisee' },
     { status: 405 }
   );
 }
 
 export async function HEAD() {
   return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée' },
+    { success: false, error: 'Methode non autorisee' },
     { status: 405 }
   );
 }
 
 export async function OPTIONS() {
   return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée' },
+    { success: false, error: 'Methode non autorisee' },
     { status: 405 }
   );
 }

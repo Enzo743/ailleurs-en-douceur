@@ -3,23 +3,15 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import styles from './page.module.scss';
+import { getPackageLabel } from '@/lib/constants';
+import { CONTACT_REQUEST_STATUS_LABELS } from '@/lib/constants';
 
 // Mapper les statuts
 const statusLabels: Record<string, { label: string; className: string }> = {
-  PENDING: { label: 'En attente', className: 'pending' },
-  FORM_SENT: { label: 'Formulaire rempli', className: 'form-sent' },
-  COMPLETED: { label: 'Terminé', className: 'completed' },
-};
-
-// Mapper les types de formule
-const packageLabels: Record<string, string> = {
-  'escapade-en-douceur': 'Escapade en douceur',
-  'voyage-sur-mesure': 'Voyage sur-mesure',
-  'voyage-de-noces': 'Voyage de noces',
-};
-
-const getPackageLabel = (value: string): string => {
-  return packageLabels[value] || value;
+  PENDING: { label: CONTACT_REQUEST_STATUS_LABELS.PENDING, className: 'pending' },
+  FORM_SENT: { label: CONTACT_REQUEST_STATUS_LABELS.FORM_SENT, className: 'form-sent' },
+  COMPLETED: { label: CONTACT_REQUEST_STATUS_LABELS.COMPLETED, className: 'completed' },
+  CANCELLED: { label: CONTACT_REQUEST_STATUS_LABELS.CANCELLED, className: 'cancelled' },
 };
 
 // Formater la date

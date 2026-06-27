@@ -1,145 +1,59 @@
-import { NextRequest, NextResponse } from "next/server";
-import nodemailer from "nodemailer";
-import { prisma } from "@/lib/prisma";
-import { generateContactRequestToken } from "@/lib/tokens";
+import { NextRequest, NextResponse } from 'next/server';
+import nodemailer from 'nodemailer';
+import { prisma } from '@/lib/prisma';
+import { generateContactRequestToken } from '@/lib/tokens';
+import {
+  getEmailConfig,
+  getCustomFormUrl,
+  getPackageLabel,
+  formatNights,
+} from '@/lib/email';
+import { validateContactForm, type ContactFormData } from '@/lib/validation';
 
-interface ContactFormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  packageType: string;
-  nights: string;
-  message: string;
-  privacyAccepted: boolean;
-}
-
-// Mapper les valeurs du formulaire vers des libellés lisibles
-const getPackageLabel = (value: string): string => {
-  const labels: Record<string, string> = {
-    "escapade-en-douceur": "Escapade en douceur",
-    "voyage-sur-mesure": "Voyage sur-mesure",
-    "voyage-de-noces": "Voyage de noces",
-  };
-  return labels[value] || value;
-};
-
-// Configuration du transporteur Nodemailer
-const createTransporter = () => {
-  // Récupération des variables d'environnement
-  const emailUser = process.env.EMAIL_USER;
-  const emailPass = process.env.EMAIL_PASS;
-  const emailHost = process.env.EMAIL_HOST || "smtp.gmail.com";
-  const emailPort = parseInt(process.env.EMAIL_PORT || "587");
-  const emailSecure = process.env.EMAIL_SECURE === "true";
-
-  if (!emailUser || !emailPass) {
-    throw new Error("Les variables d'environnement EMAIL_USER et EMAIL_PASS sont requises");
-  }
-
-  // Configuration par défaut pour Gmail
-  const transporter = nodemailer.createTransport({
-    host: emailHost,
-    port: emailPort,
-    secure: emailSecure,
-    auth: {
-      user: emailUser,
-      pass: emailPass,
-    },
-  });
-
-  return transporter;
-};
-
-// Génère l'URL du formulaire personnalisé pour le client
-const getCustomFormUrl = (token: string): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : process.env.DOMAIN);
-  return `${baseUrl}/custom-form/${token}`;
-};
-
+/**
+ * POST /api/contact
+ * Traite une nouvelle demande de contact via le formulaire
+ * Creer la demande en base, envoie des emails de notification
+ */
 export async function POST(request: NextRequest) {
   try {
     const body: ContactFormData = await request.json();
 
-    // Récupération des variables d'environnement
-    const emailUser = process.env.EMAIL_USER;
-    const emailPass = process.env.EMAIL_PASS;
-    const emailFrom = process.env.EMAIL_FROM;
-    
-    if (!emailUser || !emailPass) {
+    // Validation complete du formulaire
+    const validation = validateContactForm(body);
+    if (!validation.valid) {
       return NextResponse.json(
-        { error: "Configuration email manquante" },
-        { status: 500 }
+        { 
+          success: false, 
+          error: validation.errors[0]?.error || 'Donnees invalides',
+          errors: validation.errors 
+        },
+        { status: 400 }
       );
     }
-    
-    if (!emailFrom) {
+
+    // Configuration email
+    const { transporter, emailFrom, recipientEmail } = getEmailConfig();
+
+    // Verification recipientEmail
+    if (!recipientEmail) {
       return NextResponse.json(
-        { error: "L'adresse email de l'expéditeur (EMAIL_FROM) est requise" },
+        { error: 'Aucun email de destinataire configure' },
         { status: 500 }
       );
     }
 
-    // Récupération des contenus personnalisés depuis la base de données
+    // Contenus personnalises
     const emailSubjectContent = await prisma.siteContent.findUnique({
       where: { key: 'contact-email/client-subject' },
     });
-    const emailMessageContent = await prisma.siteContent.findUnique({
-      where: { key: 'contact-email/client-message' },
-    });
 
-    // Valeurs par défaut si non trouvées dans la base
     const clientSubject = emailSubjectContent?.value || 'Confirmation de votre demande - Ailleurs en Douceur';
 
-    // Validation basique
-    if (!body.privacyAccepted) {
-      return NextResponse.json(
-        { error: "Vous devez accepter la politique de confidentialité" },
-        { status: 400 }
-      );
-    }
-
-    // Validation des champs requis
-    const requiredFields = ["firstName", "lastName", "email", "packageType", "nights", "message"];
-    for (const field of requiredFields) {
-      if (!body[field as keyof ContactFormData]?.toString().trim()) {
-        return NextResponse.json(
-          { error: `Le champ ${field} est requis` },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Validation de l'email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(body.email)) {
-      return NextResponse.json(
-        { error: "Veuillez fournir un email valide" },
-        { status: 400 }
-      );
-    }
-
-    // Validation du nombre de nuits
+    // Conversion du nombre de nuits
     const nights = parseInt(body.nights);
-    if (isNaN(nights) || nights <= 0) {
-      return NextResponse.json(
-        { error: "Le nombre de nuits doit être un nombre positif" },
-        { status: 400 }
-      );
-    }
 
-    // Récupération de l'email du destinataire (votre cliente)
-    const recipientEmail = process.env.CONTACT_RECIPIENT_EMAIL || emailUser;
-    
-    if (!recipientEmail) {
-      return NextResponse.json(
-        { error: "Aucun email de destinataire configuré" },
-        { status: 500 }
-      );
-    }
-
-    const token = generateContactRequestToken();
-    
-    // Trouver le formulaire personnalisé associé à ce type d'offre
+    // Trouver le formulaire personnalise
     const customForm = await prisma.customForm.findFirst({
       where: {
         packageType: body.packageType,
@@ -150,7 +64,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Créer la demande de contact en base de données
+    // Creer la demande de contact
+    const token = generateContactRequestToken();
+    const packageLabel = getPackageLabel(body.packageType);
+
     const contactRequest = await prisma.contactRequest.create({
       data: {
         firstName: body.firstName,
@@ -165,18 +82,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Générer l'URL du formulaire personnalisé
+    // URL du formulaire personnalise
     const customFormUrl = getCustomFormUrl(token);
-
-    // Création du transporteur
-    const transporter = createTransporter();
-
-    // Configuration de l'email
-    const packageLabel = getPackageLabel(body.packageType);
-    
-    const emailSubject = `Nouvelle demande de contact - Ailleurs en Douceur`;
-
     const hasCustomForm = customForm !== null;
+
+    // ==========================================================================
+    // Email a la destinataire (Nelly)
+    // ==========================================================================
+
+    const emailSubject = `Nouvelle demande de contact - Ailleurs en Douceur`;
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -192,8 +106,6 @@ export async function POST(request: NextRequest) {
             .field { margin-bottom: 15px; }
             .field strong { display: inline-block; width: 150px; color: #4a3f2f; }
             .message { background: #f9f9f9; padding: 15px; border-radius: 4px; margin-top: 15px; }
-            .cta-button { display: inline-block; background: #4a3f2f; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 15px 0; font-weight: bold; }
-            .info-box { background: #e3f2fd; padding: 15px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #2196f3; }
             .footer { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
           </style>
         </head>
@@ -206,16 +118,16 @@ export async function POST(request: NextRequest) {
               <div class="field"><strong>Nom complet:</strong> ${body.firstName} ${body.lastName}</div>
               <div class="field"><strong>Email:</strong> ${body.email}</div>
               <div class="field"><strong>Type de formule:</strong> ${packageLabel}</div>
-              <div class="field"><strong>Nombre de nuits:</strong> ${nights} nuit${nights > 1 ? 's' : ''}</div>
+              <div class="field"><strong>Nombre de nuits:</strong> ${formatNights(nights)}</div>
               <div class="field">
                 <strong>Message:</strong>
                 <div class="message">${body.message.replace(/\n/g, '<br>')}</div>
               </div>
-              <div class="field"><strong>Politique de confidentialité acceptée:</strong> ${body.privacyAccepted ? 'Oui' : 'Non'}</div>
+              <div class="field"><strong>Politique de confidentialite acceptee:</strong> ${body.privacyAccepted ? 'Oui' : 'Non'}</div>
               <p><strong>Token de la demande :</strong> ${token}</p>
             </div>
             <div class="footer">
-              <p>Ce message a été envoyé via le formulaire de contact du site Ailleurs en Douceur.</p>
+              <p>Ce message a ete envoye via le formulaire de contact du site Ailleurs en Douceur.</p>
               <p>Date: ${new Date().toLocaleString('fr-FR')}</p>
             </div>
           </div>
@@ -229,30 +141,32 @@ Nouvelle demande de contact - Ailleurs en Douceur
 Nom complet: ${body.firstName} ${body.lastName}
 Email: ${body.email}
 Type de formule: ${packageLabel}
-Nombre de nuits: ${nights} nuit${nights > 1 ? 's' : ''}
+Nombre de nuits: ${formatNights(nights)}
 
 Message:
 ${body.message}
 
-Politique de confidentialité acceptée: ${body.privacyAccepted ? 'Oui' : 'Non'}
+Politique de confidentialite acceptee: ${body.privacyAccepted ? 'Oui' : 'Non'}
 
 Token de la demande : ${token}
-}
 
-Ce message a été envoyé via le formulaire de contact du site Ailleurs en Douceur.
+Ce message a ete envoye via le formulaire de contact du site Ailleurs en Douceur.
 Date: ${new Date().toLocaleString('fr-FR')}
     `;
 
-    // Envoi de l'email à la destinataire (votre cliente)
+    // Envoyer a la destinataire
     await transporter.sendMail({
-      from: `"Ailleurs en Douceur" <${emailFrom}>`, // L'email de l'expéditeur (doit être vérifié dans SendGrid)
+      from: `"Ailleurs en Douceur" <${emailFrom}>`,
       to: recipientEmail,
       subject: emailSubject,
       text: emailText,
       html: emailHtml,
     });
 
-    // Préparation de l'email de confirmation pour le client
+    // ==========================================================================
+    // Email de confirmation au client
+    // ==========================================================================
+
     const clientEmailHtml = `
       <!DOCTYPE html>
       <html>
@@ -281,38 +195,38 @@ Date: ${new Date().toLocaleString('fr-FR')}
             <div class="content">
               <p>Bonjour ${body.firstName},</p>
               
-              <p>Nous avons bien reçu votre demande de contact. Voici un récapitulatif :</p>
+              <p>Nous avons bien recu votre demande de contact. Voici un recapitulatif :</p>
               
               <div class="field"><strong>Nom:</strong> ${body.firstName} ${body.lastName}</div>
               <div class="field"><strong>Email:</strong> ${body.email}</div>
-              <div class="field"><strong>Formule demandée:</strong> ${packageLabel}</div>
-              <div class="field"><strong>Nombre de nuits:</strong> ${nights} nuit${nights > 1 ? 's' : ''}</div>
+              <div class="field"><strong>Formule demandee:</strong> ${packageLabel}</div>
+              <div class="field"><strong>Nombre de nuits:</strong> ${formatNights(nights)}</div>
               <div class="field">
                 <strong>Votre message:</strong>
                 <div class="message">${body.message.replace(/\n/g, '<br>')}</div>
               </div>
               
-              ${hasCustomForm 
+              ${hasCustomForm
                 ? `
                 <div class="info-box">
                   <p style="margin: 0 0 10px 0;"><strong>Pour aller plus loin :</strong></p>
-                  <p style="margin: 0 0 15px 0;">Nous vous invitons à compléter notre formulaire personnalisé pour nous aider à mieux préparer votre projet.</p>
-                  <a href="${customFormUrl}" class="cta-button">Compléter le formulaire</a>
+                  <p style="margin: 0 0 15px 0;">Nous vous invitons a completer notre formulaire personnalise pour nous aider a mieux preparer votre projet.</p>
+                  <a href="${customFormUrl}" class="cta-button">Completer le formulaire</a>
                   <p style="margin: 10px 0 0 0; font-size: 12px;">Lien : ${customFormUrl}</p>
                 </div>
                 `
                 : `
                 <div class="info-box">
-                  <p style="margin: 0;">Vous allez être recontacté prochainement pour convenir d'un rendez-vous personnalisé.</p>
+                  <p style="margin: 0;">Vous allez etre recontacte prochainement pour convenir d'un rendez-vous personnalise.</p>
                 </div>
                 `
               }
               
-              <p>À très bientôt,<br>Nelly d'Ailleurs en Douceur</p>
+              <p>A tres bientot,<br>Nelly d'Ailleurs en Douceur</p>
             </div>
             <div class="footer">
-              <p>Ce message a été envoyé automatiquement via le formulaire de contact du site Ailleurs en Douceur.</p>
-              <p>Merci de ne pas répondre à ce mail, il a était envoyé par un robot.</p>
+              <p>Ce message a ete envoye automatiquement via le formulaire de contact du site Ailleurs en Douceur.</p>
+              <p>Merci de ne pas repondre a ce mail, il a etait envoye par un robot.</p>
               <p>Date: ${new Date().toLocaleString('fr-FR')}</p>
             </div>
           </div>
@@ -325,36 +239,35 @@ ${clientSubject}
 
 Bonjour ${body.firstName},
 
-Nous avons bien reçu votre demande de contact. Voici un récapitulatif :
+Nous avons bien recu votre demande de contact. Voici un recapitulatif :
 
 Nom: ${body.firstName} ${body.lastName}
 Email: ${body.email}
-Formule demandée: ${packageLabel}
-Nombre de nuits: ${nights} nuit${nights > 1 ? 's' : ''}
+Formule demandee: ${packageLabel}
+Nombre de nuits: ${formatNights(nights)}
 
 Votre message:
 ${body.message}
 
-${hasCustomForm 
+${hasCustomForm
   ? `
-Pour aller plus loin, nous vous invitons à compléter notre formulaire personnalisé :
+Pour aller plus loin, nous vous invitons a completer notre formulaire personnalise :
 ${customFormUrl}
 
-Cette étape nous aidera à mieux préparer votre projet.
+Cette etape nous aidera a mieux preparer votre projet.
 `
-  :` Vous allez être recontacté prochainement pour convenir d'un rendez-vous personnalisé.
-`
+  : 'Vous allez etre recontacte prochainement pour convenir d\'un rendez-vous personnalise.'
 }
 
-À très bientôt,
+A tres bientot,
 Nelly d'Ailleurs en Douceur
 
-Ce message a été envoyé automatiquement via le formulaire de contact du site Ailleurs en Douceur.
-Merci de ne pas répondre à ce mail, il a était envoyé par un robot.
+Ce message a ete envoye automatiquement via le formulaire de contact du site Ailleurs en Douceur.
+Merci de ne pas repondre a ce mail, il a etait envoye par un robot.
 Date: ${new Date().toLocaleString('fr-FR')}
     `;
 
-    // Envoi de l'email de confirmation au client
+    // Envoyer au client
     await transporter.sendMail({
       from: `"Ailleurs en Douceur" <${emailFrom}>`,
       to: body.email,
@@ -363,11 +276,15 @@ Date: ${new Date().toLocaleString('fr-FR')}
       html: clientEmailHtml,
     });
 
-    // Réponse de succès
+    // Reponse de succes
     return NextResponse.json(
       { 
         success: true, 
-        message: "Email envoyé avec succès" 
+        message: 'Email envoye avec succes',
+        data: {
+          contactRequestId: contactRequest.id,
+          token,
+        }
       },
       { status: 200 }
     );
@@ -377,18 +294,19 @@ Date: ${new Date().toLocaleString('fr-FR')}
     
     return NextResponse.json(
       { 
-        error: "Une erreur est survenue lors de l'envoi du message. Veuillez réessayer plus tard.",
-        details: process.env.NODE_ENV === "development" ? error.message : undefined
+        success: false,
+        error: 'Une erreur est survenue lors de l\'envoi du message. Veuillez reessayer plus tard.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
       },
       { status: 500 }
     );
   }
 }
 
-// Pour les autres méthodes HTTP
+// Pour les autres methodes HTTP
 export async function GET() {
   return NextResponse.json(
-    { error: "Méthode non autorisée" },
+    { error: ' Methode non autorisee' },
     { status: 405 }
   );
 }

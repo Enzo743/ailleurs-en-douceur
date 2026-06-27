@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.scss';
+import { getPackageLabel } from '@/lib/constants';
 
 interface AppointmentSlot {
   id: string;
@@ -23,16 +24,6 @@ interface ContactRequestData {
   status: string;
   hasFormResponse: boolean;
 }
-
-// Mapper les libellés des types de formule
-const getPackageLabel = (value: string): string => {
-  const labels: Record<string, string> = {
-    'escapade-en-douceur': 'Escapade en douceur',
-    'voyage-sur-mesure': 'Voyage sur-mesure',
-    'voyage-de-noces': 'Voyage de noces',
-  };
-  return labels[value] || value;
-};
 
 // Formater la date en français
 const formatDate = (dateString: string): string => {

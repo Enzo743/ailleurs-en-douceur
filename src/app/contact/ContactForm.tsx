@@ -3,6 +3,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.scss";
+import { getPackageLabel, PACKAGE_LABELS } from '@/lib/constants';
 
 type FormData = {
   firstName: string;
@@ -24,11 +25,12 @@ type FormErrors = {
   privacyAccepted?: string;
 };
 
+// Options pour le select, base sur les constantes
 const packageOptions = [
   { value: "", label: "Sélectionnez une formule" },
-  { value: "escapade-en-douceur", label: "Escapade en douceur" },
-  { value: "voyage-sur-mesure", label: "Voyage sur-mesure" },
-  { value: "voyage-de-noces", label: "Voyage de noces" },
+  { value: "escapade-en-douceur", label: PACKAGE_LABELS['escapade-en-douceur'] },
+  { value: "voyage-sur-mesure", label: PACKAGE_LABELS['voyage-sur-mesure'] },
+  { value: "voyage-de-noces", label: PACKAGE_LABELS['voyage-de-noces'] },
 ];
 
 export default function ContactForm() {
@@ -156,11 +158,6 @@ export default function ContactForm() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const getPackageLabel = (value: string): string => {
-    const option = packageOptions.find((opt) => opt.value === value);
-    return option ? option.label : "";
   };
 
   return (

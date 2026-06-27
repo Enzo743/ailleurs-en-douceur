@@ -2,7 +2,7 @@
 
 import { verifySession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateFormPaths, revalidateContactRequestPaths } from '@/lib/cache';
 import { redirect } from 'next/navigation';
 
 /**
@@ -29,8 +29,7 @@ export async function toggleForm(formId: string) {
     });
 
     // Revalider le cache
-    revalidatePath('/dashboard/forms');
-    revalidatePath(`/dashboard/forms/${formId}/edit`);
+    revalidateFormPaths(formId);
 
     return { success: true, message: `Formulaire ${updatedForm.isActive ? 'activé' : 'désactivé'} avec succès` };
 
@@ -72,7 +71,7 @@ export async function deleteForm(formId: string) {
     });
 
     // Revalider le cache
-    revalidatePath('/dashboard/forms');
+    revalidateFormPaths();
 
     return { success: true, message: 'Formulaire supprimé avec succès' };
 
@@ -122,8 +121,7 @@ export async function assignFormToContactRequest(formId: string, contactRequestI
     });
 
     // Revalider le cache
-    revalidatePath('/dashboard/contact-requests');
-    revalidatePath(`/dashboard/contact-requests/${contactRequestId}`);
+    revalidateContactRequestPaths(contactRequestId);
 
     return { success: true, message: 'Formulaire associé avec succès' };
 
@@ -180,8 +178,7 @@ export async function updateContactRequest(
     });
 
     // Revalider le cache
-    revalidatePath('/dashboard/contact-requests');
-    revalidatePath(`/dashboard/contact-requests/${contactRequestId}`);
+    revalidateContactRequestPaths(contactRequestId);
 
     return { success: true, message: 'Demande mise à jour avec succès' };
 
@@ -226,7 +223,7 @@ export async function deleteContactRequest(contactRequestId: string) {
     });
 
     // Revalider le cache
-    revalidatePath('/dashboard/contact-requests');
+    revalidateContactRequestPaths();
 
     return { success: true, message: 'Demande supprimée avec succès' };
 
@@ -278,7 +275,7 @@ export async function cancelAppointment(appointmentId: string) {
     });
 
     // Revalider le cache
-    revalidatePath('/dashboard/contact-requests');
+    revalidateContactRequestPaths();
 
     return { success: true, message: 'Rendez-vous annulé avec succès' };
 

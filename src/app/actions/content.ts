@@ -1,10 +1,11 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateContentPaths } from '@/lib/cache';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import type { SiteContent } from '@prisma/client';
+import { DEFAULT_VALUES } from '@/lib/constants';
 
 export async function getAllContent(): Promise<SiteContent[]> {
     return prisma.siteContent.findMany({ orderBy: { key: 'asc' } });
@@ -19,8 +20,7 @@ export async function updateText(
     try {
         await prisma.siteContent.update({ where: { key }, data: { value } });
 
-        revalidatePath('/');
-        revalidatePath('/dashboard/content');
+        revalidateContentPaths();
 
         return { success: true };
     } catch (e) {
@@ -41,13 +41,13 @@ export async function uploadImage(
         if (!file || file.size === 0)
             return { success: false, error: 'Aucun fichier sélectionné.' };
 
-        const allowed: string[] = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+        const allowed: string[] = [...DEFAULT_VALUES.ALLOWED_IMAGE_TYPES];
 
         if (!allowed.includes(file.type))
-            return { success: false, error: 'Format non autorisé (jpg, png, webp, gif, svg).' };
+            return { success: false, error: `Format non autorisé (${allowed.map(t => t.replace('image/', '')).join(', ')}).` };
 
-        if (file.size > 5 * 1024 * 1024)
-            return { success: false, error: 'Fichier trop volumineux (max 5 Mo).' };
+        if (file.size > DEFAULT_VALUES.MAX_FILE_SIZE)
+            return { success: false, error: `Fichier trop volumineux (max ${Math.round(DEFAULT_VALUES.MAX_FILE_SIZE / (1024 * 1024))} Mo).` };
 
         const ext: string | undefined      = file.name.split('.').pop();
         const safeName = `${key.replace(/\//g, '-')}-${Date.now()}.${ext}`;
@@ -63,8 +63,7 @@ export async function uploadImage(
 
         await prisma.siteContent.update({ where: { key }, data: { value: url } });
 
-        revalidatePath('/');
-        revalidatePath('/dashboard/content');
+        revalidateContentPaths();
 
         return { success: true, url };
     } catch (e) {

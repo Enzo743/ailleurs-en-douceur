@@ -1,43 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import nodemailer from "nodemailer";
-import { verifySession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-
-// Configuration du transporteur Nodemailer
-const createTransporter = () => {
-  const emailUser = process.env.EMAIL_USER;
-  const emailPass = process.env.EMAIL_PASS;
-  const emailHost = process.env.EMAIL_HOST || "smtp.gmail.com";
-  const emailPort = parseInt(process.env.EMAIL_PORT || "587");
-  const emailSecure = process.env.EMAIL_SECURE === "true";
-
-  if (!emailUser || !emailPass) {
-    throw new Error("Les variables d'environnement EMAIL_USER et EMAIL_PASS sont requises");
-  }
-
-  const transporter = nodemailer.createTransport({
-    host: emailHost,
-    port: emailPort,
-    secure: emailSecure,
-    auth: {
-      user: emailUser,
-      pass: emailPass,
-    },
-  });
-
-  return transporter;
-};
-
-// Mapper les types de formule
-const packageLabels: Record<string, string> = {
-  'escapade-en-douceur': 'Escapade en douceur',
-  'voyage-sur-mesure': 'Voyage sur-mesure',
-  'voyage-de-noces': 'Voyage de noces',
-};
-
-const getPackageLabel = (value: string): string => {
-  return packageLabels[value] || value;
-};
+import { NextRequest, NextResponse } from 'next/server';
+import { verifySession } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { getEmailConfig, getCustomFormUrl, getPackageLabel, formatNights } from '@/lib/email';
 
 /**
  * POST /api/dashboard/contact-requests/[id]/resend-form
@@ -48,113 +12,155 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
-
-    // Vérification de la session
+    // Verification de la session
     await verifySession();
 
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'L\'ID de la demande de contact est requis' },
-        { status: 400 }
-      );
-    }
+    const { id } = await params;
 
-    // Vérifier que la demande existe
+    // Verifier que la demande de contact existe
     const contactRequest = await prisma.contactRequest.findUnique({
       where: { id },
       include: {
-        form: true,
+        form: {
+          select: {
+            id: true,
+            name: true,
+            successMessage: true,
+            isActive: true,
+          },
+        },
       },
     });
 
     if (!contactRequest) {
       return NextResponse.json(
-        { success: false, error: 'Demande de contact non trouvée' },
+        { success: false, error: 'Demande de contact non trouvee' },
         { status: 404 }
       );
     }
 
-    if (!contactRequest.form) {
+    if (!contactRequest.formId || !contactRequest.form) {
       return NextResponse.json(
-        { success: false, error: 'Aucun formulaire associé à cette demande' },
+        { success: false, error: 'Cette demande n\'a pas de formulaire associe' },
         { status: 400 }
       );
     }
 
-    if (!contactRequest.email) {
+    // Note: isActive est dans le select maintenant, donc on peut vérifier
+    const form = contactRequest.form;
+    if (!form.isActive) {
       return NextResponse.json(
-        { success: false, error: 'Aucun email associé à cette demande' },
+        { success: false, error: 'Le formulaire associe n\'est pas actif' },
         { status: 400 }
       );
     }
 
-    const emailFrom = process.env.EMAIL_FROM || process.env.EMAIL_USER || '';
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://votre-domaine.com');
-    const formUrl = `${baseUrl}/custom-form/${contactRequest.token}`;
+    // Configuration email
+    const { transporter, emailFrom } = getEmailConfig();
+    const emailFromConfig = emailFrom;
+
+    // Generer l'URL du formulaire
+    const customFormUrl = getCustomFormUrl(contactRequest.token);
     const packageLabel = getPackageLabel(contactRequest.packageType);
-    
-    // Récupération des contenus personnalisés depuis la base de données
-    const emailSubjectContent = await prisma.siteContent.findUnique({
-      where: { key: 'contact-email/client-subject' },
-    });
-    const emailMessageContent = await prisma.siteContent.findUnique({
-      where: { key: 'contact-email/client-message' },
-    });
 
-    // Valeurs par défaut si non trouvées dans la base
-    const clientSubject = emailSubjectContent?.value || 'Confirmation de votre demande - Ailleurs en Douceur';
-    const customMessage = emailMessageContent?.value || 'Vous allez être recontacté prochainement pour obtenir plus d\'informations et convenir d\'un entretien en visioconférence.';
+    // Preparation de l'email
+    const emailSubject = `Rappel: Complétez votre formulaire pour votre projet - Ailleurs en Douceur`;
 
-    // Création du transporteur
-    const transporter = createTransporter();
-
-    // Envoi de l'email au client
-    await transporter.sendMail({
-      from: `"Ailleurs en Douceur" <${emailFrom}>`,
-      to: contactRequest.email,
-      subject: clientSubject,
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <body>
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-              <div style="background: #f4e4c1; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-                <h2 style="color: #8b7355; margin: 0;">Ailleurs en Douceur</h2>
-              </div>
-              <div style="background: #fff; padding: 20px; border-radius: 0 0 8px 8px; border: 1px solid #ddd; border-top: none;">
-                <p>Bonjour ${contactRequest.firstName},</p>
-                <p>Nous vous remercions pour votre intérêt pour notre offre <strong>${packageLabel}</strong>.</p>
-                
-                <div style="background: #f8f4e8; padding: 15px; border-left: 4px solid #8b7355; margin: 15px 0;">
-                  <p><strong>Veuillez remplir notre formulaire personnalisé pour nous aider à préparer votre projet :</strong></p>
-                  <p style="text-align: center;">
-                    <a href="${formUrl}" style="background: #8b7355; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 10px 0;">Remplir le formulaire maintenant</a>
-                  </p>
-                  <p style="text-align: center; font-size: 14px; color: #666;">
-                    ou copiez ce lien dans votre navigateur: <code>${formUrl}</code>
-                  </p>
-                </div>
-                
-                <p>${customMessage}</p>
-                <p>Nous sommes impatients de vous accompagner dans l'organisation de votre voyage.</p>
-                
-                <p>À très bientôt,<br>L'équipe Ailleurs en Douceur</p>
-              </div>
-              <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #666; font-size: 12px;">
-                <p>Ce message a été envoyé automatiquement. Veuillez ne pas y répondre directement.</p>
-                <p>Ailleurs en Douceur - Organisation de voyages sur mesure</p>
-              </div>
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #f4e4c1; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .header h1 { margin: 0; color: #4a3f2f; }
+            .content { background: #fff; padding: 20px; border-radius: 0 0 8px 8px; }
+            .field { margin-bottom: 15px; }
+            .field strong { display: inline-block; width: 150px; color: #4a3f2f; }
+            .message { background: #f9f9f9; padding: 15px; border-radius: 4px; margin-top: 15px; }
+            .cta-button { display: inline-block; background: #4a3f2f; color: #fff; padding: 15px 30px; text-decoration: none; border-radius: 4px; margin: 15px 0; font-weight: bold; text-align: center; }
+            .info-box { background: #fff3e0; padding: 15px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #ff9800; }
+            .footer { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Rappel: Complétez votre formulaire</h1>
             </div>
-          </body>
-        </html>
-      `,
+            <div class="content">
+              <p>Bonjour ${contactRequest.firstName},</p>
+              
+              <p>Nous vous rappelons que vous pouvez compléter notre formulaire personnalisé pour nous aider à mieux préparer votre projet.</p>
+              
+              <div class="field"><strong>Formule demandée:</strong> ${packageLabel}</div>
+              <div class="field"><strong>Nombre de nuits:</strong> ${formatNights(contactRequest.nights)}</div>
+              
+              <div class="info-box">
+                <p style="margin: 0 0 10px 0;"><strong>Pour aller plus loin :</strong></p>
+                <p style="margin: 0 0 15px 0;">Complétez notre formulaire personnalisé pour nous aider à mieux préparer votre projet de ${packageLabel}.</p>
+                <a href="${customFormUrl}" class="cta-button">Compléter le formulaire</a>
+                <p style="margin: 10px 0 0 0; font-size: 12px;">Lien : ${customFormUrl}</p>
+              </div>
+              
+              <p>Formulaire: <strong>${contactRequest.form.name}</strong></p>
+              
+              <p>À très bientôt,<br>Nelly d'Ailleurs en Douceur</p>
+            </div>
+            <div class="footer">
+              <p>Ce message a été envoyé automatiquement via le site Ailleurs en Douceur.</p>
+              <p>Merci de ne pas répondre à ce mail.</p>
+              <p>Date: ${new Date().toLocaleString('fr-FR')}</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const emailText = `
+${emailSubject}
+
+Bonjour ${contactRequest.firstName},
+
+Nous vous rappelons que vous pouvez completer notre formulaire personnalise pour nous aider a mieux preparer votre projet.
+
+Formule demandee: ${packageLabel}
+Nombre de nuits: ${formatNights(contactRequest.nights)}
+
+Pour aller plus loin, completer notre formulaire :
+${customFormUrl}
+
+Formulaire: ${contactRequest.form.name}
+
+A tres bientot,
+Nelly d'Ailleurs en Douceur
+
+Ce message a ete envoye automatiquement via le site Ailleurs en Douceur.
+Merci de ne pas repondre a ce mail.
+Date: ${new Date().toLocaleString('fr-FR')}
+    `;
+
+    // Envoyer l'email
+    await transporter.sendMail({
+      from: `"Ailleurs en Douceur" <${emailFromConfig}>`,
+      to: contactRequest.email,
+      subject: emailSubject,
+      text: emailText,
+      html: emailHtml,
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: 'Lien du formulaire renvoyé avec succès',
+        message: 'Lien du formulaire renvoye avec succes',
+        data: {
+          contactRequestId: contactRequest.id,
+          formId: contactRequest.formId,
+          formName: contactRequest.form.name,
+          emailSentTo: contactRequest.email,
+        },
       },
       { status: 200 }
     );
@@ -165,10 +171,18 @@ export async function POST(
     return NextResponse.json(
       {
         success: false,
-        error: 'Une erreur est survenue lors du renvoi du formulaire',
+        error: error.message || 'Une erreur est survenue lors du renvoi du formulaire',
         message: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
     );
   }
+}
+
+// Pour les autres methodes HTTP
+export async function GET() {
+  return NextResponse.json(
+    { success: false, error: 'Methode non autorisee' },
+    { status: 405 }
+  );
 }

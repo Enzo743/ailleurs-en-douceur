@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { verifySession } from '@/lib/auth';
 import { slugify } from '@/lib/slugify';
-import { revalidatePath } from 'next/cache';
+import { revalidateArticlePaths } from '@/lib/cache';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import type { Article, Tag } from '@prisma/client';
@@ -63,11 +63,6 @@ async function resolveTags(tagNames: string[]): Promise<{ id: string }[]> {
     );
 
     return tags.filter((t): t is Tag => t !== null).map((t) => ({ id: t.id }));
-}
-
-function revalidateArticlePaths(id?: string): void {
-    revalidatePath('/dashboard/articles');
-    if (id) revalidatePath(`/dashboard/articles/${id}/edit`);
 }
 
 export async function createArticle(data: ArticleFormData): Promise<ActionResult> {

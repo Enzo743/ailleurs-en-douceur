@@ -1,9 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifySession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { FieldType } from "@prisma/client";
+import { NextRequest, NextResponse } from 'next/server';
+import { verifySession } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { getPackageLabel } from '@/lib/constants';
+import { DEFAULT_VALUES } from '@/lib/constants';
+import { FieldType } from '@prisma/client';
 
+// ============================================================================
 // Types
+// ============================================================================
+
 interface FormQueryParams {
   packageType?: string;
   isActive?: string;
@@ -68,13 +73,30 @@ interface ApiResponse {
   };
 }
 
+// ============================================================================
+// Validation Helpers
+// ============================================================================
+
+function validateFormData(data: CreateFormData): { valid: boolean; error?: string } {
+  if (!data.name?.trim()) {
+    return { valid: false, error: 'Le nom du formulaire est requis' };
+  }
+  if (!data.successMessage?.trim()) {
+    return { valid: false, error: 'Le message de confirmation est requis' };
+  }
+  return { valid: true };
+}
+
+// ============================================================================
+// GET /api/forms
+// ============================================================================
+
 /**
- * GET /api/forms
  * Liste tous les formulaires avec pagination et filtres
  */
 export async function GET(request: NextRequest) {
   try {
-    // Vérification de la session
+    // Verification de la session
     await verifySession();
 
     const { searchParams } = new URL(request.url);
@@ -87,7 +109,7 @@ export async function GET(request: NextRequest) {
     };
 
     const page = Math.max(1, parseInt(query.page || '1'));
-    const limit = Math.min(100, Math.max(1, parseInt(query.limit || '20')));
+    const limit = Math.min(100, Math.max(1, parseInt(query.limit || String(DEFAULT_VALUES.DEFAULT_LIMIT))));
     const skip = (page - 1) * limit;
 
     // Construire la condition de filtrage
@@ -108,7 +130,7 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    // Récupérer les formulaires avec leurs champs
+    // Recuperer les formulaires avec leurs champs
     const [forms, total] = await Promise.all([
       prisma.customForm.findMany({
         where,
@@ -132,11 +154,12 @@ export async function GET(request: NextRequest) {
 
     const totalPages = Math.ceil(total / limit);
 
-    // Formater les données
+    // Formater les donnees
     const formattedData = forms.map((form) => ({
       id: form.id,
       name: form.name,
       packageType: form.packageType,
+      packageTypeLabel: form.packageType ? getPackageLabel(form.packageType) : null,
       description: form.description,
       successMessage: form.successMessage,
       isActive: form.isActive,
@@ -178,7 +201,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Une erreur est survenue lors de la récupération des formulaires',
+        error: 'Une erreur est survenue lors de la recuperation des formulaires',
         message: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
@@ -186,33 +209,30 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// ============================================================================
+// POST /api/forms
+// ============================================================================
+
 /**
- * POST /api/forms
- * Créer un nouveau formulaire personnalisé
+ * Cree un nouveau formulaire personnalise
  */
 export async function POST(request: NextRequest) {
   try {
-    // Vérification de la session
+    // Verification de la session
     await verifySession();
 
     const body: CreateFormData = await request.json();
 
     // Validation
-    if (!body.name?.trim()) {
+    const validation = validateFormData(body);
+    if (!validation.valid) {
       return NextResponse.json(
-        { success: false, error: 'Le nom du formulaire est requis' },
+        { success: false, error: validation.error },
         { status: 400 }
       );
     }
 
-    if (!body.successMessage?.trim()) {
-      return NextResponse.json(
-        { success: false, error: 'Le message de confirmation est requis' },
-        { status: 400 }
-      );
-    }
-
-    // Créer le formulaire
+    // Creer le formulaire
     const form = await prisma.customForm.create({
       data: {
         name: body.name.trim(),
@@ -223,7 +243,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Créer les champs si fournis
+    // Creer les champs si fournis
     let fields = [];
     if (body.fields && body.fields.length > 0) {
       fields = await Promise.all(
@@ -245,7 +265,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Récupérer le formulaire complet avec ses champs
+    // Recuperer le formulaire complet avec ses champs
     const completeForm = await prisma.customForm.findUnique({
       where: { id: form.id },
       include: {
@@ -264,11 +284,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Formulaire créé avec succès',
+        message: 'Formulaire cree avec succes',
         data: {
           id: completeForm!.id,
           name: completeForm!.name,
           packageType: completeForm!.packageType,
+          packageTypeLabel: completeForm!.packageType ? getPackageLabel(completeForm!.packageType) : null,
           description: completeForm!.description,
           successMessage: completeForm!.successMessage,
           isActive: completeForm!.isActive,
@@ -300,7 +321,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Une erreur est survenue lors de la création du formulaire',
+        error: 'Une erreur est survenue lors de la creation du formulaire',
         message: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
@@ -308,9 +329,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// ============================================================================
+// DELETE /api/forms
+// ============================================================================
+
 /**
- * DELETE /api/forms
- * Supprimer plusieurs formulaires (non implémenté - utiliser DELETE /api/forms/[id])
+ * Supprimer plusieurs formulaires (non implemente - utiliser DELETE /api/forms/[id])
  */
 export async function DELETE() {
   return NextResponse.json(
@@ -319,24 +343,27 @@ export async function DELETE() {
   );
 }
 
-// Pour les autres méthodes HTTP
+// ============================================================================
+// Autres methodes HTTP
+// ============================================================================
+
 export async function PUT() {
   return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée' },
+    { success: false, error: 'Methode non autorisee' },
     { status: 405 }
   );
 }
 
 export async function HEAD() {
   return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée' },
+    { success: false, error: 'Methode non autorisee' },
     { status: 405 }
   );
 }
 
 export async function OPTIONS() {
   return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée' },
+    { success: false, error: 'Methode non autorisee' },
     { status: 405 }
   );
 }

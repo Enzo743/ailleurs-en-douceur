@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent, use } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.scss';
+import { getPackageLabel } from '@/lib/constants';
 
 interface FormField {
   id: string;
@@ -57,16 +58,6 @@ const getInputType = (fieldType: string): string => {
     default:
       return 'text';
   }
-};
-
-// Mapper les libellés des types de formule
-const getPackageLabel = (value: string): string => {
-  const labels: Record<string, string> = {
-    'escapade-en-douceur': 'Escapade en douceur',
-    'voyage-sur-mesure': 'Voyage sur-mesure',
-    'voyage-de-noces': 'Voyage de noces',
-  };
-  return labels[value] || value;
 };
 
 export default function CustomFormPage({ params }: { params: Promise<{ token: string }> }) {
