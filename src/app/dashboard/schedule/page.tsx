@@ -71,7 +71,7 @@ const defaultSlot: Omit<AppointmentSlot, 'id' | 'createdAt' | 'appointment'> = {
   date: '',
   startTime: '',
   endTime: '',
-  duration: 60,
+  duration: 0,
   isAvailable: true,
 };
 
@@ -81,7 +81,7 @@ export default function SchedulePage() {
   // États
   const [slots, setSlots] = useState<AppointmentSlot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [newSlots, setNewSlots] = useState<Omit<AppointmentSlot, 'id' | 'createdAt' | 'appointment'>[]>([defaultSlot]);
+  const [newSlots, setNewSlots] = useState<Omit<AppointmentSlot, 'id' | 'createdAt' | 'appointment'>[]>([{ ...defaultSlot }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ success?: boolean; message: string } | null>(null);
   const [showBatchModal, setShowBatchModal] = useState(false);
@@ -89,47 +89,52 @@ export default function SchedulePage() {
     startDate: '',
     endDate: '',
     startTime: '09:00',
-    endTime: '17:00',
+    endTime: '10:00',
     duration: 60,
     days: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'] as string[],
   });
 
-  // Charger les créneaux existants
-  useEffect(() => {
-    const fetchSlots = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Récupérer tous les créneaux (y compris ceux non disponibles)
-        const response = await fetch('/api/appointment-slots?limit=200');
-        const data = await response.json();
+  // Fonction pour recharger les créneaux
+  const fetchSlots = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Récupérer tous les créneaux (y compris ceux non disponibles)
+      const response = await fetch('/api/appointment-slots?limit=200');
+      const data = await response.json();
 
-        if (data.success && data.data) {
-          // Trier par date puis par heure de début
-          const sortedSlots = data.data.sort((a: any, b: any) => {
-            const dateA = new Date(a.date + 'T' + a.startTime);
-            const dateB = new Date(b.date + 'T' + b.startTime);
-            return dateA.getTime() - dateB.getTime();
-          });
-          setSlots(sortedSlots);
-        }
-
-      } catch (error) {
-        console.error('Error fetching slots:', error);
-      } finally {
-        setIsLoading(false);
+      if (data.success && data.data) {
+        // Trier par date puis par heure de début
+        const sortedSlots = data.data.sort((a: any, b: any) => {
+          const dateA = new Date(a.date + 'T' + a.startTime);
+          const dateB = new Date(b.date + 'T' + b.startTime);
+          return dateA.getTime() - dateB.getTime();
+        });
+        setSlots(sortedSlots);
       }
-    };
 
+    } catch (error) {
+      console.error('Error fetching slots:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Charger les créneaux existants au montage
+  useEffect(() => {
     fetchSlots();
+    
+    // Rafraîchir automatiquement toutes les minutes pour supprimer les créneaux passés
+    const intervalId = setInterval(() => {
+      fetchSlots();
+    }, 60000); // 60 secondes = 1 minute
+    
+    return () => clearInterval(intervalId);
   }, []);
 
   // Ajouter un nouveau créneau
   const addSlot = () => {
-    setNewSlots(prev => [...prev, {
-      ...defaultSlot,
-      date: new Date().toISOString().split('T')[0],
-    }]);
+    setNewSlots(prev => [...prev, { ...defaultSlot }]);
   };
 
   // Supprimer un nouveau créneau
@@ -150,7 +155,7 @@ export default function SchedulePage() {
           const startTime = property === 'startTime' ? (value as string) : slot.startTime;
           const duration = property === 'duration' ? (value as number) : slot.duration;
           
-          if (startTime && duration) {
+          if (startTime && duration && duration > 0) {
             updatedSlot.endTime = calculateEndTime(startTime, duration);
           }
         }
@@ -174,7 +179,8 @@ export default function SchedulePage() {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        setSlots(prev => prev.filter(slot => slot.id !== slotId));
+        // Recharger les créneaux pour avoir la liste à jour
+        fetchSlots();
         setSubmitStatus({
           success: true,
           message: 'Créneau supprimé avec succès.'
@@ -211,9 +217,17 @@ export default function SchedulePage() {
       errors.duration = 'La durée doit être supérieure à 0';
     }
     
-    // endTime est calculé automatiquement, mais on vérifie qu'il est présent
-    if (!slot.endTime && slot.startTime && slot.duration) {
-      errors.endTime = 'Impossible de calculer l\'heure de fin';
+    if (!slot.endTime) {
+      errors.endTime = 'L\'heure de fin est requise';
+    }
+    
+    // Vérifier que le créneau n'est pas dans le passé
+    if (slot.date && slot.startTime) {
+      const slotDateTime = new Date(slot.date + 'T' + slot.startTime);
+      const now = new Date();
+      if (slotDateTime < now) {
+        errors.startTime = 'Vous ne pouvez pas créer un créneau dans le passé';
+      }
     }
     
     return {
@@ -270,12 +284,8 @@ export default function SchedulePage() {
           message: 'Créneau créé avec succès !'
         });
         
-        // Ajouter le nouveau créneau à la liste et réinitialiser
-        setSlots(prev => [...prev, result.data].sort((a: any, b: any) => {
-          const dateA = new Date(a.date + 'T' + a.startTime);
-          const dateB = new Date(b.date + 'T' + b.startTime);
-          return dateA.getTime() - dateB.getTime();
-        }));
+        // Recharger les créneaux pour avoir la liste à jour
+        fetchSlots();
         setNewSlots([defaultSlot]);
 
       } else {
@@ -304,6 +314,25 @@ export default function SchedulePage() {
       setSubmitStatus({
         success: false,
         message: 'Les dates de début et de fin sont requises.'
+      });
+      return;
+    }
+
+    if (!batchData.duration || batchData.duration <= 0) {
+      setSubmitStatus({
+        success: false,
+        message: 'La durée doit être supérieure à 0.'
+      });
+      return;
+    }
+
+    // Vérifier que la date de début n'est pas dans le passé
+    const startDateTime = new Date(batchData.startDate + 'T' + (batchData.startTime || '00:00'));
+    const now = new Date();
+    if (startDateTime < now) {
+      setSubmitStatus({
+        success: false,
+        message: 'Vous ne pouvez pas créer de créneaux dans le passé.'
       });
       return;
     }
@@ -396,10 +425,9 @@ export default function SchedulePage() {
           message: `${result.data.length} créneau(x) créé(s) avec succès ! ${result.errors?.length ? ` (${result.errors.length} erreur(s))` : ''}`
         });
         
-        // Rafraîchir la liste des créneaux
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+        // Recharger les créneaux pour avoir la liste à jour
+        fetchSlots();
+        setShowBatchModal(false);
 
       } else {
         setSubmitStatus({
@@ -423,7 +451,7 @@ export default function SchedulePage() {
   const groupSlotsByDate = () => {
     const grouped: Record<string, AppointmentSlot[]> = {};
     
-    [...slots, ...newSlots.map(s => ({ ...s, id: generateTempId(), createdAt: new Date().toISOString() }))]
+    slots
       .sort((a: any, b: any) => {
         const dateA = new Date(a.date + 'T' + a.startTime);
         const dateB = new Date(b.date + 'T' + b.startTime);
@@ -513,6 +541,7 @@ export default function SchedulePage() {
                     id="date"
                     value={newSlots[0]?.date || ''}
                     onChange={(e) => updateNewSlot(0, 'date', e.target.value)}
+                    placeholder="YYYY-MM-DD"
                     min={new Date().toISOString().split('T')[0]}
                   />
                 </div>
@@ -524,6 +553,7 @@ export default function SchedulePage() {
                     id="startTime"
                     value={newSlots[0]?.startTime || ''}
                     onChange={(e) => updateNewSlot(0, 'startTime', e.target.value)}
+                    placeholder="HH:MM"
                   />
                 </div>
 
@@ -543,10 +573,10 @@ export default function SchedulePage() {
                   <input
                     type="number"
                     id="duration"
-                    value={newSlots[0]?.duration ?? ''}
+                    value={newSlots[0]?.duration === 0 ? '' : newSlots[0]?.duration ?? ''}
                     placeholder="60"
                     onChange={(e) => {
-                      const numericValue = e.target.value === '' ? undefined : parseInt(e.target.value);
+                      const numericValue = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
                       updateNewSlot(0, 'duration', numericValue);
                     }}
                     min="15"
@@ -569,14 +599,6 @@ export default function SchedulePage() {
           <div className={styles['slots-container']}>
             <h2 className={styles['section-title']}>
               Créneaux existants
-              {slots.length > 0 && (
-                <span className={styles['sort-info']}>
-                  Trier par : 
-                  <button onClick={() => setSlots([...slots].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()))}>
-                    Date
-                  </button>
-                </span>
-              )}
             </h2>
 
             {sortedDates.length === 0 ? (
@@ -669,6 +691,7 @@ export default function SchedulePage() {
                   type="date"
                   id="batch-startDate"
                   value={batchData.startDate}
+                  placeholder="YYYY-MM-DD"
                   onChange={(e) => setBatchData(prev => ({ ...prev, startDate: e.target.value }))}
                   min={new Date().toISOString().split('T')[0]}
                 />
@@ -680,6 +703,7 @@ export default function SchedulePage() {
                   type="date"
                   id="batch-endDate"
                   value={batchData.endDate}
+                  placeholder="YYYY-MM-DD"
                   onChange={(e) => setBatchData(prev => ({ ...prev, endDate: e.target.value }))}
                   min={batchData.startDate || new Date().toISOString().split('T')[0]}
                 />
@@ -693,7 +717,8 @@ export default function SchedulePage() {
                     id="batch-startTime"
                     value={batchData.startTime}
                     onChange={(e) => {
-                      const endTime = batchData.duration ? calculateEndTime(e.target.value, batchData.duration) : batchData.endTime;
+                      const duration = batchData.duration || 0;
+                      const endTime = e.target.value && duration > 0 ? calculateEndTime(e.target.value, duration) : batchData.endTime;
                       setBatchData(prev => ({ ...prev, startTime: e.target.value, endTime }));
                     }}
                   />
@@ -715,10 +740,11 @@ export default function SchedulePage() {
                   <input
                     type="number"
                     id="batch-duration"
-                    value={batchData.duration}
+                    value={batchData.duration === 0 ? '' : batchData.duration}
+                    placeholder="60"
                     onChange={(e) => {
-                      const duration = parseInt(e.target.value) || 60;
-                      const endTime = batchData.startTime ? calculateEndTime(batchData.startTime, duration) : batchData.endTime;
+                      const duration = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
+                      const endTime = batchData.startTime && duration > 0 ? calculateEndTime(batchData.startTime, duration) : batchData.endTime;
                       setBatchData(prev => ({ ...prev, duration, endTime }));
                     }}
                     min="15"

@@ -246,9 +246,6 @@ export default async function FormsPage({
               <Link href={`/dashboard/forms/${form.id}/edit`} className={styles['action-button']}>
                 Modifier
               </Link>
-              <Link href={`/dashboard/responses?formId=${form.id}`} className={styles['action-button']}>
-                Voir réponses
-              </Link>
               <form action={`/api/dashboard/forms/${form.id}/toggle`} method="POST">
                 <button type="submit" className={styles['action-button']}>
                   {form.isActive ? 'Désactiver' : 'Activer'}

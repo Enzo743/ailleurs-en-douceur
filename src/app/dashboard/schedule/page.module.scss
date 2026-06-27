@@ -279,28 +279,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.sort-info {
-  font-size: 13px;
-  color: #888;
-  margin-left: 15px;
-
-  button {
-    background: none;
-    border: none;
-    color: #4a3f2f;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 4px;
-    margin-left: 5px;
-
-    &:hover {
-      background: #f5f1eb;
-    }
-  }
-}
-
 // Empty state
 .empty-state {
   text-align: center;
@@ -514,6 +492,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    padding-bottom: 10px;
 
     label {
       font-size: 13px;

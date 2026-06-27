@@ -61,6 +61,37 @@ const getScheduleUrl = (token: string): string => {
   return `${baseUrl}/schedule/${token}`;
 };
 
+// Vérifie si deux créneaux se chevauchent
+function doSlotsOverlap(
+  date1: string | Date,
+  startTime1: string,
+  endTime1: string,
+  date2: string | Date,
+  startTime2: string,
+  endTime2: string
+): boolean {
+  // Convertir les dates en string YYYY-MM-DD pour comparaison
+  const date1Str = date1 instanceof Date ? date1.toISOString().split('T')[0] : date1;
+  const date2Str = date2 instanceof Date ? date2.toISOString().split('T')[0] : date2;
+  
+  // Si dates différentes, pas de chevauchement
+  if (date1Str !== date2Str) return false;
+  
+  // Convertir les heures en minutes
+  const [h1, m1] = startTime1.split(':').map(Number);
+  const [h2, m2] = startTime2.split(':').map(Number);
+  const [eh1, em1] = endTime1.split(':').map(Number);
+  const [eh2, em2] = endTime2.split(':').map(Number);
+  
+  const start1 = h1 * 60 + m1;
+  const end1 = eh1 * 60 + em1;
+  const start2 = h2 * 60 + m2;
+  const end2 = eh2 * 60 + em2;
+  
+  // Chevauchement si : slot1 commence avant que slot2 ne finisse ET slot1 finit après que slot2 ne commence
+  return start1 < end2 && end1 > start2;
+}
+
 /**
  * GET /api/appointment-slots
  * Liste tous les créneaux disponibles avec pagination et filtres
@@ -230,19 +261,27 @@ export async function POST(request: NextRequest) {
     // Convertir la date au format Date
     const dateObj = body.date instanceof Date ? body.date : new Date(body.date);
 
-    // Vérifier qu'il n'y a pas déjà un créneau à ce moment-là
-    const existingSlot = await prisma.appointmentSlot.findFirst({
+    // Vérifier qu'il n'y a pas déjà un créneau qui se chevauche
+    const existingSlots = await prisma.appointmentSlot.findMany({
       where: {
         date: dateObj,
-        startTime: body.startTime,
       },
     });
 
-    if (existingSlot) {
-      return NextResponse.json(
-        { success: false, error: 'Un créneau existe déjà à cette heure' },
-        { status: 400 }
-      );
+    for (const existingSlot of existingSlots) {
+      if (doSlotsOverlap(
+        dateObj,
+        body.startTime,
+        body.endTime,
+        existingSlot.date,
+        existingSlot.startTime,
+        existingSlot.endTime
+      )) {
+        return NextResponse.json(
+          { success: false, error: 'Un créneau existe déjà à cette heure ou se chevauche avec un créneau existant' },
+          { status: 400 }
+        );
+      }
     }
 
     // Vérifier la disponibilité dans Google Calendar
@@ -270,6 +309,32 @@ export async function POST(request: NextRequest) {
         endTime: body.endTime,
         duration: duration,
         isAvailable: true,
+      },
+    });
+
+    // Nettoyer automatiquement les créneaux passés non réservés (basé sur heure de début)
+    const now = new Date();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const currentTime = now.toTimeString().split(' ')[0]; // Format HH:MM:SS
+    
+    await prisma.appointmentSlot.deleteMany({
+      where: {
+        OR: [
+          {
+            date: {
+              lt: today,
+            },
+          },
+          {
+            date: today,
+            startTime: {
+              lt: currentTime,
+            },
+          },
+        ],
+        isAvailable: true,
+        appointment: null,
       },
     });
 
@@ -304,107 +369,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/**
- * POST /api/appointment-slots/batch
- * Crée plusieurs créneaux en une seule requête
- * Nécessite une session valide
- */
-export async function BATCH_CREATE(request: NextRequest) {
-  try {
-    // Vérification de la session
-    await verifySession();
 
-    const body = await request.json();
-    const slotsData: CreateAppointmentSlotData[] = body.slots || [];
-
-    if (!Array.isArray(slotsData) || slotsData.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'Aucun créneau à créer' },
-        { status: 400 }
-      );
-    }
-
-    // Valider chaque créneau
-    const errors: string[] = [];
-    const createdSlots: any[] = [];
-
-    for (const slotData of slotsData) {
-      try {
-        // Validation basique
-        if (!slotData.date || !slotData.startTime || !slotData.endTime) {
-          errors.push(`Créneau invalide: date, startTime et endTime sont requis`);
-          continue;
-        }
-
-        const dateObj = slotData.date instanceof Date ? slotData.date : new Date(slotData.date);
-        
-        // Vérifier qu'il n'y a pas déjà un créneau à ce moment-là
-        const existingSlot = await prisma.appointmentSlot.findFirst({
-          where: {
-            date: dateObj,
-            startTime: slotData.startTime,
-          },
-        });
-
-        if (existingSlot) {
-          errors.push(`Créneau déjà existant: ${dateObj.toISOString().split('T')[0]} ${slotData.startTime}-${slotData.endTime}`);
-          continue;
-        }
-
-        // Calculer la durée
-        const startMinutes = parseInt(slotData.startTime.split(':')[0]) * 60 + parseInt(slotData.startTime.split(':')[1]);
-        const endMinutes = parseInt(slotData.endTime.split(':')[0]) * 60 + parseInt(slotData.endTime.split(':')[1]);
-        const duration = endMinutes - startMinutes;
-
-        const slot = await prisma.appointmentSlot.create({
-          data: {
-            date: dateObj,
-            startTime: slotData.startTime,
-            endTime: slotData.endTime,
-            duration: duration,
-            isAvailable: true,
-          },
-        });
-
-        createdSlots.push({
-          id: slot.id,
-          date: slot.date.toISOString().split('T')[0],
-          startTime: slot.startTime,
-          endTime: slot.endTime,
-          duration: slot.duration,
-          isAvailable: slot.isAvailable,
-        });
-
-      } catch (error: any) {
-        errors.push(`Erreur pour un créneau: ${error.message}`);
-      }
-    }
-
-    return NextResponse.json(
-      {
-        success: errors.length === 0,
-        message: errors.length === 0 
-          ? `${createdSlots.length} créneau(x) créé(s) avec succès`
-          : `${createdSlots.length} créneau(x) créé(s), ${errors.length} erreur(s)`,
-        data: createdSlots,
-        errors: errors.length > 0 ? errors : undefined,
-      },
-      { status: errors.length === 0 ? 201 : 207 } // 207 = Multi-Status
-    );
-
-  } catch (error: any) {
-    console.error('Error creating batch appointment slots:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la création des créneaux',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
-    );
-  }
-}
 
 /**
  * DELETE /api/appointment-slots/:id
@@ -459,6 +424,32 @@ export async function DELETE(request: NextRequest) {
     // Supprimer le créneau
     await prisma.appointmentSlot.delete({
       where: { id },
+    });
+
+    // Nettoyer automatiquement les créneaux passés non réservés (basé sur heure de début)
+    const now = new Date();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const currentTime = now.toTimeString().split(' ')[0]; // Format HH:MM:SS
+    
+    await prisma.appointmentSlot.deleteMany({
+      where: {
+        OR: [
+          {
+            date: {
+              lt: today,
+            },
+          },
+          {
+            date: today,
+            startTime: {
+              lt: currentTime,
+            },
+          },
+        ],
+        isAvailable: true,
+        appointment: null,
+      },
     });
 
     return NextResponse.json(
