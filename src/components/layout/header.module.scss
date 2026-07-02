@@ -1,0 +1,190 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+.header {
+  position: relative;
+  width: 100%;
+  background-color: $color-creme;
+  z-index: 100;
+}
+
+.navbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+  height: 113px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  // Overlay semi-transparent pour améliorer la lisibilité
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(254, 250, 237, 0.9);
+    z-index: 0;
+  }
+}
+
+.logo {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoText {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logoTextContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.logoImage {
+  width: 110px;
+  height: 110px;
+  position: relative;
+  flex-shrink: 0;
+  
+  img {
+    object-fit: contain;
+    width: 100% !important;
+    height: 100% !important;
+    position: relative !important;
+  }
+}
+
+.logoTitle {
+  font-family: $font-family-title;
+  font-size: 24px;
+  font-weight: 400;
+  color: $color-brun;
+  line-height: normal;
+}
+
+.logoSubtitle {
+  font-family: $font-family-secondary;
+  font-size: 20px;
+  color: $color-caramel;
+  line-height: normal;
+  font-style: italic;
+}
+
+.navMenu {
+  position: relative;
+  z-index: 1;
+}
+
+.navList {
+  display: flex;
+  gap: 45px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navItem {
+  margin: 0;
+}
+
+.navLink {
+  font-family: $font-family-base;
+  font-size: 16px;
+  font-weight: 500;
+  color: $color-brun;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  padding: 8px 0;
+  position: relative;
+
+  &:hover {
+    color: $color-caramel;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: $color-caramel;
+    transition: width 0.2s ease;
+  }
+
+  &:hover::after {
+    width: 100%;
+  }
+}
+
+.navLinkActive {
+  font-weight: 700;
+  color: $color-caramel !important;
+
+  &::after {
+    width: 100%;
+  }
+}
+
+.ctaButton {
+  position: relative;
+  z-index: 1;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  background-color: $color-caramel;
+  color: white;
+  font-family: $font-family-base;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+
+  &:hover {
+    background-color: #b88650;
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+// Responsive styles
+@include respond-to(md) {
+  .navbar {
+    padding: 0 $spacing-md;
+    height: 80px;
+  }
+
+  .logoTitle {
+    font-size: 20px;
+  }
+
+  .logoSubtitle {
+    font-size: 16px;
+  }
+
+  .navList {
+    display: none;
+  }
+
+  .button {
+    display: none;
+  }
+}

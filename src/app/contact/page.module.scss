@@ -1,50 +1,183 @@
 @use "../../styles/variables" as *;
 @use "../../styles/mixins" as *;
 
-.contact-page {
+// Page Container
+.contactPage {
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: $spacing-xl 20px;
+  width: 100%;
   background-color: $color-creme;
   font-family: $font-family-base;
 }
 
-.contact-container {
+// Hero Section
+.heroSection {
+  position: relative;
+  width: 100%;
+  min-height: 544px;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: 800px;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  padding: $spacing-xl $spacing-lg;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 120px $spacing-xl 80px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba($color-brun, 0.5);
+    z-index: 0;
+  }
+
+  // Overlay for better text readability
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 0;
+  }
 }
 
-.contact-header {
-  text-align: center;
-  margin-bottom: $spacing-lg;
+.heroContent {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+}
 
-  h1 {
+.heroTitle {
+  color: $color-creme;
+  text-shadow: 0 4px 4px rgba(30, 30, 30, 0.20);
+  font-family: $font-family-title;
+  font-size: 48px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+
+  em {
     font-family: $font-family-title;
-    font-size: 36px;
-    font-weight: 600;
-    color: $color-brun;
-    margin-bottom: $spacing-sm;
-  }
-
-  .subtitle {
-    font-size: 16px;
-    line-height: 1.6;
-    color: $color-sauge;
-    max-width: 600px;
-    margin: 0 auto;
+    font-style: italic;
+    font-weight: 500;
   }
 }
 
+.heroSubtitle {
+  font-family: $font-family-base;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 35px;
+  text-shadow: 0 4px 4px rgba(30, 30, 30, 0.2);
+  color: $color-creme;
+  margin: 5vh 0;
+}
+
+.heroDivider {
+  width: 72px;
+  height: 2px;
+  margin: $spacing-sm 0;
+  background: linear-gradient(to right, transparent, $color-caramel, transparent);
+}
+
+// Main Content Section
+.mainContent {
+  display: flex;
+  margin: 0 auto;
+  padding: 80px $spacing-lg;
+  gap: $spacing-xl;
+  width: 100%;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-xl;
+  width: 100%;
+}
+
+// Left Column - Info Card
+.infoColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.infoCard {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  background-color: #EAE8DC;
+  border-radius: 15px;
+  padding: calc($spacing-lg + 35px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 29px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.infoCardTitle {
+  font-family: $font-family-base;
+  font-size: 30px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 40px;
+  margin: 0;
+}
+
+.infoCardText {
+  font-family: $font-family-base;
+  font-size: 15px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 30px;
+  margin: 0;
+}
+
+.botanicalDecoration {
+  width: 163px;
+  height: 115px;
+  opacity: 0.6;
+  transform: rotate(180deg) scaleY(-1);
+  pointer-events: none;
+}
+
+// Right Column - Form
+.formColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.formSection {
+  width: 100%;
+}
+
+.formHeader {
+  margin-bottom: $spacing-lg;
+}
+
+.formTitle {
+  font-family: $font-family-base;
+  font-size: 18px;
+  font-weight: 500;
+  color: $color-caramel;
+  line-height: 25px;
+  text-transform: uppercase;
+  margin-bottom: $spacing-md;
+  letter-spacing: 0.5px;
+}
+
+.formWrapper {
+  width: 100%;
+  max-width: 661px;
+}
+
+// Contact Form Styles (existing form) - using original class names
 .contact-form {
   display: flex;
   flex-direction: column;
@@ -87,21 +220,24 @@
   }
 
   label {
-    font-size: 14px;
+    font-family: $font-family-base;
+    font-size: 20px;
     font-weight: 500;
     color: $color-brun;
+    line-height: 25px;
   }
 
   input,
   select,
   textarea {
-    padding: $spacing-sm;
-    border: 1px solid $color-border-medium;
+    padding: $spacing-sm $spacing-md;
+    border: 1.5px solid $color-caramel;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 16px;
     font-family: inherit;
     color: $color-brun;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background-color: white;
 
     &::placeholder {
       color: #aaa;
@@ -109,7 +245,7 @@
 
     &:focus {
       outline: none;
-      border-color: $color-caramel;
+      border-color: #b88650;
       box-shadow: 0 0 0 2px rgba($color-caramel, 0.2);
     }
 
@@ -134,7 +270,7 @@
 
   textarea {
     resize: vertical;
-    min-height: 100px;
+    min-height: 211px;
   }
 
   .error-message {
@@ -152,22 +288,27 @@
   grid-column: span 2;
 
   input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 25px;
+    height: 25px;
     cursor: pointer;
     accent-color: $color-caramel;
+    border: 1.5px solid $color-caramel;
+    border-radius: 5px;
 
     &.error {
       accent-color: #d32f2f;
+      border-color: #d32f2f;
     }
   }
 
   .checkbox-label {
-    font-size: 14px;
+    font-family: $font-family-base;
+    font-size: 18px;
     color: $color-brun;
     cursor: pointer;
     margin: 0;
-    line-height: 1.4;
+    line-height: 25px;
+    font-weight: 500;
   }
 
   .error-message {
@@ -179,12 +320,14 @@
   display: inline-flex;
   justify-content: center;
   align-items: center;
+  gap: $spacing-sm;
   padding: $spacing-sm $spacing-lg;
-  background-color: $color-caramel;
+  background-color: $color-sauge;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 10px;
+  font-family: $font-family-base;
+  font-size: 18px;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.1s ease;
@@ -192,7 +335,7 @@
   align-self: flex-start;
 
   &:hover:not(:disabled) {
-    background-color: #b88650;
+    background-color: #9d9676;
   }
 
   &:active:not(:disabled) {
@@ -204,36 +347,321 @@
     cursor: not-allowed;
     opacity: 0.8;
   }
+
+  .button-icon {
+    width: 24px;
+    height: 24px;
+  }
 }
 
-@include respond-to(sm) {
-  .contact-page {
-    padding: $spacing-md 20px;
+// Section - Hate de vous lire
+.ctaSection {
+  position: relative;
+  width: 100%;
+  max-height: 500px;
+}
+
+.ctaGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  width: 100%;
+  height: auto;
+}
+
+.ctaTextColumn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 40px;
+  height: auto;
+  max-height: 500px;
+}
+
+.ctaBackground {
+  position: absolute;
+  inset: 0;
+  background: $color-sauge;
+  z-index: 0;
+}
+
+.ctaTextContent {
+  position: relative;
+  z-index: 1;
+  text-align: left;
+  max-width: 400px;
+  margin-bottom: $spacing-lg;
+}
+
+.ctaTextFirst,
+.ctaTextSecond {
+  font-family: $font-family-base;
+  font-size: clamp(20px, 2.5vw, 30px);
+  font-weight: 500;
+  line-height: 1.3;
+  color: $color-creme;
+  margin: 0;
+}
+
+.ctaTextFirst {
+  white-space: pre-line;
+  margin-bottom: calc($spacing-md + 10px);
+}
+
+.ctaImageColumn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ctaImageWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.ctaImage {
+  width: 100%;
+  height: 100%;
+  max-height: 500px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.ctaDivider {
+  position: absolute;
+  left: 50%;
+  top: 12.5%;
+  transform: translateX(-50%);
+  width: 91px;
+  height: 2px;
+  background: linear-gradient(to right, transparent, $color-background-light, transparent);
+  z-index: 1;
+}
+
+.ctaBotanicalDecoration {
+  position: absolute;
+  left: 50%;
+  bottom: 7.5%;
+  transform: translateX(-50%);
+  width: 115px;
+  height: 115px;
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 1;
+}
+
+// Responsive styles
+@include respond-to(lg) {
+  .heroSection {
+    padding: 80px $spacing-lg 60px;
   }
 
-  .contact-container {
-    padding: $spacing-lg $spacing-md;
+  .heroTitle {
+    font-size: 36px;
   }
 
-  .contact-header h1 {
+  .heroSubtitle {
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+  }
+
+  .infoColumn {
+    align-items: stretch;
+  }
+
+  .infoCard {
+    margin: 0 auto;
+  }
+
+  .ctaGrid {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .ctaTextColumn {
+    grid-row: 2;
+    height: auto;
+    padding: $spacing-lg;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ctaImageColumn {
+    grid-row: 1;
+    justify-content: center;
+    padding: 0 $spacing-lg $spacing-lg;
+  }
+
+  .ctaImageWrapper {
+    width: 100%;
+    max-width: 648px;
+    height: auto;
+    max-height: 500px;
+  }
+
+  .ctaImage {
+    height: 100%;
+    width: 100%;
+  }
+
+  .ctaDivider {
+    left: 50%;
+    top: 80px;
+    transform: translateX(-50%);
+  }
+
+  .ctaBotanicalDecoration {
+    left: 50%;
+    bottom: 40px;
+    transform: translateX(-50%);
+    top: auto;
+  }
+
+  .ctaSection {
+    padding: 0 $spacing-md $spacing-lg;
+  }
+}
+
+@include respond-to(md) {
+  .mainContent {
+    padding: 60px $spacing-md;
+  }
+
+  .heroSection {
+    padding: 60px $spacing-md 40px;
+  }
+
+  .heroTitle {
     font-size: 28px;
   }
 
-  .form-grid {
+  .heroSubtitle {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .formGrid {
     grid-template-columns: 1fr;
   }
 
-  .form-group {
-    &.full-width {
+  .formGroup {
+    &.fullWidth {
       grid-column: span 1;
     }
   }
 
-  .checkbox-group {
+  .checkboxGroup {
     grid-column: span 1;
   }
 
-  .submit-button {
+  .submitButton {
     width: 100%;
+  }
+
+  .ctaTextFirst,
+  .ctaTextSecond {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .ctaGrid {
+    height: auto;
+  }
+
+  .ctaImageColumn {
+    justify-content: center;
+    padding: 0 $spacing-lg $spacing-lg;
+  }
+
+  .ctaDivider {
+    left: 50%;
+    top: 60px;
+    transform: translateX(-50%);
+  }
+
+  .ctaBotanicalDecoration {
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    top: auto;
+  }
+}
+
+@include respond-to(sm) {
+  .heroSection {
+    padding: 60px $spacing-sm 40px;
+  }
+
+  .heroTitle {
+    font-size: 24px;
+  }
+
+  .heroSubtitle {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .mainContent {
+    padding: 40px $spacing-sm;
+  }
+
+  .infoCard {
+    padding: $spacing-lg $spacing-md;
+  }
+
+  .infoCardTitle {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .formLabel {
+    font-size: 16px;
+  }
+
+  .submitButton {
+    padding: $spacing-sm $spacing-lg;
+    font-size: 16px;
+  }
+
+  .ctaSection {
+    margin: 60px auto 0;
+    padding: 0 $spacing-sm $spacing-lg;
+  }
+
+  .ctaTextFirst,
+  .ctaTextSecond {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .ctaGrid {
+    height: auto;
+  }
+
+  .ctaImageColumn {
+    justify-content: center;
+    padding: 0 $spacing-md $spacing-md;
+  }
+
+  .ctaDivider,
+  .ctaBotanicalDecoration {
+    display: none;
+  }
+
+  .formHeader {
+    text-align: center;
+  }
+
+  .formTitle {
+    font-size: 16px;
   }
 }

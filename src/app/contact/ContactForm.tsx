@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import styles from "./page.module.scss";
-import { getPackageLabel, PACKAGE_LABELS } from '@/lib/constants';
+import { PACKAGE_LABELS } from '@/lib/constants';
 
 type FormData = {
   firstName: string;
@@ -27,14 +26,13 @@ type FormErrors = {
 
 // Options pour le select, base sur les constantes
 const packageOptions = [
-  { value: "", label: "Sélectionnez une formule" },
+  { value: "", label: "Type de formule souhaitée *" },
   { value: "escapade-en-douceur", label: PACKAGE_LABELS['escapade-en-douceur'] },
   { value: "voyage-sur-mesure", label: PACKAGE_LABELS['voyage-sur-mesure'] },
   { value: "voyage-de-noces", label: PACKAGE_LABELS['voyage-de-noces'] },
 ];
 
 export default function ContactForm() {
-  const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -170,7 +168,6 @@ export default function ContactForm() {
 
       <div className={styles["form-grid"]}>
         <div className={styles["form-group"]}>
-          <label htmlFor="firstName">Prénom *</label>
           <input
             type="text"
             id="firstName"
@@ -178,13 +175,12 @@ export default function ContactForm() {
             value={formData.firstName}
             onChange={handleChange}
             className={errors.firstName ? styles.error : ""}
-            placeholder="Votre prénom"
+            placeholder="Votre prénom *"
           />
           {errors.firstName && <span className={styles["error-message"]}>{errors.firstName}</span>}
         </div>
 
         <div className={styles["form-group"]}>
-          <label htmlFor="lastName">Nom *</label>
           <input
             type="text"
             id="lastName"
@@ -192,13 +188,12 @@ export default function ContactForm() {
             value={formData.lastName}
             onChange={handleChange}
             className={errors.lastName ? styles.error : ""}
-            placeholder="Votre nom"
+            placeholder="Votre nom *"
           />
           {errors.lastName && <span className={styles["error-message"]}>{errors.lastName}</span>}
         </div>
 
         <div className={`${styles["form-group"]} ${styles["full-width"]}`}>
-          <label htmlFor="email">Email *</label>
           <input
             type="email"
             id="email"
@@ -206,13 +201,12 @@ export default function ContactForm() {
             value={formData.email}
             onChange={handleChange}
             className={errors.email ? styles.error : ""}
-            placeholder="votre@email.com"
+            placeholder="votre@email.com *"
           />
           {errors.email && <span className={styles["error-message"]}>{errors.email}</span>}
         </div>
 
         <div className={styles["form-group"]}>
-          <label htmlFor="packageType">Type de formule *</label>
           <select
             id="packageType"
             name="packageType"
@@ -230,7 +224,6 @@ export default function ContactForm() {
         </div>
 
         <div className={styles["form-group"]}>
-          <label htmlFor="nights">Nombre de nuits souhaité *</label>
           <input
             type="number"
             id="nights"
@@ -238,21 +231,20 @@ export default function ContactForm() {
             value={formData.nights}
             onChange={handleChange}
             className={errors.nights ? styles.error : ""}
-            placeholder="1"
+            placeholder="Nombre de nuits souhaité *"
             min="1"
           />
           {errors.nights && <span className={styles["error-message"]}>{errors.nights}</span>}
         </div>
 
         <div className={`${styles["form-group"]} ${styles["full-width"]}`}>
-          <label htmlFor="message">Votre message *</label>
           <textarea
             id="message"
             name="message"
             value={formData.message}
             onChange={handleChange}
             className={errors.message ? styles.error : ""}
-            placeholder="Décrivez-nous vos attentes, vos dates préférées, votre budget, etc."
+            placeholder="Décrivez-nous vos attentes, vos dates préférées, votre budget, etc. *"
             rows={5}
           />
           {errors.message && <span className={styles["error-message"]}>{errors.message}</span>}
@@ -275,7 +267,29 @@ export default function ContactForm() {
 
         <div className={`${styles["form-group"]} ${styles["full-width"]}`}>
           <button type="submit" className={styles["submit-button"]} disabled={isSubmitting}>
-            {isSubmitting ? "Envoi en cours..." : "Envoyer votre demande"}
+            {isSubmitting ? (
+              "Envoi en cours..."
+            ) : (
+              <>
+                Envoyer votre demande
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  style={{ marginLeft: "8px" }}
+                >
+                  <path
+                    d="M10 14L13 21L20 4L3 11L10 14ZM20 4L10 14"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </>
+            )}
           </button>
         </div>
       </div>
