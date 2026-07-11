@@ -4,6 +4,11 @@ import { DashboardHeader, SectionCard } from '@/components/dashboard';
 import type { SiteContent } from '@prisma/client';
 import styles from './content.module.scss';
 
+// Clés de contenu à exclure de l'interface de modification
+const EXCLUDED_CONTENT_KEYS = new Set([
+    'contact/form-enabled', // Géré via le tableau de bord principal
+]);
+
 export const metadata = { title: 'Contenus — Administration' };
 
 const SECTION_PREVIEWS: Record<string, string> = {
@@ -17,7 +22,10 @@ export default async function ContentPage() {
 
     const allContent = await getAllContent();
 
-    const sections = allContent.reduce<Record<string, SiteContent[]>>((acc, item) => {
+    // Filtrer les contenus à exclure
+    const filteredContent = allContent.filter(item => !EXCLUDED_CONTENT_KEYS.has(item.key));
+
+    const sections = filteredContent.reduce<Record<string, SiteContent[]>>((acc, item) => {
         const section = item.key.split('/')[0];
         if (!acc[section]) acc[section] = [];
         acc[section].push(item);

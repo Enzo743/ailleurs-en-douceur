@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import {Instrument_Sans, Inter, Libre_Baskerville, Lora, Sacramento} from "next/font/google";
 import "@/styles/globals.scss";
+import BannerWrapper from "@/components/BannerWrapper";
 
 const libreBaskerville = Libre_Baskerville({
   weight: ["400", "500", "600", "700"],
@@ -48,7 +49,10 @@ export default function RootLayout({
       lang="fr"
       className={`${lora.variable} ${libreBaskerville.variable} ${sacramento.variable} ${inter.variable} ${instrument.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <BannerWrapper />
+        {children}
+      </body>
     </html>
   );
 }

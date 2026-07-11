@@ -18,3 +18,5 @@ export { default as Tag } from './Tag';
 export { default as TagInput } from './TagInput';
 export { default as ContactSettings } from './ContactSettings';
 export { ContactSettingsWrapper } from './ContactSettings';
+export { default as BannerSettings } from './BannerSettings';
+export { BannerSettingsWrapper } from './BannerSettings';

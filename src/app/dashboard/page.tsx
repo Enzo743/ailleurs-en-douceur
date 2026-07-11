@@ -1,6 +1,6 @@
 import { verifySession } from '@/lib/auth';
 import { getArticleCount } from '@/app/actions/articles';
-import { DashboardHeader, ContactSettingsWrapper } from '@/components/dashboard';
+import { DashboardHeader, ContactSettingsWrapper, BannerSettingsWrapper } from '@/components/dashboard';
 import { prisma } from '@/lib/prisma';
 import styles from './dashboard.module.scss';
 
@@ -15,6 +15,24 @@ export default async function DashboardPage() {
     });
     
     const contactEnabled = contactContent ? contactContent.value === 'true' : true;
+    
+    // Récupérer les paramètres du bandeau
+    const bannerContent = await prisma.siteContent.findMany({
+        where: {
+            key: {
+                startsWith: 'banner/'
+            }
+        }
+    });
+    
+    // Parser les paramètres du bandeau
+    const bannerSettings = {
+        isEnabled: bannerContent.find(item => item.key === 'banner/enabled')?.value === 'true' || false,
+        text: bannerContent.find(item => item.key === 'banner/text')?.value || '',
+        color: bannerContent.find(item => item.key === 'banner/color')?.value || '#4F46E5',
+        duration: (bannerContent.find(item => item.key === 'banner/duration')?.value || 'permanent') as 'permanent' | 'temporary',
+        endDate: bannerContent.find(item => item.key === 'banner/endDate')?.value || null
+    };
 
     return (
         <section className="dashboard-page">
@@ -43,6 +61,7 @@ export default async function DashboardPage() {
             </div>
 
             <div className="dashboardSettings">
+                <BannerSettingsWrapper initialState={bannerSettings} />
                 <ContactSettingsWrapper initialState={contactEnabled} />
             </div>
         </section>
