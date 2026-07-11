@@ -39,7 +39,7 @@ export default async function ContactPage() {
           <div className={styles.infoColumn}>
             <div className={styles.infoCard}>
               <BotanicalDecoration 
-                type="botanical-15" 
+                color={"#D4A373"}
                 className={styles.botanicalDecoration}
               />
               <RichTextDisplay html={c['contact/info-card-title']} className={styles.infoCardTitle} />

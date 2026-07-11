@@ -6,6 +6,10 @@
   width: 100%;
   background-color: $color-creme;
   z-index: 100;
+
+  &.transparent {
+    background-color: transparent;
+  }
 }
 
 .navbar {
@@ -28,6 +32,12 @@
     inset: 0;
     background: rgba(254, 250, 237, 0.9);
     z-index: 0;
+  }
+
+  .header.transparent & {
+    &::before {
+      background: transparent;
+    }
   }
 }
 

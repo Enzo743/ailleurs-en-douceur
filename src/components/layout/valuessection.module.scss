@@ -1,0 +1,66 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+// Values Section
+.values {
+  padding: 55px 48px;
+  background-color: $color-creme;
+  position: relative;
+}
+
+.valuesContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.valueItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.valueIcon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 40px;
+    height: 40px;
+    color: $color-sauge;
+  }
+}
+
+.valueTitle {
+  font-family: $font-family-base;
+  font-size: 16px;
+  font-weight: 600;
+  color: $color-brun;
+  margin-bottom: 5px;
+  line-height: 25px;
+}
+
+.valueDescription {
+  font-family: $font-family-base;
+  font-size: 13px;
+  font-weight: 400;
+  color: $color-brun;
+  line-height: 20px;
+  margin-bottom: 25px;
+  max-width: 200px;
+}
+
+.valueDivider {
+  width: 73px;
+  height: 1px;
+  background: $color-caramel;
+  margin: 0 auto;
+  opacity: 0.5;
+}

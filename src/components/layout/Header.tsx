@@ -5,9 +5,10 @@ import Image from "next/image";
 
 interface HeaderProps {
   currentPage?: string;
+  transparent?: boolean;
 }
 
-export default async function Header({ currentPage = "" }: HeaderProps) {
+export default async function Header({ currentPage = "", transparent = false }: HeaderProps) {
   const c = await getSiteContent();
 
   const navItems = [
@@ -19,7 +20,7 @@ export default async function Header({ currentPage = "" }: HeaderProps) {
   ];
 
   return (
-    <header className={styles.header}>
+    <header className={`${styles.header} ${transparent ? styles.transparent : ''}`}>
       <div className={styles.navbar}>
         <div className={styles.logo}>
           <Link href="/" className={styles.logoText}>

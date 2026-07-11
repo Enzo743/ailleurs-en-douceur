@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Libre_Baskerville, Lora, Sacramento } from "next/font/google";
+import {Instrument_Sans, Inter, Libre_Baskerville, Lora, Sacramento} from "next/font/google";
 import "@/styles/globals.scss";
 
 const libreBaskerville = Libre_Baskerville({
@@ -20,6 +20,18 @@ const sacramento = Sacramento({
   subsets: ["latin"],
 });
 
+const inter = Inter({
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const instrument = Instrument_Sans({
+  weight: ["400", "600"],
+  variable: "--font-instrument",
+  subsets: ["latin"],
+})
+
 export const metadata: Metadata = {
   title: "Ailleurs en Douceur - L'art de voyager autrement",
   description:
@@ -34,7 +46,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${lora.variable} ${libreBaskerville.variable} ${sacramento.variable}`}
+      className={`${lora.variable} ${libreBaskerville.variable} ${sacramento.variable} ${inter.variable} ${instrument.variable}`}
     >
       <body>{children}</body>
     </html>

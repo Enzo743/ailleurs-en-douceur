@@ -1,143 +1,787 @@
-@use "../styles/_mixins" as *;
+@use "../styles/variables" as *;
+@use "../styles/mixins" as *;
 
-.page {
-  --background: #fafafa;
-  --foreground: #fff;
+// Main container
+.container {
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  width: 100%;
+}
 
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
-
+// Hero Section
+.hero {
+  position: relative;
+  min-height: 66vh;
   display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: $color-creme;
+}
+
+.heroImage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
   flex: 1;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-lora);
-  background-color: var(--background);
-}
-
-.main {
-  display: flex;
-  flex: 1;
+  text-align: center;
+  padding: 0 48px;
+  max-width: 580px;
+  margin: 0 auto;
   width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
+  transform: translateY(-10vh);
 }
 
-.intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
-}
-
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
-}
-
-.intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
-  color: var(--text-secondary);
-}
-
-.intro a {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.ctas {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  max-width: 440px;
-  gap: 16px;
+.heroTagline {
+  font-family: $font-family-base;
   font-size: 14px;
-}
-
-.ctas a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
-  width: fit-content;
   font-weight: 500;
+  color: $color-caramel;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  line-height: 25px;
 }
 
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
+.heroTitle {
+  font-family: $font-family-title;
+  font-size: 48px;
+  font-weight: 400;
+  color: $color-brun;
+  line-height: normal;
+  text-shadow: 0px 0px 10px rgba(254, 250, 237, 0.8);
+}
+
+.heroSubtitle {
+  font-family: $font-family-base;
+  font-size: 16px;
+  font-weight: 600;
+  color: $color-brun;
+  line-height: 25px;
+  text-shadow: 10px 0px 10px rgba(254, 250, 237, 0.8);
+}
+
+.heroDivider {
+  width: 73px;
+  height: 2px;
+  background: $color-caramel;
+  margin: 24px auto;
+}
+
+// Offers Section
+.offers {
+  padding: 64px 24px 80px;
+  background-color: $color-creme;
+  text-align: center;
+  position: relative;
+}
+
+.offersBotanicalDecoration {
+  display: inline-block;
+  width: 46px;
+  height: 46px;
+  pointer-events: none;
+  vertical-align: middle;
+  margin-left: -5px;
+}
+
+.offersHeader {
+  margin-bottom: 37px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.offersTagline {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-caramel;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 7px;
+  line-height: 25px;
+  text-align: center;
+  max-width: 1200px;
+  width: 100%;
+  padding: 0 24px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.offersTitle {
+  font-family: $font-family-title;
+  font-size: 34px;
+  font-weight: 400;
+  color: $color-brun;
+  line-height: 40px;
+  margin: 0 auto 7px;
+  max-width: 600px;
+  width: 100%;
+  padding: 0 24px;
+  
+  em,
+  i {
+    font-family: inherit;
+    font-style: italic;
+    color: $color-sauge;
+  }
+}
+
+.offersGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(300px, 344px));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+}
+
+.offerCard {
+  background: transparent;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.offerCardImageContainer {
+  position: relative;
+  height: 204px;
+  overflow: hidden;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.offerCardContentContainer {
+  padding: 10px 24px $spacing-sm;
+  text-align: left;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  background: transparent;
+  position: relative;
+  z-index: 2;
+}
+
+.offerCardIconBubble {
+  position: absolute;
+  top: 164px;
+  left: 20%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  background: $color-sauge;
+  filter: drop-shadow(0 4px 4px rgba(210, 210, 210, 0.20));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.offerCardTitle {
+  font-family: $font-family-tertiary;
+  font-size: 20px;
+  font-weight: 700;
+  color: $color-brun;
+  margin: 0 0 8px 95px;
+  line-height: normal;
+  max-width: 212px;
+}
+
+.offerCardDescription {
+  font-family: $font-family-tertiary;
+  font-size: 13px;
+  font-weight: 400;
+  color: $color-brun;
+  line-height: normal;
+  margin: 0 0 17px 95px;
+  max-width: 233px;
+}
+
+.offerCardLink {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-caramel;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
+  transition: color 0.2s ease;
+  margin: 0 0 0 95px;
+  padding: 4px 0;
+  position: relative;
+  
+  &:hover {
+    color: $color-sauge;
+  }
+  
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background-color: $color-caramel;
+    transition: width 0.2s ease;
+  }
+  
+  &:hover::after {
+    width: 100%;
+  }
+  
+  svg {
+    margin-top: 2px;
+  }
 }
 
-a.secondary {
-  border-color: var(--button-secondary-border);
+.offerCardArrow {
+  display: inline-block;
+  
+  svg {
+    display: block;
+  }
 }
 
-@include hover-capable {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
+// About Section
+.about {
+  padding: 80px 48px;
+  background-color: #EAE8DC;
+  position: relative;
+  overflow: hidden;
+}
+
+.aboutContainer {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 40px;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.aboutImage {
+  position: relative;
+  width: 420px;
+  height: 366px;
+  border-radius: 10px;
+  border: 1px solid $color-creme;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+}
+
+.aboutContent {
+  text-align: left;
+}
+
+.aboutTagline {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-brun;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  line-height: 25px;
+}
+
+.aboutTitle {
+  font-family: $font-family-title;
+  font-size: 32px;
+  font-weight: 400;
+  color: $color-brun;
+  line-height: normal;
+  margin-bottom: 13px;
+  
+  span {
+    color: $color-caramel;
+  }
+  
+  em,
+  i {
+    font-family: inherit;
+    font-style: italic;
+    color: $color-sauge;
+  }
+}
+
+.aboutDescription {
+  font-family: $font-family-base;
+  font-size: 15px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 25px;
+  margin-bottom: 46px;
+  max-width: 550px;
+}
+
+.aboutButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  background-color: $color-creme;
+  color: $color-brun;
+  font-family: $font-family-base;
+  font-size: 13px;
+  font-weight: 400;
+  text-decoration: none;
+  border-radius: 8px;
+  border: 1px solid $color-sauge;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+
+  &:hover {
+    background-color: $color-sauge;
+    color: white;
   }
 
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.aboutDecorationFirst {
+  position: absolute;
+  top: -5%;
+  right: -10%;
+  transform: rotate(-4.62deg) skewX(0.36deg);
+  pointer-events: none;
+  width: 90px;
+  height: 91px;
+  z-index: 10;
+}
+
+.aboutDecorationSecond {
+  width: 23px;
+  height: 20px;
+  margin-left: 4px;
+  color: $color-brun;
+}
+
+// Blog Section
+.blog {
+  padding: 80px 48px 50px 48px;
+  background-color: $color-creme;
+}
+
+.blogContainer {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 80px;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.blogHeader {
+  text-align: left;
+}
+
+.blogTagline {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-caramel;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  line-height: 25px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.blogBotanicalDecoration {
+  display: inline-block;
+  width: 46px;
+  height: 46px;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.noArticlesCard {
+  grid-column: 1 / -1;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
+  border-radius: 15px;
+  padding: 40px 30px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  max-width: 500px;
+}
+
+.noArticlesTitle {
+  font-family: $font-family-title;
+  font-size: 24px;
+  font-weight: 400;
+  color: $color-brun;
+  margin: 0 0 15px;
+}
+
+.noArticlesText {
+  font-family: $font-family-base;
+  font-size: 15px;
+  font-weight: 500;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.blogTitle {
+  font-family: $font-family-title;
+  font-size: 32px;
+  font-weight: 400;
+  color: $color-brun;
+  line-height: normal;
+  margin-bottom: 12px;
+  max-width: 330px;
+  
+  em,
+  i {
+    font-family: inherit;
+    font-style: italic;
+    color: $color-sauge;
+  }
+}
+
+.blogDescription {
+  font-family: $font-family-base;
+  font-size: 15px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 25px;
+  margin-bottom: 40px;
+  max-width: 330px;
+}
+
+.blogLink {
+  font-family: $font-family-base;
+  font-size: 13px;
+  font-weight: 400;
+  color: $color-caramel;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s ease;
+  padding: 4px 0;
+  position: relative;
+  
+  &:hover {
+    color: $color-sauge;
+  }
+  
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background-color: $color-caramel;
+    transition: width 0.2s ease;
+  }
+  
+  &:hover::after {
+    width: 100%;
+  }
+}
+
+.blogArrow {
+  width: 12px;
+  height: 12px;
+}
+
+.blogImage {
+  position: relative;
+  width: 100%;
+  height: 358px;
+  border-radius: 15px;
+  overflow: hidden;
+  
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(74, 63, 47, 0.2);
+    z-index: 1;
+    pointer-events: none;
+  }
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.blogContentRight {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  min-height: 400px;
+}
+
+.blogCards {
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  padding: 0 20px 20px;
+  z-index: 10;
+}
+
+// Decorative elements
+.botanicalDecoration {
+  position: absolute;
+  pointer-events: none;
+  
+  &.topLeft {
+    top: 20px;
+    left: 20px;
+  }
+  
+  &.topRight {
+    top: 20px;
+    right: 20px;
+  }
+  
+  &.bottomLeft {
+    bottom: 20px;
+    left: 20px;
+  }
+  
+  &.bottomRight {
+    bottom: 20px;
+    right: 20px;
+  }
+}
+
+// Responsive styles
+@include respond-to(md) {
+  .heroContent {
+    padding: 150px 24px 80px;
+  }
+  
+  .heroTitle {
+    font-size: 36px;
+  }
+  
+  .valuesContainer {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+  
+  .offersBotanicalDecoration {
+    display: none;
+  }
+  
+  .offersGrid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  
+  .aboutContainer {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+  
+  .aboutImage {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  .aboutContent {
+    text-align: center;
+  }
+  
+  .aboutDescription {
+    margin: 0 auto 40px;
+    max-width: 600px;
+  }
+  
+  .blogContainer {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .blogHeader {
+    text-align: center;
+  }
+  
+  .blogTagline {
+    justify-content: center;
+  }
+  
+  .blogDescription {
+    margin: 0 auto 40px;
+    max-width: 600px;
+  }
+  
+  .blogLink {
+    justify-content: center;
+  }
+  
+  .blogContentRight {
+    flex-direction: column;
+  }
+  
+  .blogCards {
+    position: static;
+    grid-template-columns: 1fr;
+    padding: 20px 0 0;
+  }
+  
+  .noArticlesCard {
+    padding: 30px 20px;
+    max-width: 90%;
+  }
+  
+  .contactContainer {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+  
+  .contactImage {
+    width: 100%;
+    max-width: 300px;
+    height: 200px;
+    margin: 0 auto;
+  }
+  
+  .contactContent {
+    text-align: center;
+  }
+  
+  .contactDescription {
+    margin: 0 auto 40px;
+  }
+  
+  .contactButton {
+    justify-content: center;
   }
 }
 
 @include respond-to(sm) {
-  .main {
-    padding: 48px 24px;
+  .heroContent {
+    padding: 120px 24px 60px;
   }
-
-  .intro {
-    gap: 16px;
+  
+  .heroTitle {
+    font-size: 28px;
   }
-
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
+  
+  .heroSubtitle {
+    font-size: 14px;
   }
-}
-
-@include dark-mode {
-  .logo {
-    filter: #{"invert()"};
+  
+  .valuesContainer {
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
+  
+  .offersTitle {
+    font-size: 28px;
+  }
+  
 
-  .page {
-    --background: #000;
-    --foreground: #000;
+  
+  .offerCard {
+    position: relative;
+    border-radius: 15px;
+    overflow: visible;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .offerCardImageContainer {
+    border-radius: 15px 15px 0 0;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    
+    img {
+      border-radius: 15px 15px 0 0;
+    }
+  }
+  
+  .offerCardContentContainer {
+    border-radius: 0 0 15px 15px;
+    padding: 20px;
+    background: transparent;
+    margin-top: 0;
+  }
+  
+  .offerCardIconBubble {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    transform: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    
+    svg {
+      width: 25px;
+      height: 25px;
 
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
+    }
+  }
+  
+  .aboutTitle {
+    font-size: 28px;
+  }
+  
+  .blogTitle {
+    font-size: 28px;
+  }
+  
+  .contactTitle {
+    font-size: 22px;
   }
 }
