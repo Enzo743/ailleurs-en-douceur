@@ -17,7 +17,7 @@ export default async function ContactPage() {
 
   return (
     <div className={styles.contactPage}>
-      <Header currentPage="/contact" />
+      <Header currentPage="/contact" siteContent={c} />
 
       {/* Hero Section */}
       <section 

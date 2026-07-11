@@ -151,10 +151,12 @@
 .formColumn {
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .formSection {
   width: 100%;
+  max-width: 661px;
 }
 
 .formHeader {
@@ -506,25 +508,34 @@
 
   .infoCard {
     margin: 0 auto;
+    max-width: 450px;
+    padding: $spacing-lg $spacing-md;
   }
 
   .ctaGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     height: auto;
   }
 
   .ctaTextColumn {
-    grid-row: 2;
-    height: auto;
     padding: $spacing-lg;
     align-items: center;
     justify-content: center;
   }
 
   .ctaImageColumn {
-    grid-row: 1;
     justify-content: center;
-    padding: 0 $spacing-lg $spacing-lg;
+  }
+
+  .ctaImageWrapper {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ctaImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .ctaImageWrapper {
@@ -554,6 +565,8 @@
 
   .ctaSection {
     padding: 0 $spacing-md $spacing-lg;
+    max-height: 600px;
+    height: auto;
   }
 }
 
@@ -575,21 +588,43 @@
     line-height: 24px;
   }
 
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+  }
+
+  .infoColumn {
+    align-items: stretch;
+  }
+
+  .infoCard {
+    margin: 0 auto;
+    padding: $spacing-lg $spacing-md;
+  }
+
+  .formColumn {
+    align-items: stretch;
+  }
+
+  .formSection {
+    width: 100%;
+  }
+
   .formGrid {
     grid-template-columns: 1fr;
   }
 
-  .formGroup {
-    &.fullWidth {
+  .form-group {
+    &.full-width {
       grid-column: span 1;
     }
   }
 
-  .checkboxGroup {
+  .checkbox-group {
     grid-column: span 1;
   }
 
-  .submitButton {
+  .submit-button {
     width: 100%;
   }
 
@@ -620,6 +655,15 @@
     transform: translateX(-50%);
     top: auto;
   }
+
+  .ctaSection {
+    display: none;
+  }
+
+  .infoCard {
+    max-width: 350px;
+    padding: $spacing-md;
+  }
 }
 
 @include respond-to(sm) {
@@ -640,8 +684,26 @@
     padding: 40px $spacing-sm;
   }
 
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+  }
+
+  .infoColumn {
+    align-items: stretch;
+  }
+
   .infoCard {
+    margin: 0 auto;
     padding: $spacing-lg $spacing-md;
+  }
+
+  .formColumn {
+    align-items: stretch;
+  }
+
+  .formSection {
+    width: 100%;
   }
 
   .infoCardTitle {
