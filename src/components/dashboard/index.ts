@@ -16,3 +16,5 @@ export { default as StatsGrid } from './StatsGrid';
 export { default as StatCard } from './StatCard';
 export { default as Tag } from './Tag';
 export { default as TagInput } from './TagInput';
+export { default as ContactSettings } from './ContactSettings';
+export { ContactSettingsWrapper } from './ContactSettings';

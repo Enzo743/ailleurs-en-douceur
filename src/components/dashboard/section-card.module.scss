@@ -97,6 +97,76 @@
   padding: 0 1rem 1rem;
 }
 
+// ── Contenu de la carte ────────────────────────────────────────────────────────
+
+.cardContent {
+  padding: 1rem;
+}
+
+.cardDescription {
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.settingsForm {
+  margin-bottom: 1rem;
+}
+
+.actionButton {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: $color-caramel;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &:hover:not(:disabled) {
+    background-color: darken($color-caramel, 10%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}
+
+.statusText {
+  margin: $spacing-sm 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  strong {
+    color: $color-brun;
+    font-weight: 600;
+  }
+}
+
+.errorText {
+  margin: $spacing-xs 0 0;
+  font-size: 0.875rem;
+  color: #dc2626;
+  background-color: #fee2e2;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+}
+
 // ── Overlay ───────────────────────────────────────────────────────────────────
 
 .overlay {

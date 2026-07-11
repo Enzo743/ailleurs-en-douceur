@@ -177,6 +177,32 @@
   max-width: 661px;
 }
 
+.formDisabled {
+  padding: $spacing-lg;
+  background-color: rgba($color-brun, 0.05);
+  border-radius: 24px;
+  text-align: center;
+  border: 2px dashed rgba($color-brun, 0.2);
+}
+
+.formDisabledTitle {
+  margin: 0 0 $spacing-sm 0;
+  color: $color-brun;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.formDisabledText {
+  margin: 0 0 $spacing-md 0;
+  color: $color-brun;
+  font-size: 16px;
+  line-height: 1.6;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
 // Contact Form Styles (existing form) - using original class names
 .contact-form {
   display: flex;

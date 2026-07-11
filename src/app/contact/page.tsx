@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 
 export default async function ContactPage() {
   const c = await getSiteContent();
+  const contactEnabled = c['contact/form-enabled'] !== 'false';
 
   return (
     <div className={styles.contactPage}>
@@ -56,7 +57,20 @@ export default async function ContactPage() {
                 <h2 className={styles.formTitle}>{c['contact/form-title']}</h2>
               </div>
               <div className={styles.formWrapper}>
-                <ContactForm />
+                {contactEnabled ? <ContactForm /> : (
+                  <div className={styles.formDisabled}>
+                    <h3 className={styles.formDisabledTitle}>{c['contact/form-disabled-title']}</h3>
+                    <p className={styles.formDisabledText}>
+                      {c['contact/form-disabled-text-1']}
+                    </p>
+                    <p className={styles.formDisabledText}>
+                      {c['contact/form-disabled-text-2']}
+                    </p>
+                    <p className={styles.formDisabledText}>
+                      {c['contact/form-disabled-text-3']}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

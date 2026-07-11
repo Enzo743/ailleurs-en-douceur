@@ -91,3 +91,12 @@
   font-size: 1rem;
   color: #6b7280;
 }
+
+// ── Paramètres ──────────────────────────────────────────────────────────────────
+
+.dashboardSettings {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
