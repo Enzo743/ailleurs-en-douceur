@@ -41,14 +41,12 @@ export default async function Home() {
   );
   // Prendre jusqu'à 3 articles les plus récents
   const articlesToDisplay = publishedArticles.slice(0, 3);
-  
-
 
   return (
     <main>
       {/* Hero Section */}
       <section className={styles.hero}>
-        <Header transparent={true} currentPage="/" />
+        <Header transparent={true} currentPage="/" siteContent={c} />
         <div className={styles.heroImage}>
           <Image
             src={c['home/hero-image']}
@@ -56,15 +54,31 @@ export default async function Home() {
             width={1920}
             height={1080}
             loading={"eager"}
+            className={styles.heroImageDesktop}
+          />
+          <Image
+            src={c['home/hero-image-mobile']}
+            alt="Background Mobile"
+            width={750}
+            height={1334}
+            loading={"eager"}
+            className={styles.heroImageMobile}
           />
         </div>
         <div className={styles.heroContent}>
+          <div className={styles.heroLogoTitle}>
+            <p className={styles.heroLogoText}>{c['general/subtitle']}</p>
+            <h1 className={styles.heroMainTitle}>{c['general/title']}</h1>
+          </div>
           <p className={styles.heroTagline}>{c['home/hero-tagline']}</p>
           <RichTextDisplay html={c['home/hero-title']} className={styles.heroTitle} />
           <div className={styles.heroDivider} />
           <p className={styles.heroSubtitle}>
             {c['home/hero-subtitle']}
           </p>
+          <Link href="/contact" className={styles.heroContactButton}>
+            {c['home/hero-contact-button']}
+          </Link>
         </div>
       </section>
 

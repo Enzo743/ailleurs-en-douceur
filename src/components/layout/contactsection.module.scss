@@ -83,27 +83,43 @@
 @include respond-to(md) {
   .contactContainer {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 20px;
     text-align: center;
+    padding: 20px 0;
   }
 
   .contactImage {
-    width: 100%;
-    max-width: 300px;
-    height: 200px;
-    margin: 0 auto;
+    display: none;
   }
 
   .contactContent {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
   }
 
   .contactDescription {
-    margin: 0 auto 40px;
+    margin: 0 auto 20px;
+    max-width: 300px;
   }
 
   .contactButton {
-    justify-content: center;
+    margin: 20px auto 0;
+    display: block;
+    gap: 8px;
+    padding: 6px 20px;
+  }
+
+  .contactButton svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .botanicalDecoration {
+    margin: 0 auto 15px;
+    display: block;
   }
 }
 

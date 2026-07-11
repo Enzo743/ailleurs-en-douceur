@@ -26,9 +26,11 @@ const initialContent: {
 
     // ── Page d'accueil ──────────────────────────────────────────────
     { key: 'home/hero-image',       type: ContentType.IMAGE,    value: '/images/image-placeholder-3.png' },
+    { key: 'home/hero-image-mobile',       type: ContentType.IMAGE,    value: '/images/image-placeholder-2.png' },
     { key: 'home/hero-tagline',         type: ContentType.TEXT,     value: 'Travel Planner' },
     { key: 'home/hero-title',         type: ContentType.RICHTEXT,     value: 'Voyager autrement, <i><em>prendre le temps</em></i>.' },
     { key: 'home/hero-subtitle',         type: ContentType.TEXT,     value: 'Je conçois pour vous des voyages sur-mesure, écoresponsables et en slow travel, en France et en Europe.' },
+    { key: 'home/hero-contact-button',         type: ContentType.TEXT,     value: 'Me contacter' },
     { key: 'home/offers-tagline',         type: ContentType.TEXT,     value: 'Pourquoi me confier votre voyage ?' },
     { key: 'home/offers-title',         type: ContentType.RICHTEXT,     value: 'Un voyage qui vous ressemble, <i><em>en accord avec vos valeurs</em></i>.' },
     { key: 'home/offers-link',         type: ContentType.TEXT,     value: 'Découvrir' },

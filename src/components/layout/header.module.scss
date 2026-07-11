@@ -175,19 +175,66 @@
   }
 }
 
-// Responsive styles
+.hamburgerButton {
+  display: none;
+}
+
+
+// Responsive styles for medium screens
+@media (max-width: 1350px) {
+  .logoImage {
+    width: 80px;
+    height: 80px;
+  }
+
+  .logoTitle {
+    font-size: 18px;
+  }
+
+  .logoSubtitle {
+    font-size: 14px;
+  }
+
+  .navList {
+    gap: 15px;
+  }
+
+  .navLink {
+    font-size: 14px;
+    padding: 8px 3px;
+    white-space: nowrap;
+  }
+
+  .button {
+    padding: 8px 18px;
+    font-size: 14px;
+  }
+}
+
+// Hide logo completely at 1000px for better readability
+@media (max-width: 1000px) {
+  .logo {
+    display: none;
+  }
+
+  .navList {
+    gap: 20px;
+  }
+
+  .navLink {
+    font-size: 15px;
+  }
+}
+
+// Responsive styles for medium screens - show hamburger menu
 @include respond-to(md) {
   .navbar {
     padding: 0 $spacing-md;
     height: 80px;
   }
 
-  .logoTitle {
-    font-size: 20px;
-  }
-
-  .logoSubtitle {
-    font-size: 16px;
+  .logo {
+    display: none;
   }
 
   .navList {
@@ -196,5 +243,21 @@
 
   .button {
     display: none;
+  }
+
+  .hamburgerButton {
+    display: block;
+    position: relative;
+    z-index: 1;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+
+    .hamburgerIcon {
+      width: 24px;
+      height: 24px;
+      color: $color-brun;
+    }
   }
 }
