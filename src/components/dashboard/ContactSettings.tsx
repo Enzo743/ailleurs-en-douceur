@@ -44,7 +44,7 @@ export default function ContactSettings({ initialState }: { initialState: boolea
             }
         } catch (error) {
             console.error('Erreur lors du basculement:', error);
-            setError(error.message || 'Erreur de connexion');
+            setError(error instanceof Error ? error.message : 'Erreur de connexion');
         }
     };
 

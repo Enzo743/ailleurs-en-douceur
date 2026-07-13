@@ -70,7 +70,7 @@ export default function BannerSettings({ initialState }: {
             }
         } catch (error) {
             console.error('Erreur lors de la mise à jour du bandeau:', error);
-            setError(error.message || 'Erreur de connexion');
+            setError(error instanceof Error ? error.message : 'Erreur de connexion');
         }
     };
 
