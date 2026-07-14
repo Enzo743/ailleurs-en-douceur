@@ -1,11 +1,12 @@
-import {getSiteContent} from "@/lib/content";
+import {getFreshSiteContent} from "@/lib/content";
 import {BotanicalDecoration} from "@/components";
 import styles from "./contactsection.module.scss";
 import Link from "next/link";
 import Image from "next/image";
 
 export default async function ContactSection() {
-    const c = await getSiteContent();
+    // Utiliser la version non-cachée pour toujours avoir les données fraîches
+    const c = await getFreshSiteContent();
 
     return (
         <section className={styles.contact}>

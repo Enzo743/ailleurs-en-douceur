@@ -1,9 +1,10 @@
-import { getSiteContent } from '@/lib/content';
+import { getFreshSiteContent } from '@/lib/content';
 import Banner from './Banner';
 
 export default async function BannerWrapper() {
     try {
-        const siteContent = await getSiteContent();
+        // Utiliser la version non-cachée pour toujours avoir les données fraîches
+        const siteContent = await getFreshSiteContent();
         
         // Extraire les paramètres du bandeau
         const isEnabled = siteContent['banner/enabled'] === 'true';

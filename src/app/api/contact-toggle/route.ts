@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSiteContent } from '@/lib/content';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(request: Request) {
     try {
@@ -23,6 +24,10 @@ export async function POST(request: Request) {
                 value: newState ? 'true' : 'false'
             }
         });
+
+        // Revalider les pages concernées
+        revalidatePath('/contact');
+        revalidatePath('/');
 
         return NextResponse.json(
             { success: true, newState },

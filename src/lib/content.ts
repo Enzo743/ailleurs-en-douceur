@@ -25,3 +25,12 @@ export const getSiteContentByType = cache(
         return Object.fromEntries(rows.map((r) => [r.key, r.value]));
     }
 );
+
+/**
+ * Version non-cachée de getSiteContent pour les composants qui ont besoin de données fraîches.
+ * À utiliser avec parcimonie pour éviter les performances inutiles.
+ */
+export async function getFreshSiteContent(): Promise<SiteContentMap> {
+    const rows = await prisma.siteContent.findMany();
+    return Object.fromEntries(rows.map((r) => [r.key, r.value]));
+}
