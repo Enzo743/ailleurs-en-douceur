@@ -1,5 +1,6 @@
 @use "../styles/variables" as *;
 @use "../styles/mixins" as *;
+@use "sass:color";
 
 // Main container
 .container {
@@ -666,7 +667,7 @@
     cursor: pointer;
 
     &:hover {
-      background: darken($color-caramel, 10%);
+      background: color.adjust($color-caramel, $lightness: -10%);
       transform: translateY(-2px);
       box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
     }

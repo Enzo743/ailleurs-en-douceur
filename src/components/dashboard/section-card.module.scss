@@ -1,5 +1,6 @@
 @use "../../styles/_variables" as *;
 @use "../../styles/_mixins" as *;
+@use "sass:color";
 
 // ── Carte ─────────────────────────────────────────────────────────────────────
 
@@ -127,7 +128,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   &:hover:not(:disabled) {
-    background-color: darken($color-caramel, 10%);
+    background-color: color.adjust($color-caramel, $lightness: -10%);
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
