@@ -121,6 +121,10 @@
   margin: 24px auto;
 }
 
+.heroContactButton {
+  display: none;
+}
+
 // Offers Section
 .offers {
   padding: 64px 24px 80px;
@@ -846,21 +850,6 @@
   .noArticlesCard {
     padding: 30px 20px;
     max-width: 90%;
-  }
-}
-
-// Hide logo completely at 1000px for better readability
-@media (max-width: 1000px) {
-  .logo {
-    display: none;
-  }
-
-  .navList {
-    gap: 20px;
-  }
-
-  .navLink {
-    font-size: 15px;
   }
 }
 
