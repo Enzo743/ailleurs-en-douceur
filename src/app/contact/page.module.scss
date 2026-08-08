@@ -80,7 +80,7 @@
   width: 72px;
   height: 2px;
   margin: $spacing-sm 0;
-  background: linear-gradient(to right, transparent, $color-caramel, transparent);
+  background: $color-caramel;
 }
 
 // Main Content Section

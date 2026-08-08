@@ -7,6 +7,10 @@ import styles from './content.module.scss';
 // Clés de contenu à exclure de l'interface de modification
 const EXCLUDED_CONTENT_KEYS = new Set([
     'contact/form-enabled', // Géré via le tableau de bord principal
+    'banner/color',
+    'banner/duration',
+    'banner/enabled',
+    'banner/text',
 ]);
 
 export const metadata = { title: 'Contenus — Administration' };

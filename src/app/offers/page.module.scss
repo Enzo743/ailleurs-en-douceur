@@ -1,0 +1,656 @@
+@use "../../styles/_variables" as *;
+@use "../../styles/_mixins" as *;
+
+// Page Container
+.offersPage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  background-color: $color-creme;
+  font-family: $font-family-base;
+}
+
+// Container
+.container {
+  display: flex;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+  width: 100%;
+  max-width: 1440px;
+  flex-direction: column;
+}
+
+// Hero Section
+.heroSection {
+  position: relative;
+  width: 100%;
+  min-height: 542px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 113px $spacing-xl 80px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba($color-brun, 0.5);
+    z-index: 0;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 0;
+  }
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+}
+
+.heroTitle {
+  color: $color-creme;
+  text-shadow: 0 4px 4px rgba(30, 30, 30, 0.20);
+  font-family: $font-family-title;
+  font-size: 48px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 38px;
+}
+
+.heroDivider {
+  width: 72px;
+  height: 2px;
+  margin: $spacing-sm 0;
+  background: $color-caramel;
+}
+
+.heroSubtitle {
+  font-family: $font-family-base;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 28px;
+  text-shadow: 0 4px 4px rgba(30, 30, 30, 0.2);
+  color: $color-creme;
+  margin-bottom: 44px;
+  max-width: 320px;
+}
+
+// Introduction Section
+.introSection {
+  padding: 80px 0;
+  background-color: $color-creme;
+  margin: 0 auto;
+  max-width: 870px;
+}
+
+.introContent {
+  max-width: 100%;
+}
+
+.introTagline {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-caramel;
+  line-height: 25px;
+  text-transform: uppercase;
+  margin: 0 0 $spacing-md 0;
+  letter-spacing: 0.5px;
+}
+
+.introTitle {
+  font-family: $font-family-title;
+  font-size: 32px;
+  font-weight: 400;
+  color: $color-brun;
+  line-height: 45px;
+  
+  em {
+    font-family: $font-family-title;
+    font-style: italic;
+    font-weight: 500;
+  }
+}
+
+// Offers Grid Section
+.offersGridSection {
+  padding: 0 0 80px;
+  background-color: $color-creme;
+}
+
+.offersGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-lg;
+  width: 100%;
+}
+
+// Offer Card
+.offerCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.offerCardBg {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: $color-creme;
+  border: 1px solid $color-sauge;
+  border-radius: 20px;
+  z-index: 0;
+}
+
+.offerCardImageContainer {
+  position: relative;
+  width: 100%;
+  height: 390px;
+  border: 1px solid $color-creme;
+  border-radius: 15px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.offerCardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.offerCardImageOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba($color-brun, 0.15);
+  z-index: 1;
+}
+
+.offerCardEllipse {
+  position: absolute;
+  top: 330px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 380px;
+  height: 114px;
+  border-radius: 380px;
+  background: #FEFAED;
+  z-index: 1;
+}
+
+.offerCardIconBubble {
+  position: absolute;
+  top: 265px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 119px;
+  height: 114px;
+  background: $color-sauge;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  
+  svg {
+    width: 57px;
+    height: 57px;
+  }
+}
+
+.offerCardContent {
+  position: relative;
+  z-index: 3;
+  padding: 40px 55px;
+  text-align: left;
+  width: 100%;
+}
+
+.offerCardTitle {
+  font-family: $font-family-base;
+  font-size: 28px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 28px;
+  margin: 0 0 $spacing-sm 0;
+}
+
+.offerCardSubtitle {
+  font-family: $font-family-base;
+  font-size: 20px;
+  font-weight: 500;
+  color: $color-sauge;
+  line-height: 28px;
+  margin: 0 0 $spacing-lg 0;
+}
+
+.offerCardDescription {
+  font-family: $font-family-base;
+  font-size: 15px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 25px;
+  margin: 0 0 $spacing-lg 0;
+}
+
+.offerCardLink {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $color-caramel;
+  border-radius: 8px;
+  font-family: $font-family-base;
+  font-size: 15px;
+  font-weight: 500;
+  color: $color-caramel;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: rgba($color-caramel, 0.1);
+  }
+  
+  svg {
+    width: 11px;
+    height: 8px;
+  }
+}
+
+// How It Works Section
+.howItWorksSection {
+  padding: $spacing-lg 0;
+  background-color: #EAE8DC;
+}
+
+.howItWorksTitle {
+  font-family: $font-family-base;
+  font-size: 16px;
+  font-weight: 600;
+  color: $color-caramel;
+  line-height: 25px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 0;
+  width: 100%;
+  position: relative;
+}
+
+.stepItem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 0;
+  text-align: center;
+  grid-column: span 2;
+}
+
+.stepNumberContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: $spacing-md;
+  height: 78px;
+}
+
+.stepConnector {
+  position: relative;
+  height: 78px;
+  grid-column: span 1;
+  align-self: center;
+  display: flex;
+  align-items: center;
+}
+
+.stepConnector::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-image: linear-gradient(to right, black 50%, transparent 50%);
+  background-size: 8px 1px;
+  background-repeat: repeat-x;
+}
+
+.stepConnectorLast::after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid black;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+}
+
+.stepNumberContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.stepNumber {
+  font-family: $font-family-title;
+  font-size: 24px;
+  font-weight: 700;
+  color: $color-caramel;
+  line-height: 78px;
+}
+
+.stepCircle {
+  width: 78px;
+  height: 78px;
+  border: 1px solid black;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepTitle {
+  font-family: $font-family-title;
+  font-size: 24px;
+  font-weight: 700;
+  color: $color-brun;
+  line-height: 25px;
+  margin: 0 0 $spacing-sm 0;
+  max-width: 260px;
+}
+
+.stepDescription {
+  font-family: $font-family-base;
+  font-size: 18px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 25px;
+  margin: 0;
+  max-width: 186px;
+}
+
+// Responsive styles
+@include respond-to(lg) {
+  .heroSection {
+    padding: 80px $spacing-lg 60px;
+  }
+  
+  .heroTitle {
+    font-size: 36px;
+  }
+  
+  .heroSubtitle {
+    font-size: 18px;
+    line-height: 24px;
+  }
+  
+  .offersGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-lg;
+  }
+  
+  .offerCard {
+    max-width: 100%;
+  }
+  
+  .offerCardEllipse {
+    top: 330px;
+  }
+  
+  .offerCardIconBubble {
+    top: 350px;
+  }
+  
+  .stepsGrid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: $spacing-lg;
+    align-items: center;
+  }
+  
+  .stepItem {
+    grid-column: span 3;
+    padding: 40px 20px 0;
+  }
+  
+  .stepNumberContainer {
+    height: 78px;
+  }
+  
+  .stepConnector {
+    grid-column: span 1;
+    height: 78px;
+  }
+  
+  .stepConnectorLast::after {
+    border-left-width: 8px;
+    border-top-width: 5px;
+    border-bottom-width: 5px;
+    right: -8px;
+  }
+}
+
+@include respond-to(md) {
+  .heroSection {
+    padding: 60px $spacing-md 40px;
+  }
+  
+  .heroTitle {
+    font-size: 28px;
+  }
+  
+  .heroSubtitle {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  
+  .introTitle {
+    font-size: 24px;
+    line-height: 32px;
+  }
+  
+  .offersGrid {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+  }
+  
+  .offerCard {
+    max-width: 100%;
+  }
+  
+  .stepsGrid {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+    align-items: center;
+  }
+  
+  .stepItem {
+    grid-column: span 1;
+    padding: 20px 20px 0;
+  }
+  
+  .stepNumberContainer {
+    height: 60px;
+  }
+  
+  .stepConnector {
+    display: none;
+  }
+  
+  .stepCircle {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .stepNumber {
+    line-height: 60px;
+  }
+  
+  .stepConnector {
+    height: 60px;
+  }
+  
+  .stepConnectorLast::after {
+    border-left-width: 11px;
+    border-top-width: 7px;
+    border-bottom-width: 7px;
+    right: -11px;
+  }
+  
+  .stepTitle {
+    font-size: 20px;
+  }
+  
+  .stepDescription {
+    font-size: 16px;
+    line-height: 24px;
+  }
+}
+
+@include respond-to(sm) {
+  .heroSection {
+    padding: 60px $spacing-sm 40px;
+  }
+  
+  .heroTitle {
+    font-size: 24px;
+  }
+  
+  .heroSubtitle {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  
+  .introSection {
+    padding: 40px 0;
+  }
+  
+  .introTitle {
+    font-size: 20px;
+    line-height: 28px;
+  }
+  
+  .introTagline {
+    font-size: 12px;
+  }
+  
+  .container {
+    padding: 0 $spacing-sm;
+  }
+  
+  .offerCardImageContainer {
+    height: 250px;
+  }
+  
+  .offerCardEllipse {
+    top: 200px;
+    width: 90px;
+    height: 90px;
+  }
+  
+  .offerCardIconBubble {
+    top: 220px;
+    width: 90px;
+    height: 90px;
+    
+    svg {
+      width: 35px;
+      height: 35px;
+    }
+  }
+  
+  .offerCardContent {
+    padding: 40px 20px 20px;
+  }
+  
+  .offerCardTitle {
+    font-size: 24px;
+  }
+  
+  .offerCardSubtitle {
+    font-size: 18px;
+  }
+  
+  .offerCardDescription {
+    font-size: 14px;
+    line-height: 22px;
+  }
+  
+  .howItWorksSection {
+    padding: 60px 0;
+  }
+  
+  .howItWorksTitle {
+    font-size: 14px;
+  }
+  
+  .stepNumberContainer {
+    height: 50px;
+  }
+  
+  .stepCircle {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .stepNumber {
+    line-height: 50px;
+  }
+  
+  .stepConnector {
+    height: 50px;
+  }
+  
+  .stepConnectorLast::after {
+    border-left-width: 6px;
+    border-top-width: 4px;
+    border-bottom-width: 4px;
+    right: -6px;
+  }
+  
+  .stepTitle {
+    font-size: 18px;
+  }
+  
+  .stepDescription {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  
+  .stepNumber {
+    font-size: 20px;
+  }
+}
