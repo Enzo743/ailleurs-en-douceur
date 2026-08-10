@@ -211,7 +211,7 @@
   }
 }
 
-// Hide logo completely at 1000px for better readability
+// Show logo text on mobile when header is not transparent
 @media (max-width: 1000px) {
   .logoTextContainer {
     display: none;
@@ -234,7 +234,26 @@
   }
 
   .logo {
-    display: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logoImage {
+    width: 60px;
+    height: 60px;
+  }
+
+  .logoTextContainer {
+    display: flex;
+  }
+
+  .logoTitle {
+    font-size: 18px;
+  }
+
+  .logoSubtitle {
+    font-size: 14px;
   }
 
   .navList {
