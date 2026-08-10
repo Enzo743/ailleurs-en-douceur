@@ -476,37 +476,197 @@
     line-height: 32px;
   }
   
+  // Offers - exact copy from homepage md styles
+  .offersGridSection {
+    padding: 0 0 40px;
+  }
+  
   .offersGrid {
     grid-template-columns: 1fr;
-    gap: $spacing-lg;
+    gap: 32px;
+    max-width: 100%;
+    margin: 0 auto;
   }
   
   .offerCard {
+    position: relative;
+    border-radius: 15px;
+    overflow: visible;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     max-width: 100%;
   }
   
-  .stepsGrid {
-    grid-template-columns: 1fr;
-    gap: $spacing-lg;
+  .offerCardBg,
+  .offerCardImageOverlay,
+  .offerCardEllipse {
+    display: none;
+  }
+  
+  .offerCardImageContainer {
+    border-radius: 15px 15px 0 0;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    
+    img {
+      border-radius: 15px 15px 0 0;
+    }
+  }
+  
+  .offerCardContent {
+    border-radius: 0 0 15px 15px;
+    padding: 20px;
+    background: transparent;
+    margin-top: 0;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .offerCardContentContainer {
+    display: none;
+  }
+  
+  .offerCardIconBubble {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    transform: none;
+    width: 50px;
+    height: 50px;
+    background: $color-sauge;
+    border-radius: 50%;
+    display: flex;
     align-items: center;
+    justify-content: center;
+    
+    svg {
+      width: 25px;
+      height: 25px;
+    }
+  }
+  
+  .offerCardTitle {
+    font-family: $font-family-tertiary;
+    font-size: 20px;
+    font-weight: 700;
+    color: $color-brun;
+    margin: 0 0 8px 0;
+    line-height: normal;
+  }
+  
+  .offerCardSubtitle {
+    display: none;
+  }
+  
+  .offerCardDescription {
+    font-family: $font-family-tertiary;
+    font-size: 13px;
+    font-weight: 400;
+    color: $color-brun;
+    line-height: normal;
+    margin: 0 0 17px 0;
+  }
+  
+  .offerCardLink {
+    font-family: $font-family-base;
+    font-size: 16px;
+    font-weight: 500;
+    color: $color-caramel;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s ease;
+    margin: 0 0 0 0;
+    padding: 8px;
+    position: relative;
+    
+    &:hover {
+      color: $color-sauge;
+    }
+    
+    svg {
+      width: 11px;
+      height: 8px;
+    }
+  }
+  
+  // How It Works - vertical connectors
+  .stepsGrid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    gap: 0;
   }
   
   .stepItem {
-    grid-column: span 1;
-    padding: 20px 20px 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    text-align: center;
+    width: 100%;
+    grid-column: unset;
   }
   
   .stepNumberContainer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: $spacing-md;
     height: 60px;
   }
   
   .stepConnector {
-    display: none;
+    position: relative;
+    width: 2px;
+    height: 40px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: unset;
+  }
+  
+  .stepConnector::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background-image: linear-gradient(to bottom, black 50%, transparent 50%);
+    background-size: 1px 6px;
+    background-repeat: repeat-y;
+  }
+  
+  .stepConnectorLast::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-top: 8px solid black;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    right: unset;
   }
   
   .stepCircle {
     width: 60px;
     height: 60px;
+    border: 1px solid $color-caramel;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -514,6 +674,15 @@
   
   .stepNumber {
     line-height: 60px;
+  }
+  
+  .stepTitle {
+    font-size: 20px;
+  }
+  
+  .stepDescription {
+    font-size: 16px;
+    line-height: 24px;
   }
   
   .stepConnector {
@@ -590,7 +759,14 @@
   }
   
   .offerCardContent {
-    padding: 40px 20px 20px;
+    border-radius: 0 0 15px 15px;
+    padding: 20px;
+    background: transparent;
+    margin-top: 0;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    z-index: 2;
   }
   
   .offerCardTitle {
@@ -652,5 +828,215 @@
   
   .stepNumber {
     font-size: 20px;
+  }
+  
+  // Offers - exact copy from homepage sm styles
+  .offersGridSection {
+    padding: 0 0 30px;
+  }
+  
+  .offersGrid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  
+  .offerCard {
+    position: relative;
+    border-radius: 15px;
+    overflow: visible;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+  }
+  
+  .offerCardBg,
+  .offerCardImageOverlay,
+  .offerCardEllipse {
+    display: none;
+  }
+  
+  .offerCardImageContainer {
+    border-radius: 15px 15px 0 0;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    
+    img {
+      border-radius: 15px 15px 0 0;
+    }
+  }
+  
+  .offerCardContent {
+    border-radius: 0 0 15px 15px;
+    padding: 20px;
+    background: transparent;
+    margin-top: 0;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .offerCardContentContainer {
+    display: none;
+  }
+  
+  .offerCardIconBubble {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    transform: none;
+    width: 50px;
+    height: 50px;
+    background: $color-sauge;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    svg {
+      width: 25px;
+      height: 25px;
+    }
+  }
+  
+  .offerCardTitle {
+    font-family: $font-family-tertiary;
+    font-size: 20px;
+    font-weight: 700;
+    color: $color-brun;
+    margin: 0 0 8px 0;
+    line-height: normal;
+  }
+  
+  .offerCardSubtitle {
+    display: none;
+  }
+  
+  .offerCardDescription {
+    font-family: $font-family-tertiary;
+    font-size: 13px;
+    font-weight: 400;
+    color: $color-brun;
+    line-height: normal;
+    margin: 0 0 17px 0;
+  }
+  
+  .offerCardLink {
+    font-family: $font-family-base;
+    font-size: 16px;
+    font-weight: 500;
+    color: $color-caramel;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s ease;
+    margin: 0 0 0 0;
+    padding: 8px;
+    position: relative;
+    
+    &:hover {
+      color: $color-sauge;
+    }
+    
+    svg {
+      width: 11px;
+      height: 8px;
+    }
+  }
+  
+  // How It Works - vertical connectors for sm
+  .stepsGrid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    gap: 0;
+  }
+  
+  .stepItem {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 0;
+    text-align: center;
+    width: 100%;
+    grid-column: unset;
+  }
+  
+  .stepNumberContainer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: $spacing-sm;
+    height: 50px;
+  }
+  
+  .stepConnector {
+    position: relative;
+    width: 2px;
+    height: 30px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: unset;
+  }
+  
+  .stepConnector::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background-image: linear-gradient(to bottom, black 50%, transparent 50%);
+    background-size: 1px 5px;
+    background-repeat: repeat-y;
+  }
+  
+  .stepConnectorLast::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-top: 6px solid black;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    right: unset;
+  }
+  
+  .stepCircle {
+    width: 50px;
+    height: 50px;
+    border: 1px solid $color-caramel;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .stepNumber {
+    line-height: 50px;
+    font-size: 18px;
+  }
+  
+  .stepTitle {
+    font-size: 18px;
+  }
+  
+  .stepDescription {
+    font-size: 14px;
+    line-height: 20px;
   }
 }
