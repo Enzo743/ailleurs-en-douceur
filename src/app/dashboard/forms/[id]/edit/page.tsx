@@ -413,6 +413,7 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
                 value={formData.packageType}
                 onChange={handleFormChange}
               >
+                <option value="">Toutes les offres</option>
                 {PACKAGE_TYPE_OPTIONS.map((pt) => (
                   <option key={pt.value} value={pt.value}>
                     {pt.label}

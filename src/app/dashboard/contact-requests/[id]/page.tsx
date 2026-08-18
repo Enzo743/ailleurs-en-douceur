@@ -6,6 +6,7 @@ import styles from './page.module.scss';
 import { getPackageLabel } from '@/lib/constants';
 import { formatDate } from '@/lib/time';
 import { StatusBadge } from '@/components/dashboard';
+import AssignFormClient from '@/components/dashboard/AssignFormClient';
 
 // Formater les valeurs JSON pour affichage
 const formatValue = (value: any): string => {
@@ -167,26 +168,10 @@ export default async function ContactRequestDetailPage({
               
               {/* Si la demande est en attente, proposer d'assigner un formulaire */}
               {contactRequest.status === 'PENDING' && availableForms.length > 0 && (
-                <div className={styles['assign-form-section']}>
-                  <h4>Associer un formulaire:</h4>
-                  <form action={`/api/dashboard/contact-requests/${contactRequest.id}/assign-form`} method="POST">
-                    <select
-                      name="formId"
-                      required
-                      className={styles['form-select']}
-                    >
-                      <option value="">Sélectionnez un formulaire...</option>
-                      {availableForms.map((form) => (
-                        <option key={form.id} value={form.id}>
-                          {form.name} {form.packageType && ` - ${getPackageLabel(form.packageType)}`}
-                        </option>
-                      ))}
-                    </select>
-                    <button type="submit" className={styles['assign-button']}>
-                      Assigner le formulaire
-                    </button>
-                  </form>
-                </div>
+                <AssignFormClient 
+                  contactRequestId={contactRequest.id} 
+                  availableForms={availableForms} 
+                />
               )}
               
               {contactRequest.status === 'PENDING' && availableForms.length === 0 && (

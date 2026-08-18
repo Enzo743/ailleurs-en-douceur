@@ -209,13 +209,13 @@ export default function NewFormPage() {
                 value={formData.packageType}
                 onChange={handleFormChange}
               >
+                <option value="">Toutes les offres</option>
                 {PACKAGE_TYPE_OPTIONS.map((pt) => (
                   <option key={pt.value} value={pt.value}>
                     {pt.label}
                   </option>
                 ))}
               </select>
-              <small>Laisser vide pour toutes les offres</small>
             </div>
 
             <div className={styles['form-group']}>

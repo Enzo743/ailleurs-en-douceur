@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getEmailConfig, getCustomFormUrl, formatDays } from '@/lib/email';
+import { getPackageLabel } from '@/lib/constants';
+import nodemailer from 'nodemailer';
 
 // Types pour les requêtes et réponses
 interface ContactRequestQueryParams {
@@ -320,6 +323,9 @@ export async function PATCH(request: NextRequest) {
     if (body.days !== undefined) updateData.days = parseInt(body.days);
     if (body.message !== undefined) updateData.message = body.message;
 
+    // Vérifier si on associe un formulaire et si on doit envoyer un email
+    const isAssigningForm = body.formId !== undefined && body.formId !== null && body.formId !== existingRequest.formId;
+    
     const updatedRequest = await prisma.contactRequest.update({
       where: { id },
       data: updateData,
@@ -353,10 +359,111 @@ export async function PATCH(request: NextRequest) {
       },
     });
 
+    // Envoyer un email au client si un formulaire a été associé
+    if (isAssigningForm && updatedRequest.form && updatedRequest.token) {
+      try {
+        const { emailFrom, recipientEmail, transporter } = await getEmailConfig();
+        const customFormUrl = getCustomFormUrl(updatedRequest.token);
+        const packageLabel = getPackageLabel(updatedRequest.packageType);
+        
+        const clientEmailHtml = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: #f4e4c1; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                .header h1 { margin: 0; color: #4a3f2f; }
+                .content { background: #fff; padding: 20px; border-radius: 0 0 8px 8px; }
+                .field { margin-bottom: 15px; }
+                .field strong { display: inline-block; width: 150px; color: #4a3f2f; }
+                .message { background: #f9f9f9; padding: 15px; border-radius: 4px; margin-top: 15px; }
+                .info-box { background: #fff3e0; padding: 15px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #ff9800; }
+                .cta-button { display: inline-block; background: #4a3f2f; color: #fff; padding: 15px 30px; text-decoration: none; border-radius: 4px; margin: 15px 0; font-weight: bold; text-align: center; }
+                .footer { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>Merci pour votre demande</h1>
+                </div>
+                <div class="content">
+                  <p>Bonjour ${updatedRequest.firstName},</p>
+                  
+                  <p>Nous avons bien reçu votre demande de contact. Voici un récapitulatif :</p>
+                  
+                  <div class="field"><strong>Nom:</strong> ${updatedRequest.firstName} ${updatedRequest.lastName}</div>
+                  <div class="field"><strong>Email:</strong> ${updatedRequest.email}</div>
+                  <div class="field"><strong>Formule demandée:</strong> ${packageLabel}</div>
+                  <div class="field"><strong>Nombre de jours:</strong> ${formatDays(updatedRequest.days)}</div>
+                  <div class="field">
+                    <strong>Votre message:</strong>
+                    <div class="message">${updatedRequest.message?.replace(/\n/g, '<br>') || 'Aucun message'}</div>
+                  </div>
+                  
+                  <div class="info-box">
+                    <p style="margin: 0 0 10px 0;"><strong>Pour aller plus loin :</strong></p>
+                    <p style="margin: 0 0 15px 0;">Nous vous invitons à compléter notre formulaire personnalisé pour nous aider à mieux préparer votre projet.</p>
+                    <a href="${customFormUrl}" class="cta-button">Compléter le formulaire</a>
+                    <p style="margin: 10px 0 0 0; font-size: 12px;">Lien : ${customFormUrl}</p>
+                  </div>
+                  
+                  <div class="footer">
+                    <p>Ce message a été envoyé via le formulaire de contact du site Ailleurs en Douceur.</p>
+                    <p>Date: ${new Date().toLocaleString('fr-FR')}</p>
+                  </div>
+                </div>
+              </div>
+            </body>
+          </html>
+        `;
+
+        const clientEmailText = `
+Merci pour votre demande
+
+Bonjour ${updatedRequest.firstName},
+
+Nous avons bien reçu votre demande de contact.
+
+Nom: ${updatedRequest.firstName} ${updatedRequest.lastName}
+Email: ${updatedRequest.email}
+Formule demandée: ${packageLabel}
+Nombre de jours: ${formatDays(updatedRequest.days)}
+
+Votre message:
+${updatedRequest.message || 'Aucun message'}
+
+Pour aller plus loin, nous vous invitons à compléter notre formulaire personnalisé :
+${customFormUrl}
+
+Ce message a été envoyé via le formulaire de contact du site Ailleurs en Douceur.
+Date: ${new Date().toLocaleString('fr-FR')}
+        `;
+
+        // Envoyer l'email au client
+        await transporter.sendMail({
+          from: `"Ailleurs en Douceur" <${emailFrom}>`,
+          to: updatedRequest.email,
+          subject: `Votre demande de contact - Ailleurs en Douceur`,
+          text: clientEmailText,
+          html: clientEmailHtml,
+        });
+
+      } catch (emailError) {
+        console.error('Error sending email after form assignment:', emailError);
+        // Ne pas échouer la requête à cause de l'email
+      }
+    }
+
     return NextResponse.json(
       {
         success: true,
-        message: 'Demande de contact mise à jour avec succès',
+        message: isAssigningForm 
+          ? 'Formulaire associé avec succès ! Un email avec le lien du formulaire a été envoyé au client.'
+          : 'Demande de contact mise à jour avec succès',
         contactRequest: {
           id: updatedRequest.id,
           firstName: updatedRequest.firstName,

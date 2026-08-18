@@ -595,3 +595,41 @@
     text-align: center;
   }
 }
+
+// Status message pour le formulaire d'assignation
+.status-message {
+  padding: 16px 20px;
+  border-radius: 10px;
+  margin: 15px 0;
+  font-size: 15px;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease-out;
+
+  &.success {
+    background: var(--dashboard-color-completed-bg);
+    border: 2px solid var(--dashboard-color-completed);
+    color: var(--dashboard-color-completed);
+  }
+
+  &.error {
+    background: var(--dashboard-color-cancelled-bg);
+    border: 2px solid var(--dashboard-color-cancelled);
+    color: var(--dashboard-color-cancelled);
+  }
+
+  p {
+    margin: 0;
+    line-height: 1.6;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -23,15 +23,6 @@ const formatDate = (date: Date | string): string => {
   });
 };
 
-// Formater l'heure
-const formatTime = (date: Date | string): string => {
-  const d = new Date(date);
-  return d.toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
 export default async function ContactRequestsPage({
   searchParams,
 }: {
@@ -291,15 +282,6 @@ export default async function ContactRequestsPage({
                     >
                       Voir
                     </Link>
-                    {request.status === 'PENDING' && !request.formId && (
-                      <Link
-                        href={`/dashboard/contact-requests/${request.id}/assign-form`}
-                        className={styles['action-button']}
-                        title="Assigner un formulaire"
-                      >
-                        Form
-                      </Link>
-                    )}
                   </div>
                 </td>
               </tr>

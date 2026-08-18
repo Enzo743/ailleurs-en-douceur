@@ -54,7 +54,9 @@ export async function POST(request: NextRequest) {
     const days = parseInt(body.days);
 
     // Trouver le formulaire personnalise
-    const customForm = await prisma.customForm.findFirst({
+    // 1. D'abord, essayer de trouver un formulaire avec le packageType exact
+    // 2. Si aucun n'est trouvé et que packageType n'est pas vide, chercher un formulaire "toutes les offres"
+    let customForm = await prisma.customForm.findFirst({
       where: {
         packageType: body.packageType,
         isActive: true,
@@ -63,6 +65,19 @@ export async function POST(request: NextRequest) {
         createdAt: 'desc',
       },
     });
+
+    // Si aucun formulaire trouvé avec le packageType spécifique, essayer avec un formulaire "toutes les offres"
+    if (!customForm && body.packageType) {
+      customForm = await prisma.customForm.findFirst({
+        where: {
+          OR: [{ packageType: null }, { packageType: '' }],
+          isActive: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    }
 
     // Creer la demande de contact
     const token = generateContactRequestToken();
