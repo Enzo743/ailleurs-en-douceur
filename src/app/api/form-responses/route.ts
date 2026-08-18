@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
               lastName: true,
               email: true,
               packageType: true,
-              nights: true,
+              days: true,
               createdAt: true,
             },
           },

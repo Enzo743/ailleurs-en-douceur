@@ -20,7 +20,7 @@ interface ContactRequestData {
   lastName: string;
   email: string;
   packageType: string;
-  nights: number;
+  days: number;
   status: string;
   hasFormResponse: boolean;
 }
@@ -98,7 +98,7 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
           lastName: contactReq.lastName,
           email: contactReq.email,
           packageType: contactReq.packageType,
-          nights: contactReq.nights,
+          days: contactReq.days,
           status: contactReq.status,
           hasFormResponse: contactReq.formResponses && contactReq.formResponses.length > 0,
         });

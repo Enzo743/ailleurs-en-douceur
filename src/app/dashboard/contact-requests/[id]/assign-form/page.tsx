@@ -13,7 +13,7 @@ interface ContactRequest {
   lastName: string;
   email: string;
   packageType: string;
-  nights: number;
+  days: number;
   message: string;
   token: string;
   formId: string | null;
@@ -244,8 +244,8 @@ export default function AssignFormPage({ params }: { params: Promise<{ id: strin
                 <span className={styles['info-value']}>{getPackageLabel(contactRequest.packageType)}</span>
               </div>
               <div className={styles['info-item']}>
-                <span className={styles['info-label']}>Nuits:</span>
-                <span className={styles['info-value']}>{contactRequest.nights}</span>
+                <span className={styles['info-label']}>Jours:</span>
+                <span className={styles['info-value']}>{contactRequest.days}</span>
               </div>
             </div>
           </div>

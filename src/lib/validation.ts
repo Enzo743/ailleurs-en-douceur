@@ -402,7 +402,7 @@ export interface ContactFormData {
   lastName: string;
   email: string;
   packageType: string;
-  nights: string;
+  days: string;
   message: string;
   privacyAccepted: boolean;
 }
@@ -416,7 +416,7 @@ export function validateContactForm(data: ContactFormData): ValidationResults {
   const errors: ValidationResult[] = [];
   
   // Champs requis
-  const requiredFields = ['firstName', 'lastName', 'email', 'packageType', 'nights', 'message'];
+  const requiredFields = ['firstName', 'lastName', 'email', 'packageType', 'days', 'message'];
   for (const field of requiredFields) {
     const result = validateRequired((data as unknown as Record<string, unknown>)[field], field);
     if (!result.valid) {
@@ -436,10 +436,10 @@ export function validateContactForm(data: ContactFormData): ValidationResults {
     errors.push(packageTypeResult);
   }
   
-  // Validation du nombre de nuits
-  const nightsResult = validateNumber(data.nights, 'nights', { min: 1, integer: true });
-  if (!nightsResult.valid) {
-    errors.push(nightsResult);
+  // Validation du nombre de jours
+  const daysResult = validateNumber(data.days, 'days', { min: 1, integer: true });
+  if (!daysResult.valid) {
+    errors.push(daysResult);
   }
   
   // Validation de la politique de confidentialité

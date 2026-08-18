@@ -141,7 +141,7 @@ export async function updateContactRequest(
     lastName?: string;
     email?: string;
     packageType?: string;
-    nights?: number;
+    days?: number;
     message?: string;
     status?: string;
     formId?: string;
@@ -166,7 +166,7 @@ export async function updateContactRequest(
     if (data.lastName !== undefined) updateData.lastName = data.lastName;
     if (data.email !== undefined) updateData.email = data.email;
     if (data.packageType !== undefined) updateData.packageType = data.packageType;
-    if (data.nights !== undefined) updateData.nights = data.nights;
+    if (data.days !== undefined) updateData.days = data.days;
     if (data.message !== undefined) updateData.message = data.message;
     if (data.status !== undefined) updateData.status = data.status;
     if (data.formId !== undefined) updateData.formId = data.formId;

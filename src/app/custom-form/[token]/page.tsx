@@ -31,7 +31,7 @@ interface ContactRequestData {
   lastName: string;
   email: string;
   packageType: string;
-  nights: number;
+  days: number;
   formId?: string;
 }
 
@@ -92,7 +92,7 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
           lastName: contactReq.lastName,
           email: contactReq.email,
           packageType: contactReq.packageType,
-          nights: contactReq.nights,
+          days: contactReq.days,
           formId: contactReq.formId,
         });
 

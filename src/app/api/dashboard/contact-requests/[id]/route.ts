@@ -75,7 +75,7 @@ export async function POST(
     const lastName = body.get('lastName') as string;
     const email = body.get('email') as string;
     const packageType = body.get('packageType') as string;
-    const nights = body.get('nights') as string;
+    const days = body.get('days') as string;
     const message = body.get('message') as string;
     const status = body.get('status') as string;
     const formId = body.get('formId') as string;
@@ -84,7 +84,7 @@ export async function POST(
     if (lastName !== undefined) updateData.lastName = lastName;
     if (email !== undefined) updateData.email = email;
     if (packageType !== undefined) updateData.packageType = packageType;
-    if (nights !== undefined) updateData.nights = parseInt(nights) || 0;
+    if (days !== undefined) updateData.days = parseInt(days) || 0;
     if (message !== undefined) updateData.message = message;
     if (status !== undefined) updateData.status = status;
     if (formId !== undefined) updateData.formId = formId;
@@ -170,7 +170,7 @@ export async function PATCH(
     if (body.lastName !== undefined) updateData.lastName = body.lastName;
     if (body.email !== undefined) updateData.email = body.email;
     if (body.packageType !== undefined) updateData.packageType = body.packageType;
-    if (body.nights !== undefined) updateData.nights = parseInt(body.nights) || 0;
+    if (body.days !== undefined) updateData.days = parseInt(body.days) || 0;
     if (body.message !== undefined) updateData.message = body.message;
     if (body.status !== undefined) updateData.status = body.status;
     if (body.formId !== undefined) updateData.formId = body.formId;

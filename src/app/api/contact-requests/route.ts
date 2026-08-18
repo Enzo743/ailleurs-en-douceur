@@ -17,7 +17,7 @@ interface ContactRequestWithRelations {
   lastName: string;
   email: string;
   packageType: string;
-  nights: number;
+  days: number;
   message: string;
   token: string;
   formId: string | null;
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
       lastName: cr.lastName,
       email: cr.email,
       packageType: cr.packageType,
-      nights: cr.nights,
+      days: cr.days,
       message: cr.message,
       token: cr.token,
       formId: cr.formId,
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Validation des champs requis
-    const requiredFields = ['firstName', 'lastName', 'email', 'packageType', 'nights'];
+    const requiredFields = ['firstName', 'lastName', 'email', 'packageType', 'days'];
     for (const field of requiredFields) {
       if (!body[field]?.toString().trim()) {
         return NextResponse.json(
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
         lastName: body.lastName,
         email: body.email,
         packageType: body.packageType,
-        nights: parseInt(body.nights) || 0,
+        days: parseInt(body.days) || 0,
         message: body.message || '',
         token: body.token || `cr-${require('crypto').randomUUID()}`,
         formId: body.formId,
@@ -250,7 +250,7 @@ export async function POST(request: NextRequest) {
           lastName: contactRequest.lastName,
           email: contactRequest.email,
           packageType: contactRequest.packageType,
-          nights: contactRequest.nights,
+          days: contactRequest.days,
           message: contactRequest.message,
           token: contactRequest.token,
           formId: contactRequest.formId,
@@ -317,7 +317,7 @@ export async function PATCH(request: NextRequest) {
     if (body.lastName !== undefined) updateData.lastName = body.lastName;
     if (body.email !== undefined) updateData.email = body.email;
     if (body.packageType !== undefined) updateData.packageType = body.packageType;
-    if (body.nights !== undefined) updateData.nights = parseInt(body.nights);
+    if (body.days !== undefined) updateData.days = parseInt(body.days);
     if (body.message !== undefined) updateData.message = body.message;
 
     const updatedRequest = await prisma.contactRequest.update({
@@ -363,7 +363,7 @@ export async function PATCH(request: NextRequest) {
           lastName: updatedRequest.lastName,
           email: updatedRequest.email,
           packageType: updatedRequest.packageType,
-          nights: updatedRequest.nights,
+          days: updatedRequest.days,
           message: updatedRequest.message,
           token: updatedRequest.token,
           formId: updatedRequest.formId,

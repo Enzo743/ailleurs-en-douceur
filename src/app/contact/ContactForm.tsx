@@ -9,7 +9,7 @@ type FormData = {
   lastName: string;
   email: string;
   packageType: string;
-  nights: string;
+  days: string;
   message: string;
   privacyAccepted: boolean;
 };
@@ -19,7 +19,7 @@ type FormErrors = {
   lastName?: string;
   email?: string;
   packageType?: string;
-  nights?: string;
+  days?: string;
   message?: string;
   privacyAccepted?: string;
 };
@@ -38,7 +38,7 @@ export default function ContactForm() {
     lastName: "",
     email: "",
     packageType: "",
-    nights: "",
+    days: "",
     message: "",
     privacyAccepted: false,
   });
@@ -67,10 +67,10 @@ export default function ContactForm() {
       newErrors.packageType = "Veuillez sélectionner une formule";
     }
 
-    if (!formData.nights.trim()) {
-      newErrors.nights = "Le nombre de nuits est obligatoire";
-    } else if (isNaN(parseInt(formData.nights)) || parseInt(formData.nights) <= 0) {
-      newErrors.nights = "Veuillez entrer un nombre valide";
+    if (!formData.days.trim()) {
+      newErrors.days = "Le nombre de jours est obligatoire";
+    } else if (isNaN(parseInt(formData.days)) || parseInt(formData.days) <= 0) {
+      newErrors.days = "Veuillez entrer un nombre valide";
     }
 
     if (!formData.message.trim()) {
@@ -136,7 +136,7 @@ export default function ContactForm() {
           lastName: "",
           email: "",
           packageType: "",
-          nights: "",
+          days: "",
           message: "",
           privacyAccepted: false,
         });
@@ -226,15 +226,15 @@ export default function ContactForm() {
         <div className={styles["form-group"]}>
           <input
             type="number"
-            id="nights"
-            name="nights"
-            value={formData.nights}
+            id="days"
+            name="days"
+            value={formData.days}
             onChange={handleChange}
-            className={errors.nights ? styles.error : ""}
-            placeholder="Nombre de nuits souhaité *"
+            className={errors.days ? styles.error : ""}
+            placeholder="Nombre de jours souhaité *"
             min="1"
           />
-          {errors.nights && <span className={styles["error-message"]}>{errors.nights}</span>}
+          {errors.days && <span className={styles["error-message"]}>{errors.days}</span>}
         </div>
 
         <div className={`${styles["form-group"]} ${styles["full-width"]}`}>

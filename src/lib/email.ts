@@ -102,8 +102,13 @@ export function getScheduleUrl(token: string): string {
 // ============================================================================
 
 /**
- * Formate le nombre de nuits avec le bon pluriel
+ * Formate le nombre de jours avec le bon pluriel
  */
+export function formatDays(days: number): string {
+  return `${days} jour${days > 1 ? 's' : ''}`;
+}
+
+// Alias pour la compatibilité ascendante
 export function formatNights(nights: number): string {
-  return `${nights} nuit${nights > 1 ? 's' : ''}`;
+  return formatDays(nights);
 }

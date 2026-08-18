@@ -11,7 +11,7 @@ interface ContactRequest {
   lastName: string;
   email: string;
   packageType: string;
-  nights: number;
+  days: number;
   message: string;
   token: string;
   formId: string | null;
@@ -42,7 +42,7 @@ export default function EditContactRequestPage({ params }: { params: Promise<{ i
     lastName: '',
     email: '',
     packageType: '',
-    nights: 0,
+    days: 0,
     message: '',
     status: '',
   });
@@ -73,7 +73,7 @@ export default function EditContactRequestPage({ params }: { params: Promise<{ i
           lastName: cr.lastName,
           email: cr.email,
           packageType: cr.packageType,
-          nights: cr.nights,
+          days: cr.days,
           message: cr.message,
           status: cr.status,
         });
@@ -270,12 +270,12 @@ export default function EditContactRequestPage({ params }: { params: Promise<{ i
             </div>
 
             <div className={styles['form-group']}>
-              <label htmlFor="nights">Nombre de nuits *</label>
+              <label htmlFor="days">Nombre de jours *</label>
               <input
                 type="number"
-                id="nights"
-                name="nights"
-                value={formData.nights}
+                id="days"
+                name="days"
+                value={formData.days}
                 onChange={handleChange}
                 required
                 min="1"

@@ -216,7 +216,7 @@ export default async function ContactRequestsPage({
               <th>Client</th>
               <th>Email</th>
               <th>Offre</th>
-              <th>Nuits</th>
+              <th>Jours</th>
               <th>Statut</th>
               <th>Formulaire</th>
               <th>Rendez-vous</th>
@@ -236,7 +236,7 @@ export default async function ContactRequestsPage({
                   </a>
                 </td>
                 <td>{getPackageLabel(request.packageType)}</td>
-                <td>{request.nights}</td>
+                <td>{request.days}</td>
                 <td>
                   <span
                     className={`${styles['status-badge']} ${styles[request.status.toLowerCase()]}`}

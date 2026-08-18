@@ -115,8 +115,8 @@ export default async function ContactRequestDetailPage({
             </div>
           </div>
           <div className={styles['info-item']}>
-            <div className={styles['info-label']}>Nombre de nuits:</div>
-            <div className={styles['info-value']}>{contactRequest.nights} nuit{contactRequest.nights > 1 ? 's' : ''}</div>
+            <div className={styles['info-label']}>Nombre de jours:</div>
+            <div className={styles['info-value']}>{contactRequest.days} jour{contactRequest.days > 1 ? 's' : ''}</div>
           </div>
           <div className={styles['info-item']}>
             <div className={styles['info-label']}>Date de création:</div>

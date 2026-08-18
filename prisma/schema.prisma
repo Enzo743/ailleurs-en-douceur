@@ -79,7 +79,7 @@ model ContactRequest {
   lastName      String
   email         String
   packageType   String
-  nights        Int
+  days          Int                  @map("nights")
   message       String               @db.Text
   token         String               @unique
   formId        String?

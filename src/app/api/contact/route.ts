@@ -5,7 +5,7 @@ import { generateContactRequestToken } from '@/lib/tokens';
 import {
   getEmailConfig,
   getCustomFormUrl,
-  formatNights,
+  formatDays,
 } from '@/lib/email';
 import { getPackageLabel } from '@/lib/constants';
 import { validateContactForm, type ContactFormData } from '@/lib/validation';
@@ -50,8 +50,8 @@ export async function POST(request: NextRequest) {
 
     const clientSubject = emailSubjectContent?.value || 'Confirmation de votre demande - Ailleurs en Douceur';
 
-    // Conversion du nombre de nuits
-    const nights = parseInt(body.nights);
+    // Conversion du nombre de jours
+    const days = parseInt(body.days);
 
     // Trouver le formulaire personnalise
     const customForm = await prisma.customForm.findFirst({
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
         lastName: body.lastName,
         email: body.email,
         packageType: body.packageType,
-        nights: nights,
+        days: days,
         message: body.message,
         token: token,
         formId: customForm?.id,
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
               <div class="field"><strong>Nom complet:</strong> ${body.firstName} ${body.lastName}</div>
               <div class="field"><strong>Email:</strong> ${body.email}</div>
               <div class="field"><strong>Type de formule:</strong> ${packageLabel}</div>
-              <div class="field"><strong>Nombre de nuits:</strong> ${formatNights(nights)}</div>
+              <div class="field"><strong>Nombre de jours:</strong> ${formatDays(days)}</div>
               <div class="field">
                 <strong>Message:</strong>
                 <div class="message">${body.message.replace(/\n/g, '<br>')}</div>
@@ -141,7 +141,7 @@ Nouvelle demande de contact - Ailleurs en Douceur
 Nom complet: ${body.firstName} ${body.lastName}
 Email: ${body.email}
 Type de formule: ${packageLabel}
-Nombre de nuits: ${formatNights(nights)}
+Nombre de jours: ${formatDays(days)}
 
 Message:
 ${body.message}
@@ -200,7 +200,7 @@ Date: ${new Date().toLocaleString('fr-FR')}
               <div class="field"><strong>Nom:</strong> ${body.firstName} ${body.lastName}</div>
               <div class="field"><strong>Email:</strong> ${body.email}</div>
               <div class="field"><strong>Formule demandee:</strong> ${packageLabel}</div>
-              <div class="field"><strong>Nombre de nuits:</strong> ${formatNights(nights)}</div>
+              <div class="field"><strong>Nombre de jours:</strong> ${formatDays(days)}</div>
               <div class="field">
                 <strong>Votre message:</strong>
                 <div class="message">${body.message.replace(/\n/g, '<br>')}</div>
@@ -244,7 +244,7 @@ Nous avons bien recu votre demande de contact. Voici un recapitulatif :
 Nom: ${body.firstName} ${body.lastName}
 Email: ${body.email}
 Formule demandee: ${packageLabel}
-Nombre de nuits: ${formatNights(nights)}
+Nombre de jours: ${formatDays(days)}
 
 Votre message:
 ${body.message}

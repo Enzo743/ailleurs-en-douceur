@@ -233,7 +233,7 @@ export async function POST(request: NextRequest) {
 Client: ${contactRequest.firstName} ${contactRequest.lastName}
 Email: ${contactRequest.email}
 Formule: ${contactRequest.packageType}
-Nombre de nuits: ${contactRequest.nights}`,
+Nombre de jours: ${contactRequest.days}`,
       startDateTime,
       endDateTime,
       attendeeEmail: contactRequest.email,
@@ -392,7 +392,7 @@ Date: ${new Date().toLocaleString('fr-FR')}
 
                     <div class="field"><strong>Email:</strong> ${contactRequest.email}</div>
                     <div class="field"><strong>Formule:</strong> ${packageLabel}</div>
-                    ${contactRequest.nights ? `<div class="field"><strong>Nombre de nuits:</strong> ${contactRequest.nights}</div>` : ''}
+                    ${contactRequest.days ? `<div class="field"><strong>Nombre de jours:</strong> ${contactRequest.days}</div>` : ''}
                     
                     <div class="highlight">
                       <div class="field"><strong>Date:</strong> ${formatDateForDisplay(slot.date, true)}</div>
@@ -427,7 +427,7 @@ Nouveau Rendez-Vous avec ${clientFullName}
 Client: ${contactRequest.firstName} ${contactRequest.lastName}
 Email: ${contactRequest.email}
 Formule: ${packageLabel}
-${contactRequest.nights ? `Nombre de nuits: ${contactRequest.nights}` : ''}
+${contactRequest.days ? `Nombre de jours: ${contactRequest.days}` : ''}
 
 Date: ${formatDateForDisplay(slot.date, true)}
 Heure: ${slot.startTime} - ${slot.endTime}

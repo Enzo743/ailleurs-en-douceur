@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { getEmailConfig, getCustomFormUrl, formatNights } from '@/lib/email';
+import { getEmailConfig, getCustomFormUrl, formatDays } from '@/lib/email';
 import { getPackageLabel } from '@/lib/constants';
 
 /**
@@ -97,7 +97,7 @@ export async function POST(
               <p>Nous vous rappelons que vous pouvez compléter notre formulaire personnalisé pour nous aider à mieux préparer votre projet.</p>
               
               <div class="field"><strong>Formule demandée:</strong> ${packageLabel}</div>
-              <div class="field"><strong>Nombre de nuits:</strong> ${formatNights(contactRequest.nights)}</div>
+              <div class="field"><strong>Nombre de jours:</strong> ${formatDays(contactRequest.days)}</div>
               
               <div class="info-box">
                 <p style="margin: 0 0 10px 0;"><strong>Pour aller plus loin :</strong></p>
@@ -128,7 +128,7 @@ Bonjour ${contactRequest.firstName},
 Nous vous rappelons que vous pouvez completer notre formulaire personnalise pour nous aider a mieux preparer votre projet.
 
 Formule demandee: ${packageLabel}
-Nombre de nuits: ${formatNights(contactRequest.nights)}
+Nombre de jours: ${formatDays(contactRequest.days)}
 
 Pour aller plus loin, completer notre formulaire :
 ${customFormUrl}
