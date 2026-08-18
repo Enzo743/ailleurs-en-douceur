@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { FieldType } from "@prisma/client";
+import { generateFieldKey } from '@/lib/field-utils';
 
 interface UpdateFormData {
   name?: string;
@@ -316,12 +317,15 @@ export async function PATCH(
       
       switch (action) {
         case 'create':
-          // Créer un nouveau champ
+          // Créer un nouveau champ avec clé générée automatiquement
+          const existingKeys = existingForm.fields.map(f => f.key);
+          const generatedKey = generateFieldKey(fieldUpdate.label, existingKeys);
+          
           return prisma.formField.create({
             data: {
               formId: id,
               label: fieldUpdate.label,
-              key: fieldUpdate.key,
+              key: generatedKey,
               type: fieldUpdate.type as FieldType,
               placeholder: fieldUpdate.placeholder,
               required: fieldUpdate.required || false,
@@ -332,13 +336,13 @@ export async function PATCH(
           });
         
         case 'update':
-          // Mettre à jour un champ existant
+          // Mettre à jour un champ existant (la clé ne peut pas être modifiée)
           if (!fieldUpdate.id) {
             throw new Error('Field ID is required for update');
           }
           const updateFieldData: any = {};
           if (fieldUpdate.label !== undefined) updateFieldData.label = fieldUpdate.label;
-          if (fieldUpdate.key !== undefined) updateFieldData.key = fieldUpdate.key;
+          // La clé n'est pas modifiable pour éviter les conflits
           if (fieldUpdate.type !== undefined) updateFieldData.type = fieldUpdate.type;
           if (fieldUpdate.placeholder !== undefined) updateFieldData.placeholder = fieldUpdate.placeholder;
           if (fieldUpdate.required !== undefined) updateFieldData.required = fieldUpdate.required;

@@ -51,7 +51,7 @@ export const FIELD_TYPE_LABELS: Record<string, string> = {
 export interface FormField {
   id: string;
   label: string;
-  key: string;
+  key?: string; // Généré automatiquement en backend
   type: typeof FIELD_TYPES[keyof typeof FIELD_TYPES];
   placeholder?: string;
   required: boolean;

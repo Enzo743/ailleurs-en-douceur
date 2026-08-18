@@ -133,19 +133,7 @@ export default function FormField({
           {error?.includes('-label') && <span className={styles.errorMessage}>{error}</span>}
         </div>
 
-        <div className={`${styles.formGroup} ${error?.includes('-key') ? styles.hasError : ''}`}>
-          <label htmlFor={`key-${field.id}`}>Clé * (identifiant unique)</label>
-          <input
-            type="text"
-            id={`key-${field.id}`}
-            value={field.key}
-            onChange={(e) => onChange('key', e.target.value)}
-            placeholder="Ex: preferred-date"
-            className={styles.input}
-            disabled={disabled}
-          />
-          {error?.includes('-key') && <span className={styles.errorMessage}>{error}</span>}
-        </div>
+
 
         <div className={styles.formGroup}>
           <label htmlFor={`type-${field.id}`}>Type de champ *</label>

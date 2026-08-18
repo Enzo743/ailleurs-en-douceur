@@ -172,18 +172,6 @@ export function useFormFields({ initialFields = [] }: UseFormFieldsProps = {}): 
         newFieldErrors[`${field.id}-label`] = `Le libellé du champ ${index + 1} est requis`;
       }
 
-      if (!field.key.trim()) {
-        newFieldErrors[`${field.id}-key`] = `La clé du champ ${index + 1} est requise`;
-      }
-
-      // Vérifier que la clé est unique
-      if (field.key.trim()) {
-        const keyCount = fields.filter((f) => f.key === field.key.trim() && f.id !== field.id).length;
-        if (keyCount > 0) {
-          newFieldErrors[`${field.id}-key`] = 'Cette clé est déjà utilisée';
-        }
-      }
-
       // Pour les SELECT et MULTISELECT, vérifier qu'il y a des options
       if ((field.type === 'SELECT' || field.type === 'MULTISELECT') && field.options.length === 0) {
         newFieldErrors[`${field.id}-options`] = 'Ajoutez au moins une option';

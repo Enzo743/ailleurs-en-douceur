@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { getPackageLabel } from '@/lib/constants';
 import { DEFAULT_VALUES } from '@/lib/constants';
 import { FieldType } from '@prisma/client';
+import { generateFieldKey } from '@/lib/field-utils';
 
 // ============================================================================
 // Types
@@ -246,13 +247,23 @@ export async function POST(request: NextRequest) {
     // Creer les champs si fournis
     let fields = [];
     if (body.fields && body.fields.length > 0) {
+      // Générer les clés pour tous les champs d'un coup pour éviter les doublons
+      const existingKeys: string[] = [];
+      const fieldsWithKeys = body.fields.map((field) => ({
+        ...field,
+        key: field.key || generateFieldKey(field.label, existingKeys),
+      }));
+      
+      // Mettre à jour le tableau des clés existantes
+      fieldsWithKeys.forEach(f => existingKeys.push(f.key));
+      
       fields = await Promise.all(
-        body.fields.map((field, index) =>
+        fieldsWithKeys.map((field, index) =>
           prisma.formField.create({
             data: {
               formId: form.id,
               label: field.label,
-              key: field.key || `field_${index}`,
+              key: field.key,
               type: field.type as FieldType,
               placeholder: field.placeholder,
               required: field.required || false,
