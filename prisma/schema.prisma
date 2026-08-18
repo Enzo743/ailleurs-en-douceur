@@ -122,6 +122,7 @@ model FormField {
   type          FieldType
   placeholder   String?
   required      Boolean  @default(false)
+  allowOtherOption Boolean @default(false)
   options       String[] @default([])
   defaultValue  String?
   order         Int      @default(0)

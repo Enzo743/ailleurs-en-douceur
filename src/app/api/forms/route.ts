@@ -30,6 +30,7 @@ interface CreateFormData {
     type: FieldType | string;
     placeholder?: string;
     required?: boolean;
+    allowOtherOption?: boolean;
     options?: string[];
     defaultValue?: string;
     order?: number;
@@ -43,6 +44,7 @@ interface UpdateFormData extends Partial<CreateFormData> {
     type: FieldType | string;
     placeholder?: string;
     required?: boolean;
+    allowOtherOption?: boolean;
     options?: string[];
     defaultValue?: string;
     order?: number;
@@ -54,6 +56,7 @@ interface UpdateFormData extends Partial<CreateFormData> {
     type?: FieldType | string;
     placeholder?: string;
     required?: boolean;
+    allowOtherOption?: boolean;
     options?: string[];
     defaultValue?: string;
     order?: number;
@@ -173,6 +176,7 @@ export async function GET(request: NextRequest) {
         type: field.type,
         placeholder: field.placeholder,
         required: field.required,
+        allowOtherOption: field.allowOtherOption,
         options: field.options,
         defaultValue: field.defaultValue,
         order: field.order,
@@ -267,6 +271,7 @@ export async function POST(request: NextRequest) {
               type: field.type as FieldType,
               placeholder: field.placeholder,
               required: field.required || false,
+              allowOtherOption: field.allowOtherOption || false,
               options: field.options || [],
               defaultValue: field.defaultValue,
               order: field.order !== undefined ? field.order : index,
@@ -313,6 +318,7 @@ export async function POST(request: NextRequest) {
             type: field.type,
             placeholder: field.placeholder,
             required: field.required,
+            allowOtherOption: field.allowOtherOption,
             options: field.options,
             defaultValue: field.defaultValue,
             order: field.order,

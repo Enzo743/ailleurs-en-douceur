@@ -19,6 +19,7 @@ interface FormFieldUpdate {
   type: FieldType | string;
   placeholder?: string;
   required?: boolean;
+  allowOtherOption?: boolean;
   options?: string[];
   defaultValue?: string;
   order?: number;
@@ -110,6 +111,7 @@ export async function GET(
           type: field.type,
           placeholder: field.placeholder,
           required: field.required,
+          allowOtherOption: field.allowOtherOption,
           options: field.options,
           defaultValue: field.defaultValue,
           order: field.order,
@@ -222,6 +224,7 @@ export async function PUT(
             type: field.type,
             placeholder: field.placeholder,
             required: field.required,
+            allowOtherOption: field.allowOtherOption,
             options: field.options,
             defaultValue: field.defaultValue,
             order: field.order,
@@ -329,6 +332,7 @@ export async function PATCH(
               type: fieldUpdate.type as FieldType,
               placeholder: fieldUpdate.placeholder,
               required: fieldUpdate.required || false,
+              allowOtherOption: fieldUpdate.allowOtherOption || false,
               options: fieldUpdate.options || [],
               defaultValue: fieldUpdate.defaultValue,
               order: fieldUpdate.order || existingForm.fields.length,
@@ -346,6 +350,7 @@ export async function PATCH(
           if (fieldUpdate.type !== undefined) updateFieldData.type = fieldUpdate.type;
           if (fieldUpdate.placeholder !== undefined) updateFieldData.placeholder = fieldUpdate.placeholder;
           if (fieldUpdate.required !== undefined) updateFieldData.required = fieldUpdate.required;
+          if (fieldUpdate.allowOtherOption !== undefined) updateFieldData.allowOtherOption = fieldUpdate.allowOtherOption;
           if (fieldUpdate.options !== undefined) updateFieldData.options = fieldUpdate.options;
           if (fieldUpdate.defaultValue !== undefined) updateFieldData.defaultValue = fieldUpdate.defaultValue;
           if (fieldUpdate.order !== undefined) updateFieldData.order = fieldUpdate.order;

@@ -168,6 +168,22 @@ export default function FormField({
             Champ obligatoire
           </label>
         </div>
+        
+        {(field.type === 'SELECT' || field.type === 'MULTISELECT') && (
+          <div className={styles.formGroup}>
+            <label htmlFor={`allowOtherOption-${field.id}`}>
+              <input
+                type="checkbox"
+                id={`allowOtherOption-${field.id}`}
+                checked={field.allowOtherOption || false}
+                onChange={(e) => onChange('allowOtherOption', e.target.checked)}
+                className={styles.checkbox}
+                disabled={disabled}
+              />
+              Autoriser l'option "Autre" avec texte libre
+            </label>
+          </div>
+        )}
       </div>
 
       {/* Options pour SELECT et MULTISELECT */}

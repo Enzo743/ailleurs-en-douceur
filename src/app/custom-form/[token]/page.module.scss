@@ -420,4 +420,31 @@
   }
 }
 
+// Style pour le champ texte de l'option "Autre"
+.other-option-input {
+  margin-top: 12px;
+  padding-left: 24px;
+  
+  input[type="text"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid $color-border-light;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: $color-background;
+    color: $color-text-primary;
+    
+    &:focus {
+      outline: none;
+      border-color: $color-brun;
+      box-shadow: 0 0 0 3px rgba(74, 63, 47, 0.1);
+    }
+    
+    &::placeholder {
+      color: $color-text-light;
+    }
+  }
+}
 

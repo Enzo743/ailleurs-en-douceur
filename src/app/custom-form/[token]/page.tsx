@@ -12,6 +12,7 @@ interface FormField {
   type: 'TEXT' | 'TEXTAREA' | 'NUMBER' | 'EMAIL' | 'SELECT' | 'MULTISELECT' | 'CHECKBOX' | 'DATE';
   placeholder?: string;
   required: boolean;
+  allowOtherOption: boolean;
   options: string[];
   defaultValue?: string;
   order: number;
@@ -330,7 +331,35 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
                   </label>
                 </div>
               ))}
+              {field.allowOtherOption && (
+                <div className={styles['radio-option']}>
+                  <input
+                    type="radio"
+                    id={`${fieldId}-other`}
+                    name={field.key}
+                    value="_OTHER_"
+                    checked={value === '_OTHER_'}
+                    onChange={(e) => handleFieldChange(field.key, e.target.value, field.type)}
+                    className={hasError ? styles['error-input'] : ''}
+                  />
+                  <label htmlFor={`${fieldId}-other`}>
+                    Autre
+                  </label>
+                </div>
+              )}
             </fieldset>
+            {field.allowOtherOption && value === '_OTHER_' && (
+              <div className={styles['other-option-input']}>
+                <input
+                  type="text"
+                  id={`${fieldId}-other-text`}
+                  value={(formValues[`${field.key}_other`] as string) || ''}
+                  onChange={(e) => handleFieldChange(`${field.key}_other`, e.target.value, field.type)}
+                  placeholder="Précisez..."
+                  className={hasError ? styles['error-input'] : ''}
+                />
+              </div>
+            )}
             {hasError && <span className={styles['error-message']}>{hasError}</span>}
           </div>
         );
@@ -366,7 +395,39 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
                   </div>
                 );
               })}
+              {field.allowOtherOption && (
+                <div className={styles['checkbox-option']}>
+                  <input
+                    type="checkbox"
+                    id={`${fieldId}-other`}
+                    checked={(value as string[]).includes('_OTHER_')}
+                    onChange={(e) => {
+                      const currentValue = Array.isArray(value) ? value : [];
+                      const newValue = e.target.checked
+                        ? [...currentValue, '_OTHER_']
+                        : currentValue.filter(v => v !== '_OTHER_');
+                      handleFieldChange(field.key, newValue, field.type);
+                    }}
+                    className={hasError ? styles['error-input'] : ''}
+                  />
+                  <label htmlFor={`${fieldId}-other`}>
+                    Autre
+                  </label>
+                </div>
+              )}
             </fieldset>
+            {field.allowOtherOption && (value as string[]).includes('_OTHER_') && (
+              <div className={styles['other-option-input']}>
+                <input
+                  type="text"
+                  id={`${fieldId}-other-text`}
+                  value={(formValues[`${field.key}_other`] as string) || ''}
+                  onChange={(e) => handleFieldChange(`${field.key}_other`, e.target.value, field.type)}
+                  placeholder="Précisez..."
+                  className={hasError ? styles['error-input'] : ''}
+                />
+              </div>
+            )}
             {hasError && <span className={styles['error-message']}>{hasError}</span>}
           </div>
         );

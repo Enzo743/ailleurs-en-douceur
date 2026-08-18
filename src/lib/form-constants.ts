@@ -55,6 +55,7 @@ export interface FormField {
   type: typeof FIELD_TYPES[keyof typeof FIELD_TYPES];
   placeholder?: string;
   required: boolean;
+  allowOtherOption: boolean;
   options: string[];
   defaultValue?: string;
   order: number;
@@ -66,6 +67,7 @@ export const DEFAULT_FIELD: Omit<FormField, 'id' | 'order'> = {
   type: 'TEXT',
   placeholder: '',
   required: false,
+  allowOtherOption: false,
   options: [],
   defaultValue: '',
 } as const;
