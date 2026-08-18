@@ -309,22 +309,28 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
       case 'SELECT':
         return (
           <div key={field.id} className={`${styles['form-group']} ${hasError ? styles['has-error'] : ''}`}>
-            <label htmlFor={fieldId}>
-              {field.label}{field.required && <span className={styles.required}> *</span>}
-            </label>
-            <select
-              id={fieldId}
-              value={value as string}
-              onChange={(e) => handleFieldChange(field.key, e.target.value, field.type)}
-              className={hasError ? styles['error-input'] : ''}
-            >
-              {!field.required && <option value="">Sélectionnez une option</option>}
+            <fieldset className={styles['radio-group']}>
+              <legend>
+                {field.label}{field.required && <span className={styles.required}> *</span>}
+                <small className={styles['field-hint']}>Sélectionnez une seule option</small>
+              </legend>
               {field.options.map((option, index) => (
-                <option key={index} value={option}>
-                  {option}
-                </option>
+                <div key={index} className={styles['radio-option']}>
+                  <input
+                    type="radio"
+                    id={`${fieldId}-${index}`}
+                    name={field.key}
+                    value={option}
+                    checked={value === option}
+                    onChange={(e) => handleFieldChange(field.key, e.target.value, field.type)}
+                    className={hasError ? styles['error-input'] : ''}
+                  />
+                  <label htmlFor={`${fieldId}-${index}`}>
+                    {option}
+                  </label>
+                </div>
               ))}
-            </select>
+            </fieldset>
             {hasError && <span className={styles['error-message']}>{hasError}</span>}
           </div>
         );
@@ -332,43 +338,54 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
       case 'MULTISELECT':
         return (
           <div key={field.id} className={`${styles['form-group']} ${hasError ? styles['has-error'] : ''}`}>
-            <label htmlFor={fieldId}>
-              {field.label}{field.required && <span className={styles.required}> *</span>}
-            </label>
-            <select
-              id={fieldId}
-              multiple
-              value={value as string[] || []}
-              onChange={(e) => {
-                const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-                handleFieldChange(field.key, selectedOptions, field.type);
-              }}
-              className={hasError ? styles['error-input'] : ''}
-            >
-              {field.options.map((option, index) => (
-                <option key={index} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            <small>Maintenez Ctrl (Cmd sur Mac) pour sélectionner plusieurs options</small>
+            <fieldset className={styles['checkbox-group']}>
+              <legend>
+                {field.label}{field.required && <span className={styles.required}> *</span>}
+                <small className={styles['field-hint']}>Vous pouvez sélectionner plusieurs options</small>
+              </legend>
+              {field.options.map((option, index) => {
+                const currentValue = Array.isArray(value) ? value : [];
+                const isChecked = currentValue.includes(option);
+                return (
+                  <div key={index} className={styles['checkbox-option']}>
+                    <input
+                      type="checkbox"
+                      id={`${fieldId}-${index}`}
+                      checked={isChecked}
+                      onChange={(e) => {
+                        const newValue = e.target.checked
+                          ? [...currentValue, option]
+                          : currentValue.filter(v => v !== option);
+                        handleFieldChange(field.key, newValue, field.type);
+                      }}
+                      className={hasError ? styles['error-input'] : ''}
+                    />
+                    <label htmlFor={`${fieldId}-${index}`}>
+                      {option}
+                    </label>
+                  </div>
+                );
+              })}
+            </fieldset>
             {hasError && <span className={styles['error-message']}>{hasError}</span>}
           </div>
         );
 
       case 'CHECKBOX':
         return (
-          <div key={field.id} className={`${styles['form-group']} ${styles['checkbox-group']} ${hasError ? styles['has-error'] : ''}`}>
-            <input
-              type="checkbox"
-              id={fieldId}
-              checked={value as boolean || false}
-              onChange={(e) => handleFieldChange(field.key, e.target.checked, field.type)}
-              className={hasError ? styles['error-input'] : ''}
-            />
-            <label htmlFor={fieldId}>
-              {field.label}{field.required && <span className={styles.required}> *</span>}
-            </label>
+          <div key={field.id} className={`${styles['form-group']} ${hasError ? styles['has-error'] : ''}`}>
+            <div className={styles['checkbox-option']}>
+              <input
+                type="checkbox"
+                id={fieldId}
+                checked={value as boolean || false}
+                onChange={(e) => handleFieldChange(field.key, e.target.checked, field.type)}
+                className={hasError ? styles['error-input'] : ''}
+              />
+              <label htmlFor={fieldId}>
+                {field.label}{field.required && <span className={styles.required}> *</span>}
+              </label>
+            </div>
             {hasError && <span className={styles['error-message']}>{hasError}</span>}
           </div>
         );
@@ -486,7 +503,11 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
             <div className={styles['fields-container']}>
               {customForm.fields
                 .sort((a, b) => a.order - b.order)
-                .map(renderField)}
+                .map((field, index, array) => (
+                  <div key={field.id} className={index < array.length - 1 ? styles['field-separator'] : ''}>
+                    {renderField(field)}
+                  </div>
+                ))}
             </div>
 
             <div className={styles['submit-container']}>
