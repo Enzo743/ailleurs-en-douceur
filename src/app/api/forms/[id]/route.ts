@@ -22,6 +22,8 @@ interface FormFieldUpdate {
   allowOtherOption?: boolean;
   options?: string[];
   defaultValue?: string;
+  minValue?: string;
+  maxValue?: string;
   order?: number;
   _action?: 'create' | 'update' | 'delete';
 }
@@ -114,6 +116,8 @@ export async function GET(
           allowOtherOption: field.allowOtherOption,
           options: field.options,
           defaultValue: field.defaultValue,
+          minValue: field.minValue,
+          maxValue: field.maxValue,
           order: field.order,
         })),
         stats: {
@@ -227,6 +231,8 @@ export async function PUT(
             allowOtherOption: field.allowOtherOption,
             options: field.options,
             defaultValue: field.defaultValue,
+            minValue: field.minValue,
+            maxValue: field.maxValue,
             order: field.order,
           })),
           stats: {
@@ -335,6 +341,8 @@ export async function PATCH(
               allowOtherOption: fieldUpdate.allowOtherOption || false,
               options: fieldUpdate.options || [],
               defaultValue: fieldUpdate.defaultValue,
+              minValue: fieldUpdate.minValue,
+              maxValue: fieldUpdate.maxValue,
               order: fieldUpdate.order || existingForm.fields.length,
             },
           });
@@ -353,6 +361,8 @@ export async function PATCH(
           if (fieldUpdate.allowOtherOption !== undefined) updateFieldData.allowOtherOption = fieldUpdate.allowOtherOption;
           if (fieldUpdate.options !== undefined) updateFieldData.options = fieldUpdate.options;
           if (fieldUpdate.defaultValue !== undefined) updateFieldData.defaultValue = fieldUpdate.defaultValue;
+          if (fieldUpdate.minValue !== undefined) updateFieldData.minValue = fieldUpdate.minValue;
+          if (fieldUpdate.maxValue !== undefined) updateFieldData.maxValue = fieldUpdate.maxValue;
           if (fieldUpdate.order !== undefined) updateFieldData.order = fieldUpdate.order;
           
           return prisma.formField.update({

@@ -33,6 +33,8 @@ interface CreateFormData {
     allowOtherOption?: boolean;
     options?: string[];
     defaultValue?: string;
+    minValue?: string;
+    maxValue?: string;
     order?: number;
   }>;
 }
@@ -47,6 +49,8 @@ interface UpdateFormData extends Partial<CreateFormData> {
     allowOtherOption?: boolean;
     options?: string[];
     defaultValue?: string;
+    minValue?: string;
+    maxValue?: string;
     order?: number;
   }>;
   fieldsToUpdate?: Array<{
@@ -59,6 +63,8 @@ interface UpdateFormData extends Partial<CreateFormData> {
     allowOtherOption?: boolean;
     options?: string[];
     defaultValue?: string;
+    minValue?: string;
+    maxValue?: string;
     order?: number;
   }>;
   fieldsToRemove?: string[];
@@ -179,6 +185,8 @@ export async function GET(request: NextRequest) {
         allowOtherOption: field.allowOtherOption,
         options: field.options,
         defaultValue: field.defaultValue,
+        minValue: field.minValue,
+        maxValue: field.maxValue,
         order: field.order,
       })),
       stats: {
@@ -274,6 +282,8 @@ export async function POST(request: NextRequest) {
               allowOtherOption: field.allowOtherOption || false,
               options: field.options || [],
               defaultValue: field.defaultValue,
+              minValue: field.minValue,
+              maxValue: field.maxValue,
               order: field.order !== undefined ? field.order : index,
             },
           })
@@ -321,6 +331,8 @@ export async function POST(request: NextRequest) {
             allowOtherOption: field.allowOtherOption,
             options: field.options,
             defaultValue: field.defaultValue,
+            minValue: field.minValue,
+            maxValue: field.maxValue,
             order: field.order,
           })),
           stats: {

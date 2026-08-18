@@ -9,12 +9,14 @@ interface FormField {
   id: string;
   label: string;
   key: string;
-  type: 'TEXT' | 'TEXTAREA' | 'NUMBER' | 'EMAIL' | 'SELECT' | 'MULTISELECT' | 'CHECKBOX' | 'DATE';
+  type: 'TEXT' | 'TEXTAREA' | 'NUMBER' | 'EMAIL' | 'SELECT' | 'MULTISELECT' | 'CHECKBOX' | 'DATE' | 'RANGE_NUMBER' | 'RANGE_DATE';
   placeholder?: string;
   required: boolean;
   allowOtherOption: boolean;
   options: string[];
   defaultValue?: string;
+  minValue?: string;
+  maxValue?: string;
   order: number;
 }
 
@@ -46,10 +48,12 @@ const getInputType = (fieldType: string): string => {
     case 'TEXTAREA':
       return 'textarea';
     case 'NUMBER':
+    case 'RANGE_NUMBER':
       return 'number';
     case 'EMAIL':
       return 'email';
     case 'DATE':
+    case 'RANGE_DATE':
       return 'date';
     case 'SELECT':
     case 'MULTISELECT':
@@ -464,6 +468,64 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
               onChange={(e) => handleFieldChange(field.key, e.target.value, field.type)}
               className={hasError ? styles['error-input'] : ''}
             />
+            {hasError && <span className={styles['error-message']}>{hasError}</span>}
+          </div>
+        );
+
+      case 'RANGE_NUMBER':
+        return (
+          <div key={field.id} className={`${styles['form-group']} ${hasError ? styles['has-error'] : ''}`}>
+            <label htmlFor={fieldId}>
+              {field.label}{field.required && <span className={styles.required}> *</span>}
+            </label>
+            <div className={styles['range-container']}>
+              <input
+                type="number"
+                id={`${fieldId}-min`}
+                value={(formValues[`${field.key}_min`] as string) || (field.minValue || '')}
+                onChange={(e) => handleFieldChange(`${field.key}_min`, e.target.value, field.type)}
+                placeholder="Min"
+                min={field.minValue}
+                className={hasError ? styles['error-input'] : ''}
+              />
+              <span className={styles['range-separator']}>à</span>
+              <input
+                type="number"
+                id={`${fieldId}-max`}
+                value={(formValues[`${field.key}_max`] as string) || (field.maxValue || '')}
+                onChange={(e) => handleFieldChange(`${field.key}_max`, e.target.value, field.type)}
+                placeholder="Max"
+                max={field.maxValue}
+                className={hasError ? styles['error-input'] : ''}
+              />
+            </div>
+            {hasError && <span className={styles['error-message']}>{hasError}</span>}
+          </div>
+        );
+
+      case 'RANGE_DATE':
+        return (
+          <div key={field.id} className={`${styles['form-group']} ${hasError ? styles['has-error'] : ''}`}>
+            <label htmlFor={fieldId}>
+              {field.label}{field.required && <span className={styles.required}> *</span>}
+            </label>
+            <div className={styles['range-container']}>
+              <input
+                type="date"
+                id={`${fieldId}-min`}
+                value={(formValues[`${field.key}_min`] as string) || (field.minValue || '')}
+                onChange={(e) => handleFieldChange(`${field.key}_min`, e.target.value, field.type)}
+                className={hasError ? styles['error-input'] : ''}
+              />
+              <span className={styles['range-separator']}>à</span>
+              <input
+                type="date"
+                id={`${fieldId}-max`}
+                value={(formValues[`${field.key}_max`] as string) || (field.maxValue || '')}
+                onChange={(e) => handleFieldChange(`${field.key}_max`, e.target.value, field.type)}
+                className={hasError ? styles['error-input'] : ''}
+              />
+            </div>
             {hasError && <span className={styles['error-message']}>{hasError}</span>}
           </div>
         );

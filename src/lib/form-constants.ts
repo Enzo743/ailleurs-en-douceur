@@ -14,6 +14,8 @@ export const FIELD_TYPES = {
   MULTISELECT: 'MULTISELECT',
   CHECKBOX: 'CHECKBOX',
   DATE: 'DATE',
+  RANGE_NUMBER: 'RANGE_NUMBER',
+  RANGE_DATE: 'RANGE_DATE',
 } as const;
 
 /**
@@ -28,6 +30,8 @@ export const FIELD_TYPE_OPTIONS = [
   { value: 'MULTISELECT', label: 'Sélection multiple' },
   { value: 'CHECKBOX', label: 'Case à cocher' },
   { value: 'DATE', label: 'Date' },
+  { value: 'RANGE_NUMBER', label: 'Plage de nombres' },
+  { value: 'RANGE_DATE', label: 'Plage de dates' },
 ] as const;
 
 /**
@@ -42,6 +46,8 @@ export const FIELD_TYPE_LABELS: Record<string, string> = {
   [FIELD_TYPES.MULTISELECT]: 'Sélection multiple',
   [FIELD_TYPES.CHECKBOX]: 'Case à cocher',
   [FIELD_TYPES.DATE]: 'Date',
+  [FIELD_TYPES.RANGE_NUMBER]: 'Plage de nombres',
+  [FIELD_TYPES.RANGE_DATE]: 'Plage de dates',
 } as const;
 
 // ============================================================================
@@ -58,6 +64,8 @@ export interface FormField {
   allowOtherOption: boolean;
   options: string[];
   defaultValue?: string;
+  minValue?: number | string; // Pour RANGE_NUMBER et RANGE_DATE
+  maxValue?: number | string; // Pour RANGE_NUMBER et RANGE_DATE
   order: number;
 }
 
@@ -70,6 +78,8 @@ export const DEFAULT_FIELD: Omit<FormField, 'id' | 'order'> = {
   allowOtherOption: false,
   options: [],
   defaultValue: '',
+  minValue: undefined,
+  maxValue: undefined,
 } as const;
 
 // Générer un ID unique pour les champs

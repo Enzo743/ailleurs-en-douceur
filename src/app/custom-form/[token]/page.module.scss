@@ -448,3 +448,40 @@
   }
 }
 
+// Styles pour les champs de type range
+.range-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  input[type="number"],
+  input[type="date"] {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid $color-border-light;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: $color-background;
+    color: $color-text-primary;
+    
+    &:focus {
+      outline: none;
+      border-color: $color-brun;
+      box-shadow: 0 0 0 3px rgba(74, 63, 47, 0.1);
+    }
+    
+    &::placeholder {
+      color: $color-text-light;
+    }
+  }
+}
+
+.range-separator {
+  color: $color-text-secondary;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+

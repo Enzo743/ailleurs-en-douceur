@@ -152,6 +152,8 @@ export default function FormField({
             <option value="MULTISELECT">Sélection multiple</option>
             <option value="CHECKBOX">Case à cocher</option>
             <option value="DATE">Date</option>
+            <option value="RANGE_NUMBER">Plage de nombres</option>
+            <option value="RANGE_DATE">Plage de dates</option>
           </select>
         </div>
 
@@ -216,6 +218,38 @@ export default function FormField({
           <button type="button" onClick={onAddOption} className={styles.addOptionButton} disabled={disabled}>
             + Ajouter une option
           </button>
+        </div>
+      )}
+
+      {/* Valeurs min/max pour RANGE_NUMBER et RANGE_DATE */}
+      {(field.type === 'RANGE_NUMBER' || field.type === 'RANGE_DATE') && (
+        <div className={styles.rangeSection}>
+          <div className={styles.formGroup}>
+            <label htmlFor={`minValue-${field.id}`}>
+              {field.type === 'RANGE_NUMBER' ? 'Valeur minimale' : 'Date de début'}
+            </label>
+            <input
+              type={field.type === 'RANGE_NUMBER' ? 'number' : 'date'}
+              id={`minValue-${field.id}`}
+              value={(field as any).minValue || ''}
+              onChange={(e) => onChange('minValue', e.target.value)}
+              className={styles.input}
+              disabled={disabled}
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor={`maxValue-${field.id}`}>
+              {field.type === 'RANGE_NUMBER' ? 'Valeur maximale' : 'Date de fin'}
+            </label>
+            <input
+              type={field.type === 'RANGE_NUMBER' ? 'number' : 'date'}
+              id={`maxValue-${field.id}`}
+              value={(field as any).maxValue || ''}
+              onChange={(e) => onChange('maxValue', e.target.value)}
+              className={styles.input}
+              disabled={disabled}
+            />
+          </div>
         </div>
       )}
 

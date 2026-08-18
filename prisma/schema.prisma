@@ -59,6 +59,8 @@ enum FieldType {
   MULTISELECT
   CHECKBOX
   DATE
+  RANGE_NUMBER
+  RANGE_DATE
 }
 
 enum ContactRequestStatus {
@@ -125,6 +127,8 @@ model FormField {
   allowOtherOption Boolean @default(false)
   options       String[] @default([])
   defaultValue  String?
+  minValue      String?
+  maxValue      String?
   order         Int      @default(0)
 
   @@unique([formId, key])
