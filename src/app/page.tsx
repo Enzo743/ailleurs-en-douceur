@@ -161,7 +161,7 @@ export default async function Home() {
                 <p className={styles.offerCardDescription}>
                   {c['home/offers-offer3-description']}
                 </p>
-                <Link href={'/offers/lune-douceur'} className={styles.offerCardLink}>
+                <Link href={'/offers/lune-de-douceurs'} className={styles.offerCardLink}>
                   {c['home/offers-link']}
                   <ArrowRightIcon />
                 </Link>

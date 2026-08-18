@@ -1,0 +1,605 @@
+@use "../../styles/_variables" as *;
+@use "../../styles/_mixins" as *;
+
+// Page Container
+.offerPage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  background-color: $color-creme;
+  font-family: $font-family-base;
+}
+
+// Container
+.container {
+  display: flex;
+  margin: 0 auto;
+  padding: 0 $spacing-md;
+  width: 100%;
+  max-width: 1440px;
+  flex-direction: column;
+}
+
+// Hero Section
+.heroSection {
+  position: relative;
+  width: 100%;
+  min-height: 542px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 113px $spacing-xl 80px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba($color-brun, 0.5);
+    z-index: 0;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 0;
+  }
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+}
+
+.heroTagline {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-caramel;
+  line-height: 25px;
+  text-transform: uppercase;
+  margin: 0 0 $spacing-md 0;
+  letter-spacing: 0.5px;
+}
+
+.heroTitle {
+  color: $color-creme;
+  text-shadow: 0 4px 4px rgba(30, 30, 30, 0.20);
+  font-family: $font-family-title;
+  font-size: 48px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 38px;
+}
+
+.heroDivider {
+  width: 72px;
+  height: 2px;
+  margin: $spacing-sm 0;
+  background: $color-caramel;
+}
+
+.heroSubtitle {
+  font-family: $font-family-base;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 28px;
+  text-shadow: 0 4px 4px rgba(30, 30, 30, 0.2);
+  color: $color-creme;
+  margin-bottom: 44px;
+}
+
+// Pour qui ? Section
+.forWhoSection {
+  padding: $spacing-lg 0;
+  background-color: $color-creme;
+}
+
+.forWhoContent {
+  display: flex;
+  gap: $spacing-xl;
+  align-items: flex-start;
+}
+
+.forWhoImageContainer {
+  position: relative;
+  width: 415px;
+  height: 268px;
+  border-radius: 5px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.forWhoImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.forWhoTextContent {
+  flex: 1;
+}
+
+.forWhoTitle {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-sauge;
+  line-height: 25px;
+  text-transform: uppercase;
+  margin: 0 0 $spacing-sm 0;
+  letter-spacing: 0.5px;
+}
+
+.forWhoSubtitle {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-sauge;
+  line-height: 25px;
+  text-transform: uppercase;
+  margin: 0 0 $spacing-sm 0;
+  letter-spacing: 0.5px;
+}
+
+.forWhoDescription {
+  font-family: $font-family-base;
+  font-size: 30px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 40px;
+  margin: 0 0 $spacing-md 0;
+}
+
+.forWhoLocation {
+  font-family: $font-family-base;
+  font-size: 25px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 40px;
+  margin: 0;
+}
+
+.forWhoDivider {
+  height: 1px;
+  background: $color-sauge;
+  margin-top: $spacing-xl;
+  width: 85%;
+}
+
+.forWhoDividerContainer {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+// Ce qui est inclus Section
+.includedSection {
+  padding: $spacing-lg 0;
+  background-color: $color-creme;
+}
+
+.sectionTitle {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-caramel;
+  line-height: 25px;
+  text-transform: uppercase;
+  margin-bottom: $spacing-lg;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.includedGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-lg;
+  width: 100%;
+}
+
+.includedLeft,
+.includedRight {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.includedItem {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+}
+
+.checkIcon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.includedText {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 25px;
+  margin: 0;
+}
+
+// Menus Section
+.menusSection {
+  padding: $spacing-lg 0;
+  background-color: $color-creme;
+}
+
+.menusGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-lg;
+  width: 100%;
+}
+
+.menuCard {
+  position: relative;
+  padding: $spacing-md;
+}
+
+.menuCardBorder {
+  position: absolute;
+  inset: 0;
+  border: 1px solid $color-caramel;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.menuCardTitle {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 600;
+  color: $color-caramel;
+  line-height: 25px;
+  text-transform: uppercase;
+  margin: 0 0 $spacing-sm 0;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.menuCardDescription {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 25px;
+  margin: 0;
+  text-align: center;
+}
+
+// Nos Formules Section
+.formulasSection {
+  padding: $spacing-lg 0;
+  background-color: $color-creme;
+}
+
+.formulasGrid {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-lg;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.formulaCard {
+  position: relative;
+  width: 264px;
+  padding: $spacing-md;
+  text-align: center;
+}
+
+.formulaCardBorder {
+  position: absolute;
+  inset: 0;
+  border: 1px solid $color-sauge;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.formulaCardTitle {
+  font-family: $font-family-base;
+  font-size: 20px;
+  font-weight: 700;
+  color: $color-sauge;
+  line-height: 25px;
+  margin: 0 0 $spacing-sm 0;
+}
+
+.formulaCardDuration {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 25px;
+  margin: 0 0 $spacing-sm 0;
+}
+
+.formulaCardDescription {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 25px;
+  margin: 0 0 $spacing-sm 0;
+}
+
+.formulaCardPrice {
+  font-family: $font-family-base;
+  font-size: 20px;
+  font-weight: 700;
+  color: $color-caramel;
+  line-height: 25px;
+  margin: 0;
+}
+
+// Options Section
+.optionsSection {
+  padding: $spacing-lg 0;
+  background-color: $color-creme;
+}
+
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.optionItem {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+}
+
+.optionBullet {
+  width: 20px;
+  height: 2px;
+  background: $color-sauge;
+  margin-top: 10px;
+  flex-shrink: 0;
+}
+
+.optionText {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 25px;
+  margin: 0;
+}
+
+// Asterisk Section
+.asteriskSection {
+  padding: 0 0 $spacing-lg;
+  background-color: $color-creme;
+}
+
+.asteriskText {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  font-style: italic;
+  color: $color-caramel;
+  line-height: 40px;
+  margin: 0;
+}
+
+// Botanical Decorations
+.botanicalDecoration1 {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 90px;
+  height: 90px;
+  pointer-events: none;
+}
+
+// Responsive styles
+@include respond-to(lg) {
+  .heroSection {
+    padding: 80px $spacing-lg 60px;
+  }
+
+  .heroTitle {
+    font-size: 36px;
+  }
+
+  .heroSubtitle {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .forWhoContent {
+    flex-direction: column;
+    gap: $spacing-lg;
+  }
+
+  .forWhoImageContainer {
+    width: 100%;
+    max-width: 415px;
+  }
+
+  .forWhoDescription {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .forWhoLocation {
+    font-size: 20px;
+    line-height: 32px;
+  }
+
+  .menusGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .formulasGrid {
+    gap: $spacing-md;
+  }
+
+  .formulaCard {
+    width: 200px;
+  }
+
+  .formulaCardTitle {
+    font-size: 18px;
+  }
+
+  .formulaCardPrice {
+    font-size: 18px;
+  }
+
+  .includedGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@include respond-to(md) {
+  .heroSection {
+    padding: 60px $spacing-md 40px;
+  }
+
+  .heroTitle {
+    font-size: 28px;
+  }
+
+  .heroSubtitle {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .forWhoDescription {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .forWhoLocation {
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  .menusGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formulasGrid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .formulaCard {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .includedGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@include respond-to(sm) {
+  .heroSection {
+    padding: 60px $spacing-sm 40px;
+  }
+
+  .heroTitle {
+    font-size: 24px;
+  }
+
+  .heroSubtitle {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .forWhoContent {
+    flex-direction: column;
+  }
+
+  .forWhoImageContainer {
+    width: 100%;
+    height: 200px;
+  }
+
+  .forWhoDescription {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .forWhoLocation {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .sectionTitle {
+    font-size: 12px;
+  }
+
+  .formulasGrid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .formulaCard {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .formulaCardTitle {
+    font-size: 16px;
+  }
+
+  .formulaCardDuration {
+    font-size: 12px;
+  }
+
+  .formulaCardPrice {
+    font-size: 16px;
+  }
+
+  .menusGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .menuCardTitle {
+    font-size: 12px;
+  }
+
+  .menuCardDescription {
+    font-size: 12px;
+  }
+
+  .includedText {
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .optionText {
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .asteriskText {
+    font-size: 12px;
+    line-height: 24px;
+  }
+
+  .botanicalDecoration1 {
+    width: 20px;
+    height: 20px;
+  }
+}

@@ -5,3 +5,4 @@ export { default as BotanicalDecoration } from "./BotanicalDecoration";
 export { default as BlogCard } from "./BlogCard";
 export { default as ValuesSection } from "./ValuesSection";
 export { default as ContactSection } from "./ContactSection";
+export { default as OfferPageTemplate } from "./OfferPageTemplate";

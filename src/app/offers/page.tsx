@@ -59,7 +59,7 @@ export default async function OffersPage() {
       icon: <MapIcon />,
     },
     {
-      id: "lune-douceur",
+      id: "lune-de-douceurs",
       title: c['offers/offer3-title'],
       subtitle: c['offers/offer3-subtitle'],
       description: c['offers/offer3-description'],
