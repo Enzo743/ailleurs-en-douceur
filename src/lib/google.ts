@@ -62,6 +62,7 @@ export interface CreateMeetEventParams {
   endDateTime: Date | string;
   attendeeEmail: string;
   attendeeName?: string;
+  createMeetLink?: boolean; // Par défaut true
 }
 
 export interface MeetEventResult {
@@ -85,19 +86,95 @@ export const createMeetEvent = async (
     { email: params.attendeeEmail, displayName: params.attendeeName },
   ];
 
-  // Pour forcer la création d'un lien Meet, on utilise conferenceData
+  // Construire l'objet eventRequest en fonction de la préférence
+  const eventRequest: any = {
+    summary: params.summary,
+    description: params.description || '',
+    start: { dateTime: startDateTime, timeZone: 'Europe/Paris' },
+    end: { dateTime: endDateTime, timeZone: 'Europe/Paris' },
+    attendees: attendees.map(a => ({ email: a.email, displayName: a.displayName })),
+    reminders: {
+      useDefault: true,
+    },
+  };
+
+  // Ajouter conferenceData uniquement si on veut un lien Meet
+  const shouldCreateMeetLink = params.createMeetLink !== false; // true par défaut
+  if (shouldCreateMeetLink) {
+    eventRequest.conferenceData = {
+      createRequest: {
+        conferenceSolutionKey: { type: 'hangoutsMeet' },
+        requestId: `meet-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+      },
+    };
+  }
+
+  try {
+    const response = await calendar.events.insert({
+      calendarId,
+      requestBody: eventRequest,
+      conferenceDataVersion: shouldCreateMeetLink ? 1 : undefined,
+    });
+
+    const event = response.data;
+
+    // Si on a demandé un lien Meet mais qu'il n'est pas créé, on lance une erreur
+    if (shouldCreateMeetLink && !event.hangoutLink) {
+      throw new Error('No Meet link created');
+    }
+
+    return {
+      eventId: event.id!,
+      meetLink: event.hangoutLink || '',
+      htmlLink: event.htmlLink || '',
+      calendarEvent: event,
+    };
+  } catch (error: any) {
+    console.error('Error creating Google Calendar event:', error);
+    throw new Error(`Failed to create Google Calendar event: ${error.message}`);
+  }
+};
+
+/**
+ * Crée un événement Google Calendar SANS Google Meet
+ */
+export interface CreateCalendarEventParams {
+  summary: string;
+  description?: string;
+  startDateTime: Date | string;
+  endDateTime: Date | string;
+  attendeeEmail: string;
+  attendeeName?: string;
+}
+
+export interface CalendarEventResult {
+  eventId: string;
+  meetLink: string;
+  htmlLink: string;
+  calendarEvent: any;
+}
+
+export const createCalendarEvent = async (
+  params: CreateCalendarEventParams,
+  tokens?: GoogleTokens
+): Promise<CalendarEventResult> => {
+  const calendar = await getCalendarClient(tokens);
+  const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
+
+  const startDateTime = new Date(params.startDateTime).toISOString();
+  const endDateTime = new Date(params.endDateTime).toISOString();
+
+  const attendees = [
+    { email: params.attendeeEmail, displayName: params.attendeeName },
+  ];
+
+  // Créer un événement SANS conferenceData pour éviter le lien Meet
   const eventRequest = {
     summary: params.summary,
     description: params.description || '',
     start: { dateTime: startDateTime, timeZone: 'Europe/Paris' },
     end: { dateTime: endDateTime, timeZone: 'Europe/Paris' },
     attendees: attendees.map(a => ({ email: a.email, displayName: a.displayName })),
-    conferenceData: {
-      createRequest: {
-        conferenceSolutionKey: { type: 'hangoutsMeet' },
-        requestId: `meet-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
-      },
-    },
     reminders: {
       useDefault: true,
     },
@@ -107,19 +184,15 @@ export const createMeetEvent = async (
     const response = await calendar.events.insert({
       calendarId,
       requestBody: eventRequest,
-      conferenceDataVersion: 1,
+      conferenceDataVersion: 0, // Désactiver explicitement la création de lien Meet
     });
 
     const event = response.data;
 
-    if (!event.hangoutLink) {
-      throw new Error('No Meet link created');
-    }
-
     return {
       eventId: event.id!,
-      meetLink: event.hangoutLink,
-      htmlLink: event.htmlLink || event.hangoutLink,
+      meetLink: '', // Pas de lien Meet
+      htmlLink: event.htmlLink || '',
       calendarEvent: event,
     };
   } catch (error: any) {

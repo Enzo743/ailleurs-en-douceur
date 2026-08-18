@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { createMeetEvent, cancelCalendarEvent } from '@/lib/google';
+import { createMeetEvent, createCalendarEvent, cancelCalendarEvent } from '@/lib/google';
 import { getEmailConfig } from '@/lib/email';
 import { getPackageLabel } from '@/lib/constants';
 import { doSlotsOverlap, calculateDuration, formatDateForDisplay } from '@/lib/time';
@@ -13,6 +13,7 @@ import { validateAppointmentSlot, type AppointmentSlotData } from '@/lib/validat
 interface CreateAppointmentData {
   contactRequestId: string;
   slotId: string;
+  contactPreference?: string;
 }
 
 interface ApiResponse {
@@ -153,7 +154,7 @@ export async function GET(request: NextRequest) {
  * Mais necessite un contactRequestId et slotId valides
  */
 export async function POST(request: NextRequest) {
-  const { contactRequestId, slotId }: CreateAppointmentData = await request.json();
+  const { contactRequestId, slotId, contactPreference }: CreateAppointmentData = await request.json();
 
   try {
     // Validation
@@ -225,20 +226,39 @@ export async function POST(request: NextRequest) {
     const endDateTime = new Date(date);
     endDateTime.setHours(endHours, endMinutes, 0, 0);
 
-    // Creer l'evenement Google Calendar avec Meet
-    const meetResult = await createMeetEvent({
-      summary: `Rendez-vous avec ${contactRequest.firstName} ${contactRequest.lastName} - ${contactRequest.packageType}`,
-      description: `Rendez-vous pour discuter du projet: ${contactRequest.message?.substring(0, 200) || ''}
+    // Déterminer si on crée un événement avec Meet ou sans
+    const isPhonePreference = contactPreference === 'Téléphone';
+    let meetResult = null;
+    
+    const baseDescription = `Rendez-vous pour discuter du projet: ${contactRequest.message?.substring(0, 200) || ''}
 
 Client: ${contactRequest.firstName} ${contactRequest.lastName}
 Email: ${contactRequest.email}
 Formule: ${contactRequest.packageType}
-Nombre de jours: ${contactRequest.days}`,
-      startDateTime,
-      endDateTime,
-      attendeeEmail: contactRequest.email,
-      attendeeName: `${contactRequest.firstName} ${contactRequest.lastName}`,
-    });
+Nombre de jours: ${contactRequest.days}
+Préférence de contact: ${contactPreference || 'Visioconférence'}`;
+
+    if (!isPhonePreference) {
+      // Creer l'evenement Google Calendar avec Meet
+      meetResult = await createMeetEvent({
+        summary: `Rendez-vous avec ${contactRequest.firstName} ${contactRequest.lastName} - ${contactRequest.packageType}`,
+        description: baseDescription,
+        startDateTime,
+        endDateTime,
+        attendeeEmail: contactRequest.email,
+        attendeeName: `${contactRequest.firstName} ${contactRequest.lastName}`,
+      });
+    } else {
+      // Créer un événement Google Calendar SANS Meet - utiliser la fonction dédiée
+      meetResult = await createCalendarEvent({
+        summary: `Rendez-vous avec ${contactRequest.firstName} ${contactRequest.lastName} - ${contactRequest.packageType}`,
+        description: baseDescription,
+        startDateTime,
+        endDateTime,
+        attendeeEmail: contactRequest.email,
+        attendeeName: `${contactRequest.firstName} ${contactRequest.lastName}`,
+      });
+    }
 
     // Creer le rendez-vous en base de donnees
     const appointment = await prisma.appointment.create({
@@ -246,8 +266,9 @@ Nombre de jours: ${contactRequest.days}`,
         contactRequestId: contactRequestId,
         slotId: slotId,
         googleEventId: meetResult.eventId,
-        meetLink: meetResult.meetLink,
+        meetLink: isPhonePreference ? null : meetResult.meetLink || null,
         status: 'CONFIRMED',
+        contactPreference: contactPreference,
       },
       include: {
         slot: true,
@@ -306,13 +327,20 @@ Nombre de jours: ${contactRequest.days}`,
                 <div class="field"><strong>Heure:</strong> ${slot.startTime} - ${slot.endTime}</div>
                 <div class="field"><strong>Duree:</strong> ${slot.duration} minutes</div>
                 
+                ${!isPhonePreference && meetResult.meetLink ? `
                 <div class="info-box">
                   <p style="margin: 0 0 15px 0;"><strong>Lien Google Meet :</strong></p>
                   <a href="${meetResult.meetLink}" class="cta-button">Rejoindre la visioconference</a>
                   <p style="margin: 10px 0 0 0; font-size: 12px;">Lien : ${meetResult.meetLink}</p>
                 </div>
+                ` : `
+                <div class="info-box">
+                  <p style="margin: 0;"><strong>Rendez-vous par téléphone</strong></p>
+                  <p style="margin: 10px 0 0 0;">Nous vous contacterons au numéro que vous avez indiqué.</p>
+                </div>
+                `}
                 
-                <p>Un rappel sera envoye 24h avant le rendez-vous avec le lien de visioconference.</p>
+                <p>Un rappel sera envoye 24h avant le rendez-vous ${!isPhonePreference ? 'avec le lien de visioconference' : 'par téléphone'}.</p>
                 
                 <p>A tres bientot,<br>Nelly d'Ailleurs en Douceur</p>
               </div>
@@ -336,9 +364,9 @@ Date: ${formatDateForDisplay(slot.date, true)}
 Heure: ${slot.startTime} - ${slot.endTime}
 Duree: ${slot.duration} minutes
 
-Lien Google Meet : ${meetResult.meetLink}
+${!isPhonePreference && meetResult.meetLink ? `Lien Google Meet : ${meetResult.meetLink}` : 'Rendez-vous par telephone - pas de lien Meet'}
 
-Un rappel sera envoye automatiquement 24h avant le rendez-vous avec le lien de visioconference.
+Un rappel sera envoye automatiquement 24h avant le rendez-vous ${!isPhonePreference ? 'avec le lien de visioconference' : 'par telephone'}.
 
 A tres bientot,
 Nelly d'Ailleurs en Douceur
@@ -397,11 +425,17 @@ Date: ${new Date().toLocaleString('fr-FR')}
                     <div class="highlight">
                       <div class="field"><strong>Date:</strong> ${formatDateForDisplay(slot.date, true)}</div>
                       <div class="field"><strong>Heure:</strong> ${slot.startTime} - ${slot.endTime} (${slot.duration} min)</div>
+                      <div class="field"><strong>Préférence:</strong> ${contactPreference || 'Visioconférence'}</div>
                     </div>
 
+                    ${!isPhonePreference && meetResult.meetLink ? `
                     <p style="margin: 20px 0 10px 0;"><strong>Lien Google Meet :</strong></p>
                     <a href="${meetResult.meetLink}" class="meet-link">Rejoindre la visioconference</a>
                     <div style="font-size: 12px; color: #666; margin-top: 5px;">${meetResult.meetLink}</div>
+                    ` : `
+                    <p style="margin: 20px 0 10px 0;"><strong>Rendez-vous par téléphone</strong></p>
+                    <p style="font-size: 14px; color: #666;">Pas de lien Meet - contact par téléphone</p>
+                    `}
 
                     ${contactRequest.message ? `
                     <div class="highlight" style="margin-top: 20px;">
@@ -428,11 +462,12 @@ Client: ${contactRequest.firstName} ${contactRequest.lastName}
 Email: ${contactRequest.email}
 Formule: ${packageLabel}
 ${contactRequest.days ? `Nombre de jours: ${contactRequest.days}` : ''}
+Préférence: ${contactPreference || 'Visioconférence'}
 
 Date: ${formatDateForDisplay(slot.date, true)}
 Heure: ${slot.startTime} - ${slot.endTime}
 
-Lien Google Meet: ${meetResult.meetLink}
+${!isPhonePreference && meetResult.meetLink ? `Lien Google Meet: ${meetResult.meetLink}` : 'Rendez-vous par téléphone - pas de lien Meet'}
 
 ${contactRequest.message ? `
 Message du client:
@@ -455,6 +490,7 @@ ${contactRequest.message}` : ''}
           slotId: appointment.slotId,
           googleEventId: appointment.googleEventId,
           meetLink: appointment.meetLink,
+          contactPreference: appointment.contactPreference,
           status: appointment.status,
           createdAt: appointment.createdAt,
           slot: {

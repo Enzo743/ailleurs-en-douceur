@@ -248,6 +248,16 @@
   font-size: 12px;
 }
 
+.contact-preference {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dashboard-color-brun);
+  background: rgba(74, 63, 47, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
 .meet-link {
   color: var(--dashboard-color-form-sent);
   text-decoration: none;

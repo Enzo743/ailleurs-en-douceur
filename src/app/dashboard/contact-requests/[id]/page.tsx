@@ -280,6 +280,14 @@ export default async function ContactRequestDetailPage({
                     </span>
                   </div>
                 )}
+                {contactRequest.appointment.contactPreference && (
+                  <div className={styles['appointment-detail']}>
+                    <span className={styles['detail-label']}>Préférence de contact:</span>
+                    <span className={styles['detail-value']}>
+                      {contactRequest.appointment.contactPreference}
+                    </span>
+                  </div>
+                )}
               </div>
               
               <div className={styles['appointment-actions']}>

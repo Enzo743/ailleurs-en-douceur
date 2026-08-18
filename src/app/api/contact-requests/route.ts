@@ -34,6 +34,7 @@ interface ContactRequestWithRelations {
   formResponses?: {
     id: string;
     createdAt: Date;
+    values: Record<string, any>;
   }[];
   appointment?: {
     id: string;
@@ -124,6 +125,7 @@ export async function GET(request: NextRequest) {
             select: {
               id: true,
               createdAt: true,
+              values: true,
             },
             orderBy: { createdAt: 'desc' },
             take: 1,
@@ -340,6 +342,7 @@ export async function PATCH(request: NextRequest) {
           select: {
             id: true,
             createdAt: true,
+            values: true,
           },
           orderBy: { createdAt: 'desc' },
           take: 1,

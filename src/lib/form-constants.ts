@@ -82,6 +82,22 @@ export const DEFAULT_FIELD: Omit<FormField, 'id' | 'order'> = {
   maxValue: undefined,
 } as const;
 
+// Champ spécial pour le choix de contact (Visio/Téléphone)
+export const CONTACT_PREFERENCE_FIELD: Omit<FormField, 'id' | 'order' | 'key'> = {
+  label: 'Préférez-vous être recontacté par visioconférence ou par téléphone ?',
+  type: 'SELECT',
+  placeholder: '',
+  required: true,
+  allowOtherOption: false,
+  options: ['Visioconférence', 'Téléphone'],
+  defaultValue: '',
+  minValue: undefined,
+  maxValue: undefined,
+} as const;
+
+// Clé spéciale pour identifier ce champ
+export const CONTACT_PREFERENCE_KEY = 'contactPreference';
+
 // Générer un ID unique pour les champs
 let fieldIdCounter = 0;
 

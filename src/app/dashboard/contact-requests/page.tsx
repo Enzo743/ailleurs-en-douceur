@@ -255,6 +255,14 @@ export default async function ContactRequestsPage({
                       {formatDate(request.appointment.slot.date)}
                       <br />
                       {request.appointment.slot.startTime} - {request.appointment.slot.endTime}
+                      {request.appointment.contactPreference && (
+                        <>
+                          <br />
+                          <span className={styles['contact-preference']}>
+                            {request.appointment.contactPreference}
+                          </span>
+                        </>
+                      )}
                       {request.appointment.meetLink && (
                         <>
                           <br />

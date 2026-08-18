@@ -113,6 +113,8 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
             formData.data.fields.forEach((field: FormField) => {
               initialValues[field.key] = field.defaultValue || '';
             });
+            // Ajouter le champ de préférence de contact
+            initialValues['contactPreference'] = '';
             setFormValues(initialValues);
           }
         } else {
@@ -129,6 +131,8 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
               activeForm.fields.forEach((field: FormField) => {
                 initialValues[field.key] = field.defaultValue || '';
               });
+              // Ajouter le champ de préférence de contact
+              initialValues['contactPreference'] = '';
               setFormValues(initialValues);
             }
           }
@@ -204,6 +208,11 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
         }
       }
     });
+
+    // Valider le champ de préférence de contact
+    if (!formValues['contactPreference']) {
+      newErrors['contactPreference'] = 'Veuillez sélectionner une préférence de contact';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -631,6 +640,49 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
                     {renderField(field)}
                   </div>
                 ))}
+            </div>
+
+            {/* Question de préférence de contact */}
+            <div className={styles['contact-preference-container']}>
+              <div className={styles['contact-preference-field']}>
+                <fieldset className={styles['contact-preference-options']}>
+                  <legend className={styles['contact-preference-legend']}>
+                    Préférez-vous être recontacté par visioconférence ou par téléphone ?
+                    <span className={styles.required}> *</span>
+                  </legend>
+                  <div className={styles['contact-preference-option']}>
+                    <input
+                      type="radio"
+                      id="contact-preference-visio"
+                      name="contactPreference"
+                      value="Visioconférence"
+                      checked={formValues['contactPreference'] === 'Visioconférence'}
+                      onChange={(e) => handleFieldChange('contactPreference', e.target.value, 'SELECT')}
+                      className={styles['contact-preference-input']}
+                    />
+                    <label htmlFor="contact-preference-visio" className={styles['contact-preference-label']}>
+                      <span className={styles['contact-preference-icon']}>💻</span>
+                      <span>Visioconférence</span>
+                    </label>
+                  </div>
+                  <div className={styles['contact-preference-option']}>
+                    <input
+                      type="radio"
+                      id="contact-preference-phone"
+                      name="contactPreference"
+                      value="Téléphone"
+                      checked={formValues['contactPreference'] === 'Téléphone'}
+                      onChange={(e) => handleFieldChange('contactPreference', e.target.value, 'SELECT')}
+                      className={styles['contact-preference-input']}
+                    />
+                    <label htmlFor="contact-preference-phone" className={styles['contact-preference-label']}>
+                      <span className={styles['contact-preference-icon']}>📞</span>
+                      <span>Téléphone</span>
+                    </label>
+                  </div>
+                </fieldset>
+                {errors['contactPreference'] && <span className={styles['error-message']}>{errors['contactPreference']}</span>}
+              </div>
             </div>
 
             <div className={styles['submit-container']}>

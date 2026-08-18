@@ -23,6 +23,7 @@ interface ContactRequestData {
   days: number;
   status: string;
   hasFormResponse: boolean;
+  contactPreference?: string;
 }
 
 // Formater la date en français
@@ -75,6 +76,7 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
     meetLink?: string;
     date?: string;
     time?: string;
+    contactPreference?: string;
   } | null>(null);
 
   // Récupérer les données au montage
@@ -92,6 +94,14 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
         }
 
         const contactReq = contactData.data[0];
+        
+        // Récupérer la préférence de contact depuis la réponse du formulaire
+        let contactPreference: string | undefined = undefined;
+        if (contactReq.formResponses && contactReq.formResponses.length > 0) {
+          const lastResponse = contactReq.formResponses[0];
+          contactPreference = lastResponse.values?.contactPreference;
+        }
+        
         setContactRequest({
           id: contactReq.id,
           firstName: contactReq.firstName,
@@ -101,6 +111,7 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
           days: contactReq.days,
           status: contactReq.status,
           hasFormResponse: contactReq.formResponses && contactReq.formResponses.length > 0,
+          contactPreference: contactPreference,
         });
 
         // Récupérer les créneaux disponibles
@@ -154,6 +165,7 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
         body: JSON.stringify({
           contactRequestId: contactRequest.id,
           slotId: selectedSlot.id,
+          contactPreference: contactRequest.contactPreference,
         }),
       });
 
@@ -166,6 +178,7 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
           meetLink: result.data.meetLink,
           date: formatDate(selectedSlot.date),
           time: `${selectedSlot.startTime} - ${selectedSlot.endTime}`,
+          contactPreference: contactRequest.contactPreference,
         });
       } else {
         setConfirmation({
@@ -275,28 +288,38 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
                 <strong>Heure :</strong>
                 <span>{confirmation.time}</span>
               </div>
-              <div className={styles['detail-item']}>
-                <strong>Lien Google Meet :</strong>
+              {confirmation.contactPreference !== 'Téléphone' && confirmation.meetLink && (
+                <div className={styles['detail-item']}>
+                  <strong>Lien Google Meet :</strong>
+                  <a 
+                    href={confirmation.meetLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={styles['meet-link']}
+                  >
+                    {confirmation.meetLink}
+                  </a>
+                </div>
+              )}
+              {confirmation.contactPreference === 'Téléphone' && (
+                <div className={styles['detail-item']}>
+                  <strong>Type de rendez-vous :</strong>
+                  <span>Téléphone</span>
+                </div>
+              )}
+            </div>
+
+            <div className={styles['actions']}>
+              {confirmation.contactPreference !== 'Téléphone' && confirmation.meetLink && (
                 <a 
                   href={confirmation.meetLink} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className={styles['meet-link']}
+                  className={styles['primary-button']}
                 >
-                  {confirmation.meetLink}
+                  Joindre la réunion maintenant
                 </a>
-              </div>
-            </div>
-
-            <div className={styles['actions']}>
-              <a 
-                href={confirmation.meetLink} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className={styles['primary-button']}
-              >
-                Joindre la réunion maintenant
-              </a>
+              )}
               <button 
                 onClick={() => router.push('/')}
                 className={styles['secondary-button']}
@@ -306,7 +329,8 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
             </div>
 
             <p className={styles['note']}>
-              <strong>Note :</strong> Un email de confirmation avec le lien Google Meet 
+              <strong>Note :</strong> Un email de confirmation 
+              {confirmation.contactPreference !== 'Téléphone' ? 'avec le lien Google Meet ' : ''}
               vous a été envoyé. Vous recevrez également un rappel 24h avant le rendez-vous.
             </p>
           </div>

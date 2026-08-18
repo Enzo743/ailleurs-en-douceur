@@ -485,3 +485,75 @@
   white-space: nowrap;
 }
 
+// Styles pour la question de préférence de contact
+.contact-preference-container {
+  margin-bottom: 30px;
+}
+
+.contact-preference-field {
+  .contact-preference-options {
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .contact-preference-legend {
+    font-size: 16px;
+    font-weight: 600;
+    color: $color-brun;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .contact-preference-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    
+    .contact-preference-input {
+      display: none;
+      
+      &:checked + .contact-preference-label {
+        background: $color-brun;
+        color: $color-background;
+        border-color: $color-brun;
+        
+        .contact-preference-icon {
+          color: $color-background;
+        }
+      }
+    }
+
+    .contact-preference-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      border: 2px solid $color-border-light;
+      border-radius: 12px;
+      background: $color-background;
+      color: $color-text-primary;
+      font-size: 15px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      width: 100%;
+      text-align: center;
+      
+      &:hover {
+        border-color: $color-brun;
+        background: lighten($color-background, 2%);
+      }
+
+      .contact-preference-icon {
+        font-size: 20px;
+        color: $color-brun;
+      }
+    }
+  }
+}
+

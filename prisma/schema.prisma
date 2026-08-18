@@ -170,6 +170,7 @@ model Appointment {
   slot            AppointmentSlot @relation(fields: [slotId], references: [id])
   googleEventId   String?
   meetLink        String?
+  contactPreference String?
   status          AppointmentStatus @default(CONFIRMED)
   createdAt       DateTime         @default(now())
 
