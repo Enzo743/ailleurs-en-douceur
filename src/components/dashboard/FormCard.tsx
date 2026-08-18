@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useState } from 'react';
 import { getPackageLabel } from '@/lib/constants';
 import { FIELD_TYPE_LABELS } from '@/lib/form-constants';
 import StatusBadge from './StatusBadge';
@@ -31,6 +34,63 @@ interface FormCardProps {
 }
 
 export default function FormCard({ form }: FormCardProps) {
+  const [isSubmitting, setIsSubmitting] = useState<string | null>(null);
+  const [submitStatus, setSubmitStatus] = useState<{ success?: boolean; message: string } | null>(null);
+
+  const handleAction = async (actionType: string, formId: string) => {
+    setIsSubmitting(actionType);
+    setSubmitStatus(null);
+    
+    try {
+      const url = actionType === 'toggle' 
+        ? `/api/dashboard/forms/${formId}/toggle`
+        : `/api/dashboard/forms/${formId}`;
+      
+      const method = actionType === 'toggle' ? 'POST' : 'DELETE';
+      const body = actionType === 'delete' 
+        ? JSON.stringify({ _method: 'DELETE' })
+        : null;
+      
+      const response = await fetch(url, {
+        method: method,
+        headers: body ? { 'Content-Type': 'application/json' } : undefined,
+        body: body,
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        setSubmitStatus({
+          success: true,
+          message: result.message || 
+            (actionType === 'toggle' 
+              ? `Formulaire ${form.isActive ? 'désactivé' : 'activé'} avec succès !`
+              : 'Formulaire supprimé avec succès !')
+        });
+        
+        // Recharger la page après 1,5 seconde
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+        
+      } else {
+        setSubmitStatus({
+          success: false,
+          message: result.error || result.message || 'Une erreur est survenue.'
+        });
+      }
+      
+    } catch (error: any) {
+      console.error('Error:', error);
+      setSubmitStatus({
+        success: false,
+        message: 'Impossible de compléter l\'action. Veuillez vérifier votre connexion.'
+      });
+    } finally {
+      setIsSubmitting(null);
+    }
+  };
+
   return (
     <div className={styles.card}>
       <div className={styles['card-header']}>
@@ -78,18 +138,31 @@ export default function FormCard({ form }: FormCardProps) {
         <Link href={`/dashboard/forms/${form.id}/edit`} className={styles['action-button']}>
           Modifier
         </Link>
-        <form action={`/api/dashboard/forms/${form.id}/toggle`} method="POST">
-          <button type="submit" className={styles['action-button']}>
-            {form.isActive ? 'Désactiver' : 'Activer'}
-          </button>
-        </form>
+        
+        {submitStatus && (
+          <div className={`${styles['status-message']} ${submitStatus.success ? styles.success : styles.error}`}>
+            <p>{submitStatus.message}</p>
+          </div>
+        )}
+        
+        <button 
+          type="button" 
+          onClick={() => handleAction('toggle', form.id)}
+          disabled={isSubmitting === 'toggle'}
+          className={styles['action-button']}
+        >
+          {isSubmitting === 'toggle' ? 'Traitement...' : (form.isActive ? 'Désactiver' : 'Activer')}
+        </button>
+        
         {form._count.responses === 0 && (
-          <form action={`/api/dashboard/forms/${form.id}`} method="POST">
-            <input type="hidden" name="_method" value="DELETE" />
-            <button type="submit" className={styles['delete-button']}>
-              Supprimer
-            </button>
-          </form>
+          <button 
+            type="button" 
+            onClick={() => handleAction('delete', form.id)}
+            disabled={isSubmitting === 'delete'}
+            className={styles['delete-button']}
+          >
+            {isSubmitting === 'delete' ? 'Suppression...' : 'Supprimer'}
+          </button>
         )}
       </div>
     </div>
