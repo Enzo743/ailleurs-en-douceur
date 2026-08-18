@@ -7,6 +7,7 @@ import { getPackageLabel } from '@/lib/constants';
 import { formatDate } from '@/lib/time';
 import { StatusBadge } from '@/components/dashboard';
 import AssignFormClient from '@/components/dashboard/AssignFormClient';
+import ActionFormClient from '@/components/dashboard/ActionFormClient';
 
 // Formater les valeurs JSON pour affichage
 const formatValue = (value: any): string => {
@@ -290,12 +291,16 @@ export default async function ContactRequestDetailPage({
                 >
                   Rejoindre la réunion
                 </a>
-                <form action={`/api/dashboard/appointments/${contactRequest.appointment.id}`} method="POST">
-                  <input type="hidden" name="_method" value="DELETE" />
-                  <button type="submit" className={styles['cancel-button']}>
-                    Annuler le rendez-vous
-                  </button>
-                </form>
+                <ActionFormClient
+                  actionUrl={`/api/dashboard/appointments/${contactRequest.appointment.id}`}
+                  method="POST"
+                  hiddenInputs={{ _method: 'DELETE' }}
+                  submitText="Annuler le rendez-vous"
+                  successMessage="Rendez-vous annulé avec succès !"
+                  errorMessage="Impossible d'annuler le rendez-vous."
+                  reloadOnSuccess={true}
+                  className={styles['cancel-form']}
+                />
               </div>
             </>
           ) : (
@@ -331,18 +336,25 @@ export default async function ContactRequestDetailPage({
           Modifier la demande
         </Link>
         {contactRequest.status !== 'COMPLETED' && (
-          <form action={`/api/dashboard/contact-requests/${contactRequest.id}/resend-form`} method="POST">
-            <button type="submit" className={styles['action-button']}>
-              Renvoyer le lien du formulaire
-            </button>
-          </form>
+          <ActionFormClient
+            actionUrl={`/api/dashboard/contact-requests/${contactRequest.id}/resend-form`}
+            method="POST"
+            submitText="Renvoyer le lien du formulaire"
+            successMessage="Lien du formulaire renvoyé avec succès ! Le client a reçu un nouvel email."
+            errorMessage="Impossible de renvoyer le lien du formulaire."
+            className={styles['resend-form']}
+          />
         )}
-        <form action={`/api/dashboard/contact-requests/${contactRequest.id}`} method="POST">
-          <input type="hidden" name="_method" value="DELETE" />
-          <button type="submit" className={styles['delete-button']}>
-            Supprimer la demande
-          </button>
-        </form>
+        <ActionFormClient
+          actionUrl={`/api/dashboard/contact-requests/${contactRequest.id}`}
+          method="POST"
+          hiddenInputs={{ _method: 'DELETE' }}
+          submitText="Supprimer la demande"
+          successMessage="Demande supprimée avec succès !"
+          errorMessage="Impossible de supprimer la demande."
+          redirectOnSuccess="/dashboard/contact-requests"
+          className={styles['delete-form']}
+        />
       </div>
     </section>
   );
