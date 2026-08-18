@@ -17,6 +17,10 @@ interface CustomForm {
   successMessage: string;
   isActive: boolean;
   fields: FormFieldType[];
+  stats?: {
+    responsesCount: number;
+    requestsCount: number;
+  };
 }
 
 interface FormData {
@@ -42,8 +46,10 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ success?: boolean; message: string } | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [hasResponses, setHasResponses] = useState(false);
 
   // Utiliser le hook pour gérer les champs
   const {
@@ -88,6 +94,9 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
 
         // Initialiser les champs avec les données du formulaire
         setFields(form.fields);
+        
+        // Vérifier si le formulaire a des réponses
+        setHasResponses((form.stats?.responsesCount || 0) > 0);
 
       } catch (error) {
         console.error('Error fetching form:', error);
@@ -121,6 +130,15 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
 
   // Supprimer un champ avec confirmation pour les champs existants
   const removeField = (fieldId: string) => {
+    // Si le formulaire a des réponses, ne pas supprimer
+    if (hasResponses) {
+      setSubmitStatus({
+        success: false,
+        message: 'Impossible de supprimer ce champ car le formulaire a déjà des réponses.'
+      });
+      return;
+    }
+
     // Ne pas supprimer si c'est le dernier champ
     if (fields.length <= 1) {
       setSubmitStatus({
@@ -130,14 +148,26 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
       return;
     }
 
-    // Si c'est un champ existant (avec un vrai ID), demander confirmation
-    if (!fieldId.startsWith('new-')) {
+    // Si c'est un champ existant (avec un vrai ID de base de données), demander confirmation
+    if (!fieldId.startsWith('field-')) {
       if (!confirm('Êtes-vous sûr de vouloir supprimer ce champ ? Cette action est irréversible.')) {
         return;
       }
     }
 
     removeFieldFromHook(fieldId, 1);
+  };
+
+  // Ajouter un champ - désactivé si le formulaire a des réponses
+  const handleAddField = () => {
+    if (hasResponses) {
+      setSubmitStatus({
+        success: false,
+        message: 'Impossible d\'ajouter un champ car le formulaire a déjà des réponses.'
+      });
+      return;
+    }
+    addField();
   };
 
   // Valider le formulaire
@@ -176,15 +206,23 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
     setSubmitStatus(null);
 
     try {
-      // Séparer les champs existants et nouveaux
-      const existingFields = fields.filter((f) => !f.id.startsWith('new-'));
-      const newFields = fields.filter((f) => f.id.startsWith('new-'));
+      // Séparer les champs existants (IDs de base de données) et nouveaux (IDs locaux)
+      // Les IDs de base de données sont des CUIDs (format: cxxxxxxxxxxxxxxxxxxxxxxxx)
+      // Les IDs locaux commencent par 'field-'
+      const existingFields = fields.filter((f) => !f.id.startsWith('field-'));
+      const newFields = fields.filter((f) => f.id.startsWith('field-'));
+
+      // Préparer les données au format attendu par l'API
+      // L'API attend un tableau 'fields' avec un champ '_action' pour chaque élément
+      const fieldsForApi = [
+        ...existingFields.map((field) => ({ ...field, _action: 'update' })),
+        ...newFields.map(({ id, ...rest }) => ({ ...rest, _action: 'create' })),
+      ];
 
       // Préparer les données
       const dataToSend = {
         ...formData,
-        fieldsToAdd: newFields.map(({ id, ...rest }) => rest),
-        fieldsToUpdate: existingFields.map((field) => field),
+        fields: fieldsForApi,
       };
 
       const response = await fetch(`/api/forms/${id}`, {
@@ -222,6 +260,61 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Dupliquer le formulaire pour permettre la modification
+  const handleDuplicateForm = async () => {
+    if (!hasResponses) {
+      setSubmitStatus({
+        success: false,
+        message: 'Ce formulaire n&#39;a pas de réponses, vous pouvez le modifier directement.'
+      });
+      return;
+    }
+
+    if (!confirm('Êtes-vous sûr de vouloir dupliquer ce formulaire ? L&#39;ancien formulaire sera désactivé et toutes les demandes en cours seront transférées vers la nouvelle copie.')) {
+      return;
+    }
+
+    setIsDuplicating(true);
+    setSubmitStatus(null);
+
+    try {
+      const response = await fetch(`/api/dashboard/forms/${id}/duplicate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setSubmitStatus({
+          success: true,
+          message: 'Formulaire dupliqué avec succès ! Redirection vers la nouvelle copie...'
+        });
+
+        setTimeout(() => {
+          router.push(`/dashboard/forms/${result.data.id}/edit`);
+        }, 2000);
+
+      } else {
+        setSubmitStatus({
+          success: false,
+          message: result.error || 'Une erreur est survenue lors de la duplication du formulaire.'
+        });
+      }
+
+    } catch (error: any) {
+      console.error('Error duplicating form:', error);
+      setSubmitStatus({
+        success: false,
+        message: 'Impossible de dupliquer le formulaire. Veuillez vérifier votre connexion.'
+      });
+    } finally {
+      setIsDuplicating(false);
     }
   };
 
@@ -373,10 +466,29 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
         <div className={styles['form-section']}>
           <h2 className={styles['section-title']}>
             Champs du formulaire
-            <button type="button" onClick={addField} className={styles['add-field-button']}>
-              + Ajouter un champ
-            </button>
+            {hasResponses ? (
+              <span className={styles['responses-warning']}>
+                ⚠️ Impossible de modifier les champs - ce formulaire a déjà des réponses
+              </span>
+            ) : (
+              <button type="button" onClick={handleAddField} className={styles['add-field-button']}>
+                + Ajouter un champ
+              </button>
+            )}
           </h2>
+
+          {hasResponses && (
+            <div className={styles['info-box']}>
+              <p>
+                Ce formulaire a déjà reçu des réponses. Pour préserver l'intégrité des données,
+                il n'est plus possible d'ajouter, modifier ou supprimer des champs.
+              </p>
+              <p>
+                Vous pouvez toujours modifier les informations du formulaire (nom, description, etc.)
+                et son statut (actif/inactif).
+              </p>
+            </div>
+          )}
 
           <div className={styles['fields-container']}>
             {fields.map((field, index) => (
@@ -394,7 +506,8 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
                 onRemove={() => removeField(field.id)}
                 canMoveUp={index > 0}
                 canMoveDown={index < fields.length - 1}
-                showActions={true}
+                showActions={!hasResponses}
+                disabled={hasResponses}
               />
             ))}
           </div>
@@ -402,6 +515,16 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
 
         {/* Actions */}
         <div className={styles['form-actions']}>
+          {hasResponses && (
+            <button
+              type="button"
+              onClick={handleDuplicateForm}
+              disabled={isDuplicating}
+              className={styles['duplicate-button']}
+            >
+              {isDuplicating ? 'Duplication en cours...' : 'Dupliquer et modifier'}
+            </button>
+          )}
           <button
             type="submit"
             disabled={isSubmitting}

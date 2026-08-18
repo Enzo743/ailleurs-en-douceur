@@ -277,13 +277,28 @@ export async function PATCH(
     // Vérifier que le formulaire existe
     const existingForm = await prisma.customForm.findUnique({
       where: { id },
-      include: { fields: true },
+      include: { 
+        fields: true,
+        _count: { select: { responses: true } }
+      },
     });
 
     if (!existingForm) {
       return NextResponse.json(
         { success: false, error: 'Formulaire non trouvé' },
         { status: 404 }
+      );
+    }
+
+    // Vérifier si le formulaire a des réponses - on ne peut pas modifier les champs
+    // Mais on peut modifier les métadonnées du formulaire (nom, description, etc.)
+    if (existingForm._count.responses > 0 && fieldUpdates.length > 0) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: `Impossible de modifier les champs de ce formulaire car il a ${existingForm._count.responses} réponses associées. Vous pouvez modifier les informations du formulaire, mais pas ses champs.` 
+        },
+        { status: 400 }
       );
     }
 

@@ -17,6 +17,7 @@ interface FormFieldProps {
   canMoveUp: boolean;
   canMoveDown: boolean;
   showActions: boolean;
+  disabled?: boolean;
 }
 
 export default function FormField({
@@ -33,8 +34,9 @@ export default function FormField({
   canMoveUp,
   canMoveDown,
   showActions,
+  disabled = false,
 }: FormFieldProps) {
-  const renderInputByType = () => {
+  const renderInputByType = (isDisabled: boolean = false) => {
     switch (field.type) {
       case 'TEXTAREA':
         return (
@@ -45,6 +47,7 @@ export default function FormField({
             placeholder="Valeur par défaut"
             rows={3}
             className={styles.input}
+            disabled={isDisabled}
           />
         );
       case 'SELECT':
@@ -65,6 +68,7 @@ export default function FormField({
             onChange={(e) => onChange('defaultValue', e.target.value)}
             placeholder="Valeur par défaut"
             className={styles.input}
+            disabled={isDisabled}
           />
         );
     }
@@ -85,6 +89,7 @@ export default function FormField({
                 onClick={onMoveUp}
                 className={styles.moveButton}
                 title="Monter"
+                disabled={disabled}
               >
                 ↑
               </button>
@@ -95,6 +100,7 @@ export default function FormField({
                 onClick={onMoveDown}
                 className={styles.moveButton}
                 title="Descendre"
+                disabled={disabled}
               >
                 ↓
               </button>
@@ -104,6 +110,7 @@ export default function FormField({
               onClick={onRemove}
               className={styles.removeButton}
               title="Supprimer"
+              disabled={disabled}
             >
               ×
             </button>
@@ -121,6 +128,7 @@ export default function FormField({
             onChange={(e) => onChange('label', e.target.value)}
             placeholder="Ex: Quelle est votre date préférée ?"
             className={styles.input}
+            disabled={disabled}
           />
           {error?.includes('-label') && <span className={styles.errorMessage}>{error}</span>}
         </div>
@@ -134,6 +142,7 @@ export default function FormField({
             onChange={(e) => onChange('key', e.target.value)}
             placeholder="Ex: preferred-date"
             className={styles.input}
+            disabled={disabled}
           />
           {error?.includes('-key') && <span className={styles.errorMessage}>{error}</span>}
         </div>
@@ -145,6 +154,7 @@ export default function FormField({
             value={field.type}
             onChange={(e) => onChange('type', e.target.value as FormFieldType['type'])}
             className={styles.input}
+            disabled={disabled}
           >
             <option value="TEXT">Texte court</option>
             <option value="TEXTAREA">Texte long</option>
@@ -165,6 +175,7 @@ export default function FormField({
               checked={field.required}
               onChange={(e) => onChange('required', e.target.checked)}
               className={styles.checkbox}
+              disabled={disabled}
             />
             Champ obligatoire
           </label>
@@ -183,11 +194,13 @@ export default function FormField({
                 onChange={(e) => onUpdateOption(optIndex, e.target.value)}
                 placeholder={`Option ${optIndex + 1}`}
                 className={styles.input}
+                disabled={disabled}
               />
               <button
                 type="button"
                 onClick={() => onRemoveOption(optIndex)}
                 className={styles.removeOptionButton}
+                disabled={disabled}
               >
                 ×
               </button>
@@ -196,7 +209,7 @@ export default function FormField({
           {error?.includes('-options') && (
             <span className={styles.errorMessage}>{error}</span>
           )}
-          <button type="button" onClick={onAddOption} className={styles.addOptionButton}>
+          <button type="button" onClick={onAddOption} className={styles.addOptionButton} disabled={disabled}>
             + Ajouter une option
           </button>
         </div>
@@ -213,6 +226,7 @@ export default function FormField({
             onChange={(e) => onChange('placeholder', e.target.value)}
             placeholder="Texte d'aide"
             className={styles.input}
+            disabled={disabled}
           />
         </div>
       )}
@@ -221,7 +235,7 @@ export default function FormField({
       {field.type !== 'CHECKBOX' && field.type !== 'SELECT' && field.type !== 'MULTISELECT' && (
         <div className={styles.formGroup}>
           <label htmlFor={`defaultValue-${field.id}`}>Valeur par défaut (optionnelle)</label>
-          {renderInputByType()}
+          {renderInputByType(disabled)}
         </div>
       )}
     </div>
