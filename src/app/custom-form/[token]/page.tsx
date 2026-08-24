@@ -7,7 +7,8 @@ import { getPackageLabel } from '@/lib/constants';
 import { FormSection, FormField as FormFieldType } from '@/lib/form-constants';
 import FormProgressBar from '@/components/FormProgressBar';
 
-interface FormField extends FormFieldType {
+interface FormField extends Omit<FormFieldType, 'key'> {
+  key: string; // Rend la clé obligatoire pour le frontend
   sectionId?: string;
 }
 

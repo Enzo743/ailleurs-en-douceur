@@ -204,7 +204,7 @@ export default function NewFormPage() {
   const renderField = useCallback((field: FormFieldType, sectionId?: string) => {
     const fieldIndex = fields.findIndex(f => f.id === field.id);
     const section = sectionId ? getSectionById(sectionId) : undefined;
-    const sectionFields = section ? getFieldsForSection(sectionId) : [];
+    const sectionFields = section ? getFieldsForSection(section.id) : [];
     const fieldPositionInSection = sectionFields.findIndex(f => f.id === field.id);
 
     return (

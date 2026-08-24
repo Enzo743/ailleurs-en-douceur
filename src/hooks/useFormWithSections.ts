@@ -24,7 +24,7 @@ interface UseFormWithSectionsReturn {
   expandedSections: Set<string>;
   
   // Actions pour les champs
-  setFields: (fields: FormField[]) => void;
+  setFields: (fields: FormField[] | ((prev: FormField[]) => FormField[])) => void;
   addField: (sectionId?: string) => void;
   removeField: (fieldId: string, minFields?: number) => boolean;
   handleFieldChange: (
@@ -40,7 +40,7 @@ interface UseFormWithSectionsReturn {
   assignFieldToSection: (fieldId: string, sectionId: string | null) => void;
   
   // Actions pour les sections
-  setSections: (sections: FormSection[]) => void;
+  setSections: (sections: FormSection[] | ((prev: FormSection[]) => FormSection[])) => void;
   addSection: () => void;
   removeSection: (sectionId: string) => boolean;
   handleSectionChange: (
@@ -264,7 +264,7 @@ export function useFormWithSections({
     // Mettre à jour le champ
     setFields((prev) =>
       prev.map((field) =>
-        field.id === fieldId ? { ...field, sectionId } : field
+        field.id === fieldId ? { ...field, sectionId: sectionId ?? undefined } : field
       )
     );
 

@@ -164,7 +164,11 @@ export async function GET(request: NextRequest) {
       createdAt: cr.createdAt,
       updatedAt: cr.updatedAt,
       form: cr.form,
-      formResponses: cr.formResponses,
+      formResponses: cr.formResponses.map((fr) => ({
+        id: fr.id,
+        createdAt: fr.createdAt,
+        values: (fr.values as Record<string, any>) || {},
+      })),
       appointment: cr.appointment ? {
         id: cr.appointment.id,
         status: cr.appointment.status,
@@ -481,7 +485,11 @@ Date: ${new Date().toLocaleString('fr-FR')}
           createdAt: updatedRequest.createdAt,
           updatedAt: updatedRequest.updatedAt,
           form: updatedRequest.form,
-          formResponses: updatedRequest.formResponses,
+          formResponses: updatedRequest.formResponses.map((fr) => ({
+            id: fr.id,
+            createdAt: fr.createdAt,
+            values: (fr.values as Record<string, any>) || {},
+          })),
           appointment: updatedRequest.appointment,
         },
       },

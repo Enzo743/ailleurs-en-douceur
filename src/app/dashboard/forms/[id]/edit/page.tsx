@@ -4,9 +4,9 @@ import { useState, FormEvent, useEffect, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PACKAGE_TYPE_OPTIONS } from '@/lib/constants';
-import { FormField as FormFieldType, FormSection } from '@/lib/form-constants';
+import { FormField, FormField as FormFieldType, FormSection } from '@/lib/form-constants';
 import { useFormWithSections } from '@/hooks/useFormWithSections';
-import { FormField, FormSection as FormSectionComponent } from '@/components/dashboard';
+import { FormField as FormFieldComponent, FormSection as FormSectionComponent } from '@/components/dashboard';
 import styles from './page.module.scss';
 
 interface CustomForm {
@@ -308,11 +308,11 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
   const renderField = useCallback((field: FormFieldType, sectionId?: string) => {
     const fieldIndex = fields.findIndex(f => f.id === field.id);
     const section = sectionId ? getSectionById(sectionId) : undefined;
-    const sectionFields = section ? getFieldsForSection(sectionId) : [];
+    const sectionFields = section ? getFieldsForSection(section.id) : [];
     const fieldPositionInSection = sectionFields.findIndex(f => f.id === field.id);
 
     return (
-      <FormField
+      <FormFieldComponent
         key={field.id}
         field={field}
         fieldIndex={fieldIndex + 1}
@@ -376,11 +376,11 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
         }]);
         
         // Assigner tous les champs à cette section
-        setFields(prev => prev.map(field => ({ ...field, sectionId })));
+        setFields((prev: FormField[]) => prev.map(field => ({ ...field, sectionId } as FormField)));
       }
     } else {
       // Si on désactive les sections, retirer les assignations
-      setFields(prev => prev.map(field => ({ ...field, sectionId: undefined })));
+      setFields((prev: FormField[]) => prev.map(field => ({ ...field, sectionId: undefined } as FormField)));
       setSections([]);
     }
     

@@ -223,8 +223,8 @@ export default async function ContactRequestDetailPage({
               {contactRequest.form && (
                 <div className={styles['response-grid']}>
                   {contactRequest.form.fields.map((field) => {
-                    const value = (formResponse.values as Record<string, any>)[field.key];
-                    const allValues = formResponse.values as Record<string, any>;
+                    const allValues = (formResponse.values as Record<string, any>) || {};
+                    const value = allValues[field.key];
                     return (
                       <div key={field.id} className={styles['response-item']}>
                         <div className={styles['response-field-label']}>
