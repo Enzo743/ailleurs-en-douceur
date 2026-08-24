@@ -10,11 +10,26 @@ import AssignFormClient from '@/components/dashboard/AssignFormClient';
 import ActionFormClient from '@/components/dashboard/ActionFormClient';
 
 // Formater les valeurs JSON pour affichage
-const formatValue = (value: any): string => {
+const formatValue = (value: any, allValues: Record<string, any> = {}, fieldKey?: string): string => {
   if (value === null || value === undefined) return 'Non renseigné';
-  if (Array.isArray(value)) return value.join(', ');
+  if (Array.isArray(value)) {
+    // Pour les tableaux, vérifier si '_OTHER_' est présent et remplacer par la valeur personnalisée
+    const formattedArray = value.map((v: any) => {
+      if (v === '_OTHER_' && fieldKey && allValues[`${fieldKey}_other`]) {
+        return allValues[`${fieldKey}_other`];
+      }
+      return String(v);
+    });
+    return formattedArray.join(', ');
+  }
   if (typeof value === 'boolean') return value ? 'Oui' : 'Non';
   if (typeof value === 'object') return JSON.stringify(value);
+  
+  // Cas spécial : si la valeur est '_OTHER_', afficher la valeur personnalisée
+  if (value === '_OTHER_' && fieldKey && allValues[`${fieldKey}_other`]) {
+    return String(allValues[`${fieldKey}_other`]);
+  }
+  
   return String(value);
 };
 
@@ -209,13 +224,14 @@ export default async function ContactRequestDetailPage({
                 <div className={styles['response-grid']}>
                   {contactRequest.form.fields.map((field) => {
                     const value = (formResponse.values as Record<string, any>)[field.key];
+                    const allValues = formResponse.values as Record<string, any>;
                     return (
                       <div key={field.id} className={styles['response-item']}>
                         <div className={styles['response-field-label']}>
                           {field.label}{field.required && <span className={styles.required}>*</span>}
                         </div>
                         <div className={styles['response-field-value']}>
-                          {formatValue(value)}
+                          {formatValue(value, allValues, field.key)}
                         </div>
                       </div>
                     );
