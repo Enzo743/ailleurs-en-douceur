@@ -1,0 +1,290 @@
+.section-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    border-color: #4a3f2f;
+  }
+
+  &.expanded {
+    border-color: #4a3f2f;
+  }
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  cursor: pointer;
+
+  .section-title-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #4a3f2f;
+    margin: 0;
+    flex: 1;
+  }
+
+  .section-description {
+    font-size: 14px;
+    color: #666;
+    margin: 5px 0 0 0;
+    font-style: italic;
+  }
+
+  .section-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+}
+
+.section-content {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.section-form-group {
+  margin-bottom: 15px;
+
+  label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4a3f2f;
+    margin-bottom: 5px;
+  }
+
+  input[type="text"],
+  textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #4a3f2f;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+}
+
+.section-fields-list {
+  margin-top: 15px;
+}
+
+.section-fields-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a3f2f;
+  margin-bottom: 10px;
+}
+
+.section-field-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  background: var(--dashboard-color-background-light);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid var(--dashboard-color-border);
+
+  .field-info {
+    flex: 1;
+    font-size: 14px;
+  }
+
+  .remove-field-from-section {
+    background: var(--dashboard-color-cancelled);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background: var(--dashboard-color-cancelled-dark);
+    }
+  }
+
+  .field-actions-in-section {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 10px;
+    border-top: 1px solid var(--dashboard-color-border-medium);
+    margin-top: 5px;
+  }
+}
+
+.add-section-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #4a3f2f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  margin-bottom: 20px;
+
+  &:hover {
+    background: #3a3228;
+  }
+
+  .icon {
+    font-size: 16px;
+  }
+}
+
+.sections-list {
+  margin-bottom: 20px;
+}
+
+.section-order-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: #4a3f2f;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.section-move-buttons {
+  display: flex;
+  gap: 4px;
+
+  button {
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s;
+
+    &:hover:not(:disabled) {
+      background: #e0e0e0;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.empty-section-message {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+  font-style: italic;
+  background: #f9f9f9;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.section-error {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+// Animation pour l'expansion
+.section-expand-enter {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.section-expand-enter-active {
+  max-height: 1000px;
+}
+
+.section-expand-exit {
+  max-height: 1000px;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in;
+}
+
+.section-expand-exit-active {
+  max-height: 0;
+}
+
+// Style pour la barre de progression
+.progress-bar-container {
+  background: #f0f0f0;
+  height: 4px;
+  border-radius: 2px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #4a3f2f;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.progress-indicators {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+
+  .progress-indicator {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+
+    &.active {
+      background: #4a3f2f;
+      color: white;
+    }
+
+    &.completed {
+      background: #2e7d32;
+      color: white;
+    }
+  }
+}

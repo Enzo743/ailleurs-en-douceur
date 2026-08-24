@@ -463,3 +463,282 @@
     padding: 4px 8px;
   }
 }
+
+// ============================================================================
+// Styles pour les sections
+// ============================================================================
+
+.form-section {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dashboard-color-primary);
+    margin: 0 0 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dashboard-color-primary);
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  select,
+  textarea {
+    padding: 10px 14px;
+    border: 2px solid var(--dashboard-color-border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: white;
+    color: var(--dashboard-color-text-primary);
+
+    &:focus {
+      outline: none;
+      border-color: var(--dashboard-color-primary);
+      box-shadow: 0 0 0 3px rgba(74, 63, 47, 0.1);
+    }
+
+    &::placeholder {
+      color: var(--dashboard-color-text-light);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  select {
+    cursor: pointer;
+  }
+
+  &.has-error {
+    input,
+    select,
+    textarea {
+      border-color: var(--dashboard-color-cancelled);
+    }
+  }
+
+  .error-message {
+    color: var(--dashboard-color-cancelled);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+}
+
+.checkbox-label {
+  margin-left: 8px;
+  font-size: 14px;
+  color: var(--dashboard-color-text-primary);
+  cursor: pointer;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--dashboard-color-text-secondary);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+// Boutons
+.add-field-button,
+.add-section-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--dashboard-color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background: var(--dashboard-color-primary-dark);
+  }
+}
+
+// Sections
+.sections-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.unassigned-fields {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 2px solid var(--dashboard-color-border);
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dashboard-color-primary);
+    margin: 0 0 10px 0;
+  }
+}
+
+.fields-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px;
+  color: var(--dashboard-color-text-secondary);
+  background: var(--dashboard-color-background);
+  border-radius: 8px;
+  margin: 15px 0;
+
+  p {
+    margin: 0;
+  }
+}
+
+// Boutons de soumission
+.submit-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid var(--dashboard-color-border);
+}
+
+.submit-button {
+  background: var(--dashboard-color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 30px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+
+  &:hover:not(:disabled) {
+    background: var(--dashboard-color-primary-dark);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Styles pour les actions de section
+.section-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: 15px;
+}
+
+// Styles pour les champs non assignés
+.unassigned-field-container {
+  background: var(--dashboard-color-background-light);
+  border: 1px solid var(--dashboard-color-border);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+
+  // Le composant FormField est affiché normalement
+  > div {
+    margin-bottom: 15px;
+  }
+}
+
+.assign-section-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--dashboard-color-border-medium);
+}
+
+.section-selector {
+  padding: 8px 12px;
+  border: 2px solid var(--dashboard-color-border);
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--dashboard-color-background);
+  color: var(--dashboard-color-text-primary);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  min-width: 200px;
+
+  &:focus {
+    outline: none;
+    border-color: var(--dashboard-color-primary);
+  }
+
+  option {
+    background: var(--dashboard-color-background);
+    color: var(--dashboard-color-text-primary);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .page {
+    padding: 15px;
+  }
+  
+  .assign-section-container {
+    justify-content: stretch;
+  }
+  
+  .section-selector {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .section-actions {
+    flex-direction: column;
+    gap: 8px;
+    margin-left: 0;
+    margin-top: 10px;
+    width: 100%;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+

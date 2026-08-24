@@ -557,3 +557,81 @@
   }
 }
 
+// ============================================================================
+// Styles pour les sections
+// ============================================================================
+
+.sections-container {
+  margin-bottom: 30px;
+}
+
+.current-section {
+  margin-bottom: 20px;
+}
+
+.section-description {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: $color-background-light;
+  border-radius: 8px;
+  border-left: 4px solid $color-brun;
+
+  p {
+    margin: 0;
+    color: $color-text-secondary;
+    line-height: 1.6;
+  }
+}
+
+.section-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid $color-border-light;
+
+  .nav-button {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: $color-brun;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: darken($color-brun, 10%);
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .submit-button {
+    background: $color-brun;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: darken($color-brun, 10%);
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+

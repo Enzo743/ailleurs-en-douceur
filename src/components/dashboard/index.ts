@@ -8,6 +8,7 @@ export { default as EmptyState } from './EmptyState';
 export { default as FilterForm } from './FilterForm';
 export { default as FormCard } from './FormCard';
 export { default as FormField } from './FormField';
+export { default as FormSection } from './FormSection';
 export { default as Pagination } from './Pagination';
 export { default as RichTextEditor } from './RichTextEditor';
 export { default as SectionCard } from './SectionCard';

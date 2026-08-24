@@ -4,12 +4,37 @@ import { prisma } from "@/lib/prisma";
 import { FieldType } from "@prisma/client";
 import { generateFieldKey } from '@/lib/field-utils';
 
+interface FormSectionData {
+  id?: string;
+  name: string;
+  description?: string;
+  order?: number;
+  fieldIds?: string[];
+}
+
 interface UpdateFormData {
   name?: string;
   packageType?: string;
   description?: string;
   successMessage?: string;
   isActive?: boolean;
+  sections?: FormSectionData[];
+  fields?: Array<{
+    id?: string;
+    label: string;
+    key: string;
+    type: FieldType | string;
+    placeholder?: string;
+    required?: boolean;
+    allowOtherOption?: boolean;
+    options?: string[];
+    defaultValue?: string;
+    minValue?: string;
+    maxValue?: string;
+    order?: number;
+    sectionId?: string;
+    _action?: 'create' | 'update' | 'delete';
+  }>;
 }
 
 interface FormFieldUpdate {
@@ -25,6 +50,7 @@ interface FormFieldUpdate {
   minValue?: string;
   maxValue?: string;
   order?: number;
+  sectionId?: string;
   _action?: 'create' | 'update' | 'delete';
 }
 
@@ -56,12 +82,20 @@ export async function GET(
       );
     }
 
-    // Récupérer le formulaire avec ses champs et statistiques
+    // Récupérer le formulaire avec ses champs, sections et statistiques
     const form = await prisma.customForm.findUnique({
       where: { id },
       include: {
         fields: {
           orderBy: { order: 'asc' },
+        },
+        sections: {
+          orderBy: { order: 'asc' },
+          include: {
+            fields: {
+              orderBy: { order: 'asc' },
+            },
+          },
         },
         _count: {
           select: {
@@ -106,6 +140,13 @@ export async function GET(
         isActive: form.isActive,
         createdAt: form.createdAt,
         updatedAt: form.updatedAt,
+        sections: form.sections.map((section) => ({
+          id: section.id,
+          name: section.name,
+          description: section.description,
+          order: section.order,
+          fieldIds: section.fields.map(f => f.id),
+        })),
         fields: form.fields.map((field) => ({
           id: field.id,
           label: field.label,
@@ -119,6 +160,7 @@ export async function GET(
           minValue: field.minValue,
           maxValue: field.maxValue,
           order: field.order,
+          sectionId: field.sectionId,
         })),
         stats: {
           responsesCount: form._count.responses,
@@ -192,57 +234,214 @@ export async function PUT(
     if (formData.successMessage !== undefined) updateData.successMessage = formData.successMessage;
     if (formData.isActive !== undefined) updateData.isActive = formData.isActive;
 
-    const updatedForm = await prisma.customForm.update({
-      where: { id },
-      data: updateData,
-      include: {
-        fields: {
-          orderBy: { order: 'asc' },
-        },
-        _count: {
-          select: {
-            responses: true,
-            contactRequests: true,
-          },
-        },
-      },
-    });
+    // Gérer les sections et champs
+    if (formData.sections) {
+      // Supprimer les anciennes sections et champs
+      await prisma.formSection.deleteMany({
+        where: { formId: id },
+      });
+      
+      await prisma.formField.deleteMany({
+        where: { formId: id },
+      });
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Formulaire mis à jour avec succès',
-        data: {
-          id: updatedForm.id,
-          name: updatedForm.name,
-          packageType: updatedForm.packageType,
-          description: updatedForm.description,
-          successMessage: updatedForm.successMessage,
-          isActive: updatedForm.isActive,
-          createdAt: updatedForm.createdAt,
-          updatedAt: updatedForm.updatedAt,
-          fields: updatedForm.fields.map((field) => ({
-            id: field.id,
-            label: field.label,
-            key: field.key,
-            type: field.type,
-            placeholder: field.placeholder,
-            required: field.required,
-            allowOtherOption: field.allowOtherOption,
-            options: field.options,
-            defaultValue: field.defaultValue,
-            minValue: field.minValue,
-            maxValue: field.maxValue,
-            order: field.order,
-          })),
-          stats: {
-            responsesCount: updatedForm._count.responses,
-            requestsCount: updatedForm._count.contactRequests,
+      // Créer les nouvelles sections
+      const newSections = await Promise.all(
+        formData.sections.map((section, index) =>
+          prisma.formSection.create({
+            data: {
+              formId: id,
+              name: section.name,
+              description: section.description,
+              order: section.order !== undefined ? section.order : index,
+            },
+          })
+        )
+      );
+
+      // Créer les nouveaux champs avec leurs sections
+      // Créer une map des anciens IDs de section (du client) vers les nouveaux IDs (base de données)
+      const sectionMap = new Map<string, string>();
+      formData.sections.forEach((section, index) => {
+        if (newSections[index]) {
+          // Mapper l'ancien ID (section.id) vers le nouvel ID (newSections[index].id)
+          if (section.id) {
+            sectionMap.set(section.id, newSections[index].id);
+          }
+        }
+      });
+
+      const newFields = await Promise.all(
+        (formData.fields || []).map((field, index) => {
+          // Trouver l'ID de la section pour ce champ
+          let sectionId: string | undefined = undefined;
+          if (field.sectionId) {
+            // Utiliser la map pour trouver le nouvel ID de section
+            sectionId = sectionMap.get(field.sectionId);
+            // Si pas trouvé dans la map, ne pas assigner de section
+            if (!sectionId) {
+              console.warn(`Section ID ${field.sectionId} not found in sectionMap, field will be created without section`);
+              sectionId = undefined;
+            }
+          }
+
+          return prisma.formField.create({
+            data: {
+              formId: id,
+              sectionId: sectionId,
+              label: field.label,
+              key: field.key,
+              type: field.type as FieldType,
+              placeholder: field.placeholder,
+              required: field.required || false,
+              allowOtherOption: field.allowOtherOption || false,
+              options: field.options || [],
+              defaultValue: field.defaultValue,
+              minValue: field.minValue,
+              maxValue: field.maxValue,
+              order: field.order !== undefined ? field.order : index,
+            },
+          });
+        })
+      );
+
+      // Récupérer le formulaire mis à jour avec ses relations
+      const updatedForm = await prisma.customForm.findUnique({
+        where: { id },
+        include: {
+          fields: {
+            orderBy: { order: 'asc' },
+          },
+          sections: {
+            orderBy: { order: 'asc' },
+            include: {
+              fields: {
+                orderBy: { order: 'asc' },
+              },
+            },
+          },
+          _count: {
+            select: {
+              responses: true,
+              contactRequests: true,
+            },
           },
         },
-      },
-      { status: 200 }
-    );
+      });
+
+      return NextResponse.json(
+        {
+          success: true,
+          message: 'Formulaire mis à jour avec succès',
+          data: {
+            id: updatedForm!.id,
+            name: updatedForm!.name,
+            packageType: updatedForm!.packageType,
+            description: updatedForm!.description,
+            successMessage: updatedForm!.successMessage,
+            isActive: updatedForm!.isActive,
+            createdAt: updatedForm!.createdAt,
+            updatedAt: updatedForm!.updatedAt,
+            sections: updatedForm!.sections.map((section) => ({
+              id: section.id,
+              name: section.name,
+              description: section.description,
+              order: section.order,
+              fieldIds: section.fields.map(f => f.id),
+            })),
+            fields: updatedForm!.fields.map((field) => ({
+              id: field.id,
+              label: field.label,
+              key: field.key,
+              type: field.type,
+              placeholder: field.placeholder,
+              required: field.required,
+              allowOtherOption: field.allowOtherOption,
+              options: field.options,
+              defaultValue: field.defaultValue,
+              minValue: field.minValue,
+              maxValue: field.maxValue,
+              order: field.order,
+              sectionId: field.sectionId,
+            })),
+            stats: {
+              responsesCount: updatedForm!._count.responses,
+              requestsCount: updatedForm!._count.contactRequests,
+            },
+          },
+        },
+        { status: 200 }
+      );
+    } else {
+      // Mise à jour sans sections (ancien comportement)
+      const updatedForm = await prisma.customForm.update({
+        where: { id },
+        data: updateData,
+        include: {
+          fields: {
+            orderBy: { order: 'asc' },
+          },
+          sections: {
+            orderBy: { order: 'asc' },
+            include: {
+              fields: {
+                orderBy: { order: 'asc' },
+              },
+            },
+          },
+          _count: {
+            select: {
+              responses: true,
+              contactRequests: true,
+            },
+          },
+        },
+      });
+
+      return NextResponse.json(
+        {
+          success: true,
+          message: 'Formulaire mis à jour avec succès',
+          data: {
+            id: updatedForm.id,
+            name: updatedForm.name,
+            packageType: updatedForm.packageType,
+            description: updatedForm.description,
+            successMessage: updatedForm.successMessage,
+            isActive: updatedForm.isActive,
+            createdAt: updatedForm.createdAt,
+            updatedAt: updatedForm.updatedAt,
+            sections: updatedForm.sections.map((section) => ({
+              id: section.id,
+              name: section.name,
+              description: section.description,
+              order: section.order,
+              fieldIds: section.fields.map(f => f.id),
+            })),
+            fields: updatedForm.fields.map((field) => ({
+              id: field.id,
+              label: field.label,
+              key: field.key,
+              type: field.type,
+              placeholder: field.placeholder,
+              required: field.required,
+              allowOtherOption: field.allowOtherOption,
+              options: field.options,
+              defaultValue: field.defaultValue,
+              minValue: field.minValue,
+              maxValue: field.maxValue,
+              order: field.order,
+              sectionId: field.sectionId,
+            })),
+            stats: {
+              responsesCount: updatedForm._count.responses,
+              requestsCount: updatedForm._count.contactRequests,
+            },
+          },
+        },
+        { status: 200 }
+      );
+    }
 
   } catch (error: any) {
     console.error('Error updating form:', error);

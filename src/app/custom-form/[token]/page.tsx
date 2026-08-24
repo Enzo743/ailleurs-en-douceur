@@ -4,20 +4,11 @@ import { useState, useEffect, FormEvent, use } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.scss';
 import { getPackageLabel } from '@/lib/constants';
+import { FormSection, FormField as FormFieldType } from '@/lib/form-constants';
+import FormProgressBar from '@/components/FormProgressBar';
 
-interface FormField {
-  id: string;
-  label: string;
-  key: string;
-  type: 'TEXT' | 'TEXTAREA' | 'NUMBER' | 'EMAIL' | 'SELECT' | 'MULTISELECT' | 'CHECKBOX' | 'DATE' | 'RANGE_NUMBER' | 'RANGE_DATE';
-  placeholder?: string;
-  required: boolean;
-  allowOtherOption: boolean;
-  options: string[];
-  defaultValue?: string;
-  minValue?: string;
-  maxValue?: string;
-  order: number;
+interface FormField extends FormFieldType {
+  sectionId?: string;
 }
 
 interface CustomFormData {
@@ -26,6 +17,7 @@ interface CustomFormData {
   description?: string;
   successMessage: string;
   fields: FormField[];
+  sections: FormSection[];
 }
 
 interface ContactRequestData {
@@ -75,6 +67,7 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
   const [formValues, setFormValues] = useState<FieldValue>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitStatus, setSubmitStatus] = useState<{ success?: boolean; message: string } | null>(null);
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
 
   // Récupérer les données au montage
   useEffect(() => {
@@ -184,7 +177,58 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
     }
   };
 
-  // Valider le formulaire
+  // Navigation entre les sections
+  const goToSection = (index: number) => {
+    setCurrentSectionIndex(index);
+  };
+
+  const goToNextSection = () => {
+    if (customForm && currentSectionIndex < customForm.sections.length - 1) {
+      setCurrentSectionIndex(prev => prev + 1);
+    }
+  };
+
+  const goToPreviousSection = () => {
+    if (currentSectionIndex > 0) {
+      setCurrentSectionIndex(prev => prev - 1);
+    }
+  };
+
+  // Valider une section spécifique
+  const validateSection = (sectionIndex: number): boolean => {
+    if (!customForm) return false;
+    
+    const newErrors: Record<string, string> = {};
+    const section = customForm.sections[sectionIndex];
+    if (!section) return true;
+
+    // Récupérer les champs de cette section
+    const sectionFields = customForm.fields.filter(field => field.sectionId === section.id);
+    
+    sectionFields.forEach((field) => {
+      if (field.required) {
+        const value = formValues[field.key];
+        
+        if (value === undefined || value === null || value === '') {
+          newErrors[field.key] = `${field.label} est obligatoire`;
+        } else if (field.type === 'EMAIL' && typeof value === 'string') {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(value)) {
+            newErrors[field.key] = 'Veuillez entrer un email valide';
+          }
+        } else if (field.type === 'NUMBER' && typeof value === 'number') {
+          if (isNaN(value) || value <= 0) {
+            newErrors[field.key] = 'Veuillez entrer un nombre valide';
+          }
+        }
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Valider le formulaire complet
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -218,7 +262,7 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
     return Object.keys(newErrors).length === 0;
   };
 
-  // Soumettre le formulaire
+  // Soumettre le formulaire ou passer à la section suivante
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -230,6 +274,24 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
       return;
     }
 
+    // Si on a des sections et qu'on n'est pas à la dernière, valider la section courante
+    if (customForm.sections && customForm.sections.length > 1 && 
+        currentSectionIndex < customForm.sections.length - 1) {
+      
+      if (!validateSection(currentSectionIndex)) {
+        setSubmitStatus({
+          success: false,
+          message: 'Veuillez corriger les erreurs dans cette section.'
+        });
+        return;
+      }
+      
+      // Passer à la section suivante
+      goToNextSection();
+      return;
+    }
+
+    // Si on est à la dernière section ou qu'il n'y a pas de sections, valider le formulaire complet
     if (!validateForm()) {
       setSubmitStatus({
         success: false,
@@ -632,68 +694,148 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
           </div>
         ) : (
           <form onSubmit={handleSubmit} className={styles.form}>
-            <div className={styles['fields-container']}>
-              {customForm.fields
-                .sort((a, b) => a.order - b.order)
-                .map((field, index, array) => (
-                  <div key={field.id} className={index < array.length - 1 ? styles['field-separator'] : ''}>
-                    {renderField(field)}
-                  </div>
-                ))}
-            </div>
+            {/* Barre de progression si il y a des sections */}
+            {customForm.sections && customForm.sections.length > 1 && (
+              <FormProgressBar
+                sections={customForm.sections}
+                currentSectionIndex={currentSectionIndex}
+                onSectionChange={goToSection}
+              />
+            )}
 
-            {/* Question de préférence de contact */}
-            <div className={styles['contact-preference-container']}>
-              <div className={styles['contact-preference-field']}>
-                <fieldset className={styles['contact-preference-options']}>
-                  <legend className={styles['contact-preference-legend']}>
-                    Préférez-vous être recontacté par visioconférence ou par téléphone ?
-                    <span className={styles.required}> *</span>
-                  </legend>
-                  <div className={styles['contact-preference-option']}>
-                    <input
-                      type="radio"
-                      id="contact-preference-visio"
-                      name="contactPreference"
-                      value="Visioconférence"
-                      checked={formValues['contactPreference'] === 'Visioconférence'}
-                      onChange={(e) => handleFieldChange('contactPreference', e.target.value, 'SELECT')}
-                      className={styles['contact-preference-input']}
-                    />
-                    <label htmlFor="contact-preference-visio" className={styles['contact-preference-label']}>
-                      <span className={styles['contact-preference-icon']}>💻</span>
-                      <span>Visioconférence</span>
-                    </label>
+            {/* Affichage des sections ou des champs simples */}
+            {customForm.sections && customForm.sections.length > 0 ? (
+              <div className={styles['sections-container']}>
+                {/* Afficher uniquement la section courante */}
+                <div className={styles['current-section']}>
+                  {(() => {
+                    const currentSection = customForm.sections[currentSectionIndex];
+                    if (!currentSection) return null;
+
+                    // Récupérer les champs de cette section
+                    const sectionFields = customForm.fields
+                      .filter(field => field.sectionId === currentSection.id)
+                      .sort((a, b) => a.order - b.order);
+
+                    return (
+                      <>
+                        {/* Afficher la description de la section si elle existe */}
+                        {currentSection.description && (
+                          <div className={styles['section-description']}>
+                            <p>{currentSection.description}</p>
+                          </div>
+                        )}
+
+                        {/* Afficher les champs de la section */}
+                        <div className={styles['fields-container']}>
+                          {sectionFields.map((field, index, array) => (
+                            <div key={field.id} className={index < array.length - 1 ? styles['field-separator'] : ''}>
+                              {renderField(field)}
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+
+                {/* Boutons de navigation entre sections */}
+                {customForm.sections.length > 1 && (
+                  <div className={styles['section-navigation']}>
+                    {currentSectionIndex > 0 && (
+                      <button
+                        type="button"
+                        onClick={goToPreviousSection}
+                        className={styles['nav-button']}
+                      >
+                        ← Précédent
+                      </button>
+                    )}
+                    {currentSectionIndex < customForm.sections.length - 1 ? (
+                      <button
+                        type="submit"
+                        className={styles['nav-button']}
+                      >
+                        Suivant →
+                      </button>
+                    ) : (
+                      <button
+                        type="submit"
+                        className={styles['submit-button']}
+                      >
+                        {isSubmitting ? 'Envoi en cours...' : 'Envoyer le formulaire'}
+                      </button>
+                    )}
                   </div>
-                  <div className={styles['contact-preference-option']}>
-                    <input
-                      type="radio"
-                      id="contact-preference-phone"
-                      name="contactPreference"
-                      value="Téléphone"
-                      checked={formValues['contactPreference'] === 'Téléphone'}
-                      onChange={(e) => handleFieldChange('contactPreference', e.target.value, 'SELECT')}
-                      className={styles['contact-preference-input']}
-                    />
-                    <label htmlFor="contact-preference-phone" className={styles['contact-preference-label']}>
-                      <span className={styles['contact-preference-icon']}>📞</span>
-                      <span>Téléphone</span>
-                    </label>
-                  </div>
-                </fieldset>
-                {errors['contactPreference'] && <span className={styles['error-message']}>{errors['contactPreference']}</span>}
+                )}
               </div>
-            </div>
+            ) : (
+              <div className={styles['fields-container']}>
+                {customForm.fields
+                  .sort((a, b) => a.order - b.order)
+                  .map((field, index, array) => (
+                    <div key={field.id} className={index < array.length - 1 ? styles['field-separator'] : ''}>
+                      {renderField(field)}
+                    </div>
+                  ))}
+              </div>
+            )}
 
-            <div className={styles['submit-container']}>
-              <button
-                type="submit"
-                className={styles['submit-button']}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Envoi en cours...' : 'Envoyer le formulaire'}
-              </button>
-            </div>
+            {currentSectionIndex === (customForm.sections?.length || 1) - 1 && (
+              <div className={styles['contact-preference-container']}>
+                <div className={styles['contact-preference-field']}>
+                  <fieldset className={styles['contact-preference-options']}>
+                    <legend className={styles['contact-preference-legend']}>
+                      Préférez-vous être recontacté par visioconférence ou par téléphone ?
+                      <span className={styles.required}> *</span>
+                    </legend>
+                    <div className={styles['contact-preference-option']}>
+                      <input
+                        type="radio"
+                        id="contact-preference-visio"
+                        name="contactPreference"
+                        value="Visioconférence"
+                        checked={formValues['contactPreference'] === 'Visioconférence'}
+                        onChange={(e) => handleFieldChange('contactPreference', e.target.value, 'SELECT')}
+                        className={styles['contact-preference-input']}
+                      />
+                      <label htmlFor="contact-preference-visio" className={styles['contact-preference-label']}>
+                        <span className={styles['contact-preference-icon']}>💻</span>
+                        <span>Visioconférence</span>
+                      </label>
+                    </div>
+                    <div className={styles['contact-preference-option']}>
+                      <input
+                        type="radio"
+                        id="contact-preference-phone"
+                        name="contactPreference"
+                        value="Téléphone"
+                        checked={formValues['contactPreference'] === 'Téléphone'}
+                        onChange={(e) => handleFieldChange('contactPreference', e.target.value, 'SELECT')}
+                        className={styles['contact-preference-input']}
+                      />
+                      <label htmlFor="contact-preference-phone" className={styles['contact-preference-label']}>
+                        <span className={styles['contact-preference-icon']}>📞</span>
+                        <span>Téléphone</span>
+                      </label>
+                    </div>
+                  </fieldset>
+                  {errors['contactPreference'] && <span className={styles['error-message']}>{errors['contactPreference']}</span>}
+                </div>
+              </div>
+            )}
+
+            {(!customForm.sections || customForm.sections.length <= 1) && (
+              <div className={styles['submit-container']}>
+                <button
+                  type="submit"
+                  className={styles['submit-button']}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Envoi en cours...' : 'Envoyer le formulaire'}
+                </button>
+              </div>
+            )}
           </form>
         )}
 

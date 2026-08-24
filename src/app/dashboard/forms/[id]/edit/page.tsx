@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, FormEvent, useEffect, use } from 'react';
+import { useState, FormEvent, useEffect, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PACKAGE_TYPE_OPTIONS } from '@/lib/constants';
-import { FormField as FormFieldType } from '@/lib/form-constants';
-import { useFormFields } from '@/hooks/useFormFields';
-import { FormField } from '@/components/dashboard';
+import { FormField as FormFieldType, FormSection } from '@/lib/form-constants';
+import { useFormWithSections } from '@/hooks/useFormWithSections';
+import { FormField, FormSection as FormSectionComponent } from '@/components/dashboard';
 import styles from './page.module.scss';
 
 interface CustomForm {
@@ -17,6 +17,7 @@ interface CustomForm {
   successMessage: string;
   isActive: boolean;
   fields: FormFieldType[];
+  sections: FormSection[];
   stats?: {
     responsesCount: number;
     requestsCount: number;
@@ -50,23 +51,41 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
   const [submitStatus, setSubmitStatus] = useState<{ success?: boolean; message: string } | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [hasResponses, setHasResponses] = useState(false);
+  const [useSections, setUseSections] = useState(false);
 
-  // Utiliser le hook pour gérer les champs
+  // Utiliser le hook pour gérer les champs et sections
   const {
     fields,
     fieldErrors,
+    sections,
+    sectionErrors,
+    expandedSections,
     setFields,
-    handleFieldChange,
     addField,
-    removeField: removeFieldFromHook,
+    removeField,
+    handleFieldChange,
     addOption,
     removeOption,
     updateOption,
     moveFieldUp,
     moveFieldDown,
+    assignFieldToSection,
+    setSections,
+    addSection,
+    removeSection,
+    handleSectionChange,
+    moveSectionUp,
+    moveSectionDown,
+    toggleSectionExpand,
     validateFields,
+    validateSections,
+    validateAll,
     setFieldErrors,
-  } = useFormFields();
+    setSectionErrors,
+    getFieldsForSection,
+    getUnassignedFields,
+    getSectionById,
+  } = useFormWithSections();
 
   // Charger les données du formulaire
   useEffect(() => {
@@ -95,6 +114,12 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
         // Initialiser les champs avec les données du formulaire
         setFields(form.fields);
         
+        // Initialiser les sections si elles existent
+        if (form.sections && form.sections.length > 0) {
+          setSections(form.sections);
+          setUseSections(true);
+        }
+        
         // Vérifier si le formulaire a des réponses
         setHasResponses((form.stats?.responsesCount || 0) > 0);
 
@@ -107,9 +132,9 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
     };
 
     fetchForm();
-  }, [id, setFields]);
+  }, [id, setFields, setSections]);
 
-  // Mettre à jour un champ du formulaire
+  // Mettre à jour un champ du formulaire principal
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
@@ -119,6 +144,7 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
       [name]: type === 'checkbox' ? checked : value,
     }));
 
+    // Supprimer l'erreur si elle existe
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -128,52 +154,11 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
     }
   };
 
-  // Supprimer un champ avec confirmation pour les champs existants
-  const removeField = (fieldId: string) => {
-    // Si le formulaire a des réponses, ne pas supprimer
-    if (hasResponses) {
-      setSubmitStatus({
-        success: false,
-        message: 'Impossible de supprimer ce champ car le formulaire a déjà des réponses.'
-      });
-      return;
-    }
-
-    // Ne pas supprimer si c'est le dernier champ
-    if (fields.length <= 1) {
-      setSubmitStatus({
-        success: false,
-        message: 'Un formulaire doit avoir au moins un champ.'
-      });
-      return;
-    }
-
-    // Si c'est un champ existant (avec un vrai ID de base de données), demander confirmation
-    if (!fieldId.startsWith('field-')) {
-      if (!confirm('Êtes-vous sûr de vouloir supprimer ce champ ? Cette action est irréversible.')) {
-        return;
-      }
-    }
-
-    removeFieldFromHook(fieldId, 1);
-  };
-
-  // Ajouter un champ - désactivé si le formulaire a des réponses
-  const handleAddField = () => {
-    if (hasResponses) {
-      setSubmitStatus({
-        success: false,
-        message: 'Impossible d\'ajouter un champ car le formulaire a déjà des réponses.'
-      });
-      return;
-    }
-    addField();
-  };
-
-  // Valider le formulaire
+  // Valider le formulaire complet
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
+    // Valider les champs du formulaire
     if (!formData.name.trim()) {
       newErrors.name = 'Le nom du formulaire est requis';
     }
@@ -184,10 +169,13 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
 
     // Valider les champs personnalisés
     const isFieldsValid = validateFields();
+    
+    // Valider les sections si on les utilise
+    const isSectionsValid = useSections ? validateSections() : true;
 
     setErrors(newErrors);
 
-    return Object.keys(newErrors).length === 0 && isFieldsValid;
+    return Object.keys(newErrors).length === 0 && isFieldsValid && isSectionsValid;
   };
 
   // Soumettre le formulaire
@@ -197,7 +185,7 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
     if (!validateForm()) {
       setSubmitStatus({
         success: false,
-        message: 'Veuillez corriger les erreurs dans le formulaire.'
+        message: 'Veuillez corriger les erreurs dans le formulaire.',
       });
       return;
     }
@@ -206,27 +194,34 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
     setSubmitStatus(null);
 
     try {
-      // Séparer les champs existants (IDs de base de données) et nouveaux (IDs locaux)
-      // Les IDs de base de données sont des CUIDs (format: cxxxxxxxxxxxxxxxxxxxxxxxx)
-      // Les IDs locaux commencent par 'field-'
-      const existingFields = fields.filter((f) => !f.id.startsWith('field-'));
-      const newFields = fields.filter((f) => f.id.startsWith('field-'));
-
-      // Préparer les données au format attendu par l'API
-      // L'API attend un tableau 'fields' avec un champ '_action' pour chaque élément
-      const fieldsForApi = [
-        ...existingFields.map((field) => ({ ...field, _action: 'update' })),
-        ...newFields.map(({ id, ...rest }) => ({ ...rest, _action: 'create' })),
-      ];
-
-      // Préparer les données
-      const dataToSend = {
-        ...formData,
-        fields: fieldsForApi,
+      // Préparer les données à envoyer
+      const dataToSend: any = {
+        name: formData.name.trim(),
+        packageType: formData.packageType?.trim(),
+        description: formData.description?.trim(),
+        successMessage: formData.successMessage,
+        isActive: formData.isActive,
+        fields: fields.map(({ id, ...rest }) => rest),
       };
 
+      // Ajouter les sections si on les utilise
+      if (useSections && sections.length > 0) {
+        dataToSend.sections = sections.map(section => ({
+          id: section.id,
+          name: section.name,
+          description: section.description,
+          order: section.order,
+        }));
+        
+        // Ajouter sectionId aux champs
+        dataToSend.fields = dataToSend.fields.map((field: any) => ({
+          ...field,
+          sectionId: field.sectionId,
+        }));
+      }
+
       const response = await fetch(`/api/forms/${id}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -238,17 +233,18 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
       if (response.ok && result.success) {
         setSubmitStatus({
           success: true,
-          message: 'Formulaire mis à jour avec succès !'
+          message: 'Formulaire mis à jour avec succès !',
         });
 
+        // Recharger les données après 2 secondes
         setTimeout(() => {
-          router.push('/dashboard/forms');
+          window.location.reload();
         }, 2000);
 
       } else {
         setSubmitStatus({
           success: false,
-          message: result.error || 'Une erreur est survenue lors de la mise à jour du formulaire.'
+          message: result.error || 'Une erreur est survenue lors de la mise à jour du formulaire.',
         });
       }
 
@@ -256,54 +252,34 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
       console.error('Error updating form:', error);
       setSubmitStatus({
         success: false,
-        message: 'Impossible de mettre à jour le formulaire. Veuillez vérifier votre connexion.'
+        message: 'Impossible de mettre à jour le formulaire. Veuillez vérifier votre connexion.',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Dupliquer le formulaire pour permettre la modification
-  const handleDuplicateForm = async () => {
-    if (!hasResponses) {
-      setSubmitStatus({
-        success: false,
-        message: 'Ce formulaire n&#39;a pas de réponses, vous pouvez le modifier directement.'
-      });
-      return;
-    }
-
-    if (!confirm('Êtes-vous sûr de vouloir dupliquer ce formulaire ? L&#39;ancien formulaire sera désactivé et toutes les demandes en cours seront transférées vers la nouvelle copie.')) {
+  // Dupliquer le formulaire
+  const handleDuplicate = async () => {
+    if (!window.confirm('Êtes-vous sûr de vouloir dupliquer ce formulaire ?')) {
       return;
     }
 
     setIsDuplicating(true);
-    setSubmitStatus(null);
 
     try {
       const response = await fetch(`/api/dashboard/forms/${id}/duplicate`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
 
       const result = await response.json();
 
       if (response.ok && result.success) {
-        setSubmitStatus({
-          success: true,
-          message: 'Formulaire dupliqué avec succès ! Redirection vers la nouvelle copie...'
-        });
-
-        setTimeout(() => {
-          router.push(`/dashboard/forms/${result.data.id}/edit`);
-        }, 2000);
-
+        router.push('/dashboard/forms');
       } else {
         setSubmitStatus({
           success: false,
-          message: result.error || 'Une erreur est survenue lors de la duplication du formulaire.'
+          message: result.error || 'Une erreur est survenue lors de la duplication du formulaire.',
         });
       }
 
@@ -311,7 +287,7 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
       console.error('Error duplicating form:', error);
       setSubmitStatus({
         success: false,
-        message: 'Impossible de dupliquer le formulaire. Veuillez vérifier votre connexion.'
+        message: 'Impossible de dupliquer le formulaire.',
       });
     } finally {
       setIsDuplicating(false);
@@ -323,17 +299,99 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
     return fieldErrors[`${fieldId}-${property}`];
   };
 
+  // Trouver l'erreur pour une section spécifique
+  const getSectionError = (sectionId: string, property: string): string | undefined => {
+    return sectionErrors[`${sectionId}-${property}`];
+  };
+
+  // Rendre un champ
+  const renderField = useCallback((field: FormFieldType, sectionId?: string) => {
+    const fieldIndex = fields.findIndex(f => f.id === field.id);
+    const section = sectionId ? getSectionById(sectionId) : undefined;
+    const sectionFields = section ? getFieldsForSection(sectionId) : [];
+    const fieldPositionInSection = sectionFields.findIndex(f => f.id === field.id);
+
+    return (
+      <FormField
+        key={field.id}
+        field={field}
+        fieldIndex={fieldIndex + 1}
+        error={getFieldError(field.id, 'label')}
+        onChange={(property, value) => handleFieldChange(field.id, property as keyof FormFieldType, value)}
+        onAddOption={() => addOption(field.id)}
+        onRemoveOption={(index) => removeOption(field.id, index)}
+        onUpdateOption={(index, value) => updateOption(field.id, index, value)}
+        onMoveUp={() => moveFieldUp(field.id)}
+        onMoveDown={() => moveFieldDown(field.id)}
+        onRemove={() => removeField(field.id, 1)}
+        canMoveUp={fieldPositionInSection > 0}
+        canMoveDown={fieldPositionInSection < sectionFields.length - 1}
+        showActions={true}
+        disabled={hasResponses}
+      />
+    );
+  }, [fields, getSectionById, getFieldsForSection, getFieldError, handleFieldChange, addOption, removeOption, updateOption, moveFieldUp, moveFieldDown, removeField, hasResponses]);
+
+  // Rendre une section
+  const renderSection = (section: FormSection, sectionIndex: number) => {
+    const sectionFields = getFieldsForSection(section.id);
+    const isExpanded = expandedSections.has(section.id);
+
+    return (
+      <FormSectionComponent
+        key={section.id}
+        section={section}
+        sectionIndex={sectionIndex}
+        allFields={fields}
+        error={getSectionError(section.id, 'name')}
+        onChange={(property, value) => handleSectionChange(section.id, property as keyof Omit<FormSection, 'id' | 'order' | 'fieldIds'>, value)}
+        onMoveUp={() => moveSectionUp(section.id)}
+        onMoveDown={() => moveSectionDown(section.id)}
+        onRemove={() => removeSection(section.id)}
+        onAssignField={(fieldId) => assignFieldToSection(fieldId, section.id)}
+        onUnassignField={(fieldId) => assignFieldToSection(fieldId, null)}
+        canMoveUp={sectionIndex > 0}
+        canMoveDown={sectionIndex < sections.length - 1}
+        showActions={true}
+        expanded={isExpanded}
+        onToggleExpand={() => toggleSectionExpand(section.id)}
+        renderField={renderField}
+        sectionId={section.id}
+      />
+    );
+  };
+
+  // Basculer l'utilisation des sections
+  const toggleUseSections = (useSections: boolean) => {
+    if (useSections) {
+      // Si on active les sections, créer une section par défaut avec tous les champs
+      if (sections.length === 0) {
+        const sectionId = `section-${Date.now()}`;
+        setSections([{
+          id: sectionId,
+          name: 'Section principale',
+          description: '',
+          order: 0,
+          fieldIds: fields.map(f => f.id),
+        }]);
+        
+        // Assigner tous les champs à cette section
+        setFields(prev => prev.map(field => ({ ...field, sectionId })));
+      }
+    } else {
+      // Si on désactive les sections, retirer les assignations
+      setFields(prev => prev.map(field => ({ ...field, sectionId: undefined })));
+      setSections([]);
+    }
+    
+    setUseSections(useSections);
+  };
+
   // Si chargement
   if (isLoading) {
     return (
       <section className={styles.page}>
-        <div className={styles.header}>
-          <Link href="/dashboard/forms" className={styles['back-link']}>
-            ← Retour aux formulaires
-          </Link>
-          <h1 className={styles.pageTitle}>Modification du formulaire</h1>
-        </div>
-        <div className={styles.loading}>
+        <div className={styles.container}>
           <div className={styles['loading-spinner']}></div>
           <p>Chargement du formulaire...</p>
         </div>
@@ -345,17 +403,14 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
   if (notFound) {
     return (
       <section className={styles.page}>
-        <div className={styles.header}>
-          <Link href="/dashboard/forms" className={styles['back-link']}>
-            ← Retour aux formulaires
-          </Link>
-          <h1 className={styles.pageTitle}>Formulaire non trouvé</h1>
-        </div>
-        <div className={styles['error-box']}>
-          <p>Le formulaire que vous cherchez n'existe pas ou a été supprimé.</p>
-          <Link href="/dashboard/forms" className={styles['back-button']}>
-            Retour à la liste
-          </Link>
+        <div className={styles.container}>
+          <div className={styles['error-box']}>
+            <h2>Formulaire non trouvé</h2>
+            <p>Le formulaire que vous cherchez n'existe pas ou a été supprimé.</p>
+            <Link href="/dashboard/forms" className={styles['back-link']}>
+              Retour à la liste des formulaires
+            </Link>
+          </div>
         </div>
       </section>
     );
@@ -370,19 +425,34 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
           </Link>
           <h1 className={styles.pageTitle}>Modifier le formulaire</h1>
           <p className={styles.pageSubtitle}>
-            Modifiez les informations et les champs de votre formulaire
+            Modifiez les informations et les questions de votre formulaire
           </p>
+        </div>
+        
+        <div className={styles['header-actions']}>
+          <button
+            type="button"
+            onClick={handleDuplicate}
+            className={styles['duplicate-button']}
+            disabled={isDuplicating}
+          >
+            {isDuplicating ? 'Duplication...' : 'Dupliquer'}
+          </button>
         </div>
       </div>
 
       {submitStatus && (
         <div className={`${styles['status-message']} ${submitStatus.success ? styles.success : styles.error}`}>
           <p>{submitStatus.message}</p>
-          {submitStatus.success && (
-            <p className={styles['redirect-message']}>
-              Redirection vers la liste des formulaires...
-            </p>
-          )}
+        </div>
+      )}
+
+      {hasResponses && (
+        <div className={styles['warning-box']}>
+          <p>
+            <strong>Attention :</strong> Ce formulaire a déjà reçu des réponses. 
+            Les modifications peuvent affecter les données existantes.
+          </p>
         </div>
       )}
 
@@ -401,141 +471,202 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
                 value={formData.name}
                 onChange={handleFormChange}
                 placeholder="Ex: Formulaire Voyage de Noces"
+                disabled={hasResponses}
               />
               {errors.name && <span className={styles['error-message']}>{errors.name}</span>}
             </div>
 
-            <div className={styles['form-group']}>
-              <label htmlFor="packageType">Associer à une offre</label>
+            <div className={`${styles['form-group']} ${errors.packageType ? styles['has-error'] : ''}`}>
+              <label htmlFor="packageType">Type de formule</label>
               <select
                 id="packageType"
                 name="packageType"
                 value={formData.packageType}
                 onChange={handleFormChange}
+                disabled={hasResponses}
               >
-                <option value="">Toutes les offres</option>
-                {PACKAGE_TYPE_OPTIONS.map((pt) => (
-                  <option key={pt.value} value={pt.value}>
-                    {pt.label}
+                <option value="">Tous les types</option>
+                {PACKAGE_TYPE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>
-              <small>Laisser vide pour toutes les offres</small>
             </div>
 
             <div className={styles['form-group']}>
-              <label htmlFor="isActive">
+              <label htmlFor="description">Description (optionnelle)</label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleFormChange}
+                placeholder="Description du formulaire"
+                rows={3}
+                disabled={hasResponses}
+              />
+            </div>
+
+            <div className={`${styles['form-group']} ${errors.successMessage ? styles['has-error'] : ''}`}>
+              <label htmlFor="successMessage">Message de confirmation *</label>
+              <textarea
+                id="successMessage"
+                name="successMessage"
+                value={formData.successMessage}
+                onChange={handleFormChange}
+                placeholder="Message affiché après soumission du formulaire"
+                rows={3}
+              />
+              {errors.successMessage && <span className={styles['error-message']}>{errors.successMessage}</span>}
+            </div>
+
+            <div className={styles['form-group']}>
+              <label>
                 <input
                   type="checkbox"
-                  id="isActive"
                   name="isActive"
                   checked={formData.isActive}
                   onChange={handleFormChange}
+                  disabled={hasResponses}
                 />
-                Formulaire actif
+                <span className={styles['checkbox-label']}>Formulaire actif</span>
               </label>
             </div>
           </div>
-
-          <div className={styles['form-group']}>
-            <label htmlFor="description">Description (optionnelle)</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleFormChange}
-              placeholder="Ex: Ce formulaire nous aidera à mieux comprendre vos attentes..."
-              rows={3}
-            />
-          </div>
-
-          <div className={`${styles['form-group']} ${errors.successMessage ? styles['has-error'] : ''}`}>
-            <label htmlFor="successMessage">Message de confirmation *</label>
-            <textarea
-              id="successMessage"
-              name="successMessage"
-              value={formData.successMessage}
-              onChange={handleFormChange}
-              placeholder="Message affiché après soumission du formulaire"
-              rows={3}
-            />
-            {errors.successMessage && <span className={styles['error-message']}>{errors.successMessage}</span>}
-          </div>
         </div>
 
-        {/* Champs du formulaire */}
+        {/* Option pour activer/désactiver les sections */}
         <div className={styles['form-section']}>
-          <h2 className={styles['section-title']}>
-            Champs du formulaire
-            {hasResponses ? (
-              <span className={styles['responses-warning']}>
-                ⚠️ Impossible de modifier les champs - ce formulaire a déjà des réponses
-              </span>
-            ) : (
-              <button type="button" onClick={handleAddField} className={styles['add-field-button']}>
-                + Ajouter un champ
-              </button>
-            )}
-          </h2>
-
-          {hasResponses && (
-            <div className={styles['info-box']}>
-              <p>
-                Ce formulaire a déjà reçu des réponses. Pour préserver l'intégrité des données,
-                il n'est plus possible d'ajouter, modifier ou supprimer des champs.
-              </p>
-              <p>
-                Vous pouvez toujours modifier les informations du formulaire (nom, description, etc.)
-                et son statut (actif/inactif).
-              </p>
-            </div>
-          )}
-
-          <div className={styles['fields-container']}>
-            {fields.map((field, index) => (
-              <FormField
-                key={field.id}
-                field={field}
-                fieldIndex={index}
-                error={getFieldError(field.id, 'label') || getFieldError(field.id, 'key') || getFieldError(field.id, 'options')}
-                onChange={(property, value) => handleFieldChange(field.id, property, value)}
-                onAddOption={() => addOption(field.id)}
-                onRemoveOption={(optIndex) => removeOption(field.id, optIndex)}
-                onUpdateOption={(optIndex, newValue) => updateOption(field.id, optIndex, newValue)}
-                onMoveUp={() => moveFieldUp(field.id)}
-                onMoveDown={() => moveFieldDown(field.id)}
-                onRemove={() => removeField(field.id)}
-                canMoveUp={index > 0}
-                canMoveDown={index < fields.length - 1}
-                showActions={!hasResponses}
+          <h2 className={styles['section-title']}>Organisation du formulaire</h2>
+          
+          <div className={styles['form-group']}>
+            <label>
+              <input
+                type="checkbox"
+                checked={useSections}
+                onChange={(e) => toggleUseSections(e.target.checked)}
                 disabled={hasResponses}
               />
-            ))}
+              <span className={styles['checkbox-label']}>
+                Utiliser des sections pour organiser les questions sur plusieurs pages
+              </span>
+            </label>
+            <p className={styles['hint']}>
+              Activez cette option pour créer un formulaire multi-pages avec une barre de progression.
+              {hasResponses && ' (Non modifiable car le formulaire a déjà des réponses)'}
+            </p>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className={styles['form-actions']}>
-          {hasResponses && (
-            <button
-              type="button"
-              onClick={handleDuplicateForm}
-              disabled={isDuplicating}
-              className={styles['duplicate-button']}
-            >
-              {isDuplicating ? 'Duplication en cours...' : 'Dupliquer et modifier'}
-            </button>
-          )}
+        {/* Sections (si activé) */}
+        {useSections && (
+          <div className={styles['form-section']}>
+            <h2 className={styles['section-title']}>
+              Sections du formulaire
+              <div className={styles['section-actions']}>
+                <button
+                  type="button"
+                  onClick={() => addField()}
+                  className={styles['add-field-button']}
+                  disabled={hasResponses}
+                >
+                  + Ajouter une question
+                </button>
+                <button
+                  type="button"
+                  onClick={addSection}
+                  className={styles['add-section-button']}
+                  disabled={hasResponses}
+                >
+                  + Ajouter une section
+                </button>
+              </div>
+            </h2>
+
+            {sections.length === 0 && (
+              <div className={styles['empty-state']}>
+                <p>Aucune section créée. Cliquez sur "Ajouter une section" pour commencer.</p>
+              </div>
+            )}
+
+            <div className={styles['sections-list']}>
+              {sections.map((section, index) => renderSection(section, index))}
+            </div>
+
+            {/* Champs non assignés à une section */}
+            {getUnassignedFields().length > 0 && (
+              <div className={styles['unassigned-fields']}>
+                <h3>Champs non assignés à une section</h3>
+                <p className={styles['hint']}>
+                  Ces champs ne sont pas encore assignés à une section. 
+                  Vous pouvez les éditer et les assigner à une section.
+                </p>
+                <div className={styles['fields-list']}>
+                  {getUnassignedFields().map((field) => (
+                    <div key={field.id} className={styles['unassigned-field-container']}>
+                      {renderField(field)}
+                      <div className={styles['assign-section-container']}>
+                        <select
+                          value=""
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              assignFieldToSection(field.id, e.target.value);
+                            }
+                          }}
+                          className={styles['section-selector']}
+                        >
+                          <option value="">-- Assigner à une section --</option>
+                          {sections.map((section) => (
+                            <option key={section.id} value={section.id}>
+                              {section.name || `Section ${sections.indexOf(section) + 1}`}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Champs (si pas de sections) */}
+        {!useSections && (
+          <div className={styles['form-section']}>
+            <h2 className={styles['section-title']}>
+              Questions du formulaire
+              <button
+                type="button"
+                onClick={() => addField()}
+                className={styles['add-field-button']}
+                disabled={hasResponses}
+              >
+                + Ajouter une question
+              </button>
+            </h2>
+
+            {fields.length === 0 && (
+              <div className={styles['empty-state']}>
+                <p>Aucune question créée. Cliquez sur "Ajouter une question" pour commencer.</p>
+              </div>
+            )}
+
+            <div className={styles['fields-list']}>
+              {fields.map((field, index) => renderField(field))}
+            </div>
+          </div>
+        )}
+
+        {/* Boutons de soumission */}
+        <div className={styles['submit-container']}>
           <button
             type="submit"
-            disabled={isSubmitting}
             className={styles['submit-button']}
+            disabled={isSubmitting || hasResponses}
           >
             {isSubmitting ? 'Mise à jour en cours...' : 'Mettre à jour le formulaire'}
           </button>
-          <Link href="/dashboard/forms" className={styles['cancel-button']}>
-            Annuler
-          </Link>
         </div>
       </form>
     </section>

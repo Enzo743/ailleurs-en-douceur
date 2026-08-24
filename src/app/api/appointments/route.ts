@@ -227,7 +227,9 @@ export async function POST(request: NextRequest) {
     endDateTime.setHours(endHours, endMinutes, 0, 0);
 
     // Déterminer si on crée un événement avec Meet ou sans
+    // Par défaut, si contactPreference n'est pas fourni, on ne crée pas de lien Meet
     const isPhonePreference = contactPreference === 'Téléphone';
+    const shouldCreateMeetLink = contactPreference !== 'Téléphone' && contactPreference !== undefined;
     let meetResult = null;
     
     const baseDescription = `Rendez-vous pour discuter du projet: ${contactRequest.message?.substring(0, 200) || ''}
@@ -236,9 +238,9 @@ Client: ${contactRequest.firstName} ${contactRequest.lastName}
 Email: ${contactRequest.email}
 Formule: ${contactRequest.packageType}
 Nombre de jours: ${contactRequest.days}
-Préférence de contact: ${contactPreference || 'Visioconférence'}`;
+Préférence de contact: ${contactPreference || 'Non spécifiée'}`;
 
-    if (!isPhonePreference) {
+    if (shouldCreateMeetLink) {
       // Creer l'evenement Google Calendar avec Meet
       meetResult = await createMeetEvent({
         summary: `Rendez-vous avec ${contactRequest.firstName} ${contactRequest.lastName} - ${contactRequest.packageType}`,
@@ -266,7 +268,7 @@ Préférence de contact: ${contactPreference || 'Visioconférence'}`;
         contactRequestId: contactRequestId,
         slotId: slotId,
         googleEventId: meetResult.eventId,
-        meetLink: isPhonePreference ? null : meetResult.meetLink || null,
+        meetLink: shouldCreateMeetLink ? meetResult.meetLink || null : null,
         status: 'CONFIRMED',
         contactPreference: contactPreference,
       },
@@ -327,7 +329,7 @@ Préférence de contact: ${contactPreference || 'Visioconférence'}`;
                 <div class="field"><strong>Heure:</strong> ${slot.startTime} - ${slot.endTime}</div>
                 <div class="field"><strong>Duree:</strong> ${slot.duration} minutes</div>
                 
-                ${!isPhonePreference && meetResult.meetLink ? `
+                ${shouldCreateMeetLink && meetResult.meetLink ? `
                 <div class="info-box">
                   <p style="margin: 0 0 15px 0;"><strong>Lien Google Meet :</strong></p>
                   <a href="${meetResult.meetLink}" class="cta-button">Rejoindre la visioconference</a>
@@ -335,12 +337,12 @@ Préférence de contact: ${contactPreference || 'Visioconférence'}`;
                 </div>
                 ` : `
                 <div class="info-box">
-                  <p style="margin: 0;"><strong>Rendez-vous par téléphone</strong></p>
-                  <p style="margin: 10px 0 0 0;">Nous vous contacterons au numéro que vous avez indiqué.</p>
+                  <p style="margin: 0;"><strong>Rendez-vous ${isPhonePreference ? 'par téléphone' : 'sans lien Meet'}</strong></p>
+                  <p style="margin: 10px 0 0 0;">${isPhonePreference ? 'Nous vous contacterons au numéro que vous avez indiqué.' : 'Le rendez-vous aura lieu sans visioconférence.'}</p>
                 </div>
                 `}
                 
-                <p>Un rappel sera envoye 24h avant le rendez-vous ${!isPhonePreference ? 'avec le lien de visioconference' : 'par téléphone'}.</p>
+                <p>Un rappel sera envoye 24h avant le rendez-vous ${shouldCreateMeetLink ? 'avec le lien de visioconference' : isPhonePreference ? 'par téléphone' : 'pour confirmer les détails'}.</p>
                 
                 <p>A tres bientot,<br>Nelly d'Ailleurs en Douceur</p>
               </div>
@@ -364,9 +366,9 @@ Date: ${formatDateForDisplay(slot.date, true)}
 Heure: ${slot.startTime} - ${slot.endTime}
 Duree: ${slot.duration} minutes
 
-${!isPhonePreference && meetResult.meetLink ? `Lien Google Meet : ${meetResult.meetLink}` : 'Rendez-vous par telephone - pas de lien Meet'}
+${shouldCreateMeetLink && meetResult.meetLink ? `Lien Google Meet : ${meetResult.meetLink}` : isPhonePreference ? 'Rendez-vous par téléphone - pas de lien Meet' : 'Rendez-vous sans visioconférence'}
 
-Un rappel sera envoye automatiquement 24h avant le rendez-vous ${!isPhonePreference ? 'avec le lien de visioconference' : 'par telephone'}.
+Un rappel sera envoye automatiquement 24h avant le rendez-vous ${shouldCreateMeetLink ? 'avec le lien de visioconference' : isPhonePreference ? 'par téléphone' : 'pour confirmer les détails'}.
 
 A tres bientot,
 Nelly d'Ailleurs en Douceur
@@ -425,16 +427,16 @@ Date: ${new Date().toLocaleString('fr-FR')}
                     <div class="highlight">
                       <div class="field"><strong>Date:</strong> ${formatDateForDisplay(slot.date, true)}</div>
                       <div class="field"><strong>Heure:</strong> ${slot.startTime} - ${slot.endTime} (${slot.duration} min)</div>
-                      <div class="field"><strong>Préférence:</strong> ${contactPreference || 'Visioconférence'}</div>
+                      <div class="field"><strong>Préférence:</strong> ${contactPreference || 'Non spécifiée'}</div>
                     </div>
 
-                    ${!isPhonePreference && meetResult.meetLink ? `
+                    ${shouldCreateMeetLink && meetResult.meetLink ? `
                     <p style="margin: 20px 0 10px 0;"><strong>Lien Google Meet :</strong></p>
                     <a href="${meetResult.meetLink}" class="meet-link">Rejoindre la visioconference</a>
                     <div style="font-size: 12px; color: #666; margin-top: 5px;">${meetResult.meetLink}</div>
                     ` : `
-                    <p style="margin: 20px 0 10px 0;"><strong>Rendez-vous par téléphone</strong></p>
-                    <p style="font-size: 14px; color: #666;">Pas de lien Meet - contact par téléphone</p>
+                    <p style="margin: 20px 0 10px 0;"><strong>Rendez-vous ${isPhonePreference ? 'par téléphone' : 'sans visioconférence'}</strong></p>
+                    <p style="font-size: 14px; color: #666;">${isPhonePreference ? 'Pas de lien Meet - contact par téléphone' : 'Pas de lien Meet pour ce rendez-vous'}</p>
                     `}
 
                     ${contactRequest.message ? `
@@ -462,12 +464,12 @@ Client: ${contactRequest.firstName} ${contactRequest.lastName}
 Email: ${contactRequest.email}
 Formule: ${packageLabel}
 ${contactRequest.days ? `Nombre de jours: ${contactRequest.days}` : ''}
-Préférence: ${contactPreference || 'Visioconférence'}
+Préférence: ${contactPreference || 'Non spécifiée'}
 
 Date: ${formatDateForDisplay(slot.date, true)}
 Heure: ${slot.startTime} - ${slot.endTime}
 
-${!isPhonePreference && meetResult.meetLink ? `Lien Google Meet: ${meetResult.meetLink}` : 'Rendez-vous par téléphone - pas de lien Meet'}
+${shouldCreateMeetLink && meetResult.meetLink ? `Lien Google Meet: ${meetResult.meetLink}` : isPhonePreference ? 'Rendez-vous par téléphone - pas de lien Meet' : 'Rendez-vous sans visioconférence'}
 
 ${contactRequest.message ? `
 Message du client:

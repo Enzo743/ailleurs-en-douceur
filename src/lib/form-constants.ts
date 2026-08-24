@@ -67,6 +67,7 @@ export interface FormField {
   minValue?: number | string; // Pour RANGE_NUMBER et RANGE_DATE
   maxValue?: number | string; // Pour RANGE_NUMBER et RANGE_DATE
   order: number;
+  sectionId?: string; // ID de la section à laquelle ce champ appartient
 }
 
 export const DEFAULT_FIELD: Omit<FormField, 'id' | 'order'> = {
@@ -102,9 +103,37 @@ export const CONTACT_PREFERENCE_KEY = 'contactPreference';
 let fieldIdCounter = 0;
 
 export const generateFieldId = (): string => {
-  return `field-${Date.now()}-${++fieldIdCounter}`;
+  return `field-${++fieldIdCounter}`;
 };
 
 export const resetFieldIdCounter = (): void => {
   fieldIdCounter = 0;
+};
+
+// ============================================================================
+// Form Sections
+// ============================================================================
+
+export interface FormSection {
+  id: string;
+  name: string;
+  description?: string;
+  order: number;
+  fieldIds: string[]; // IDs des champs appartenant à cette section
+}
+
+export const DEFAULT_SECTION: Omit<FormSection, 'id' | 'order' | 'fieldIds'> = {
+  name: 'Nouvelle section',
+  description: '',
+} as const;
+
+// Générer un ID unique pour les sections
+let sectionIdCounter = 0;
+
+export const generateSectionId = (): string => {
+  return `section-${++sectionIdCounter}`;
+};
+
+export const resetSectionIdCounter = (): void => {
+  sectionIdCounter = 0;
 };

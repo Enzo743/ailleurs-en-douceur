@@ -109,16 +109,34 @@ model CustomForm {
   updatedAt     DateTime  @updatedAt
 
   fields        FormField[]
+  sections      FormSection[]
   responses     FormResponse[]
   contactRequests ContactRequest[]
 
   @@index([packageType])
 }
 
-model FormField {
+model FormSection {
   id            String   @id @default(cuid())
   formId        String
   form          CustomForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?   @db.Text
+  order         Int      @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  fields        FormField[]
+
+  @@index([formId, order])
+}
+
+model FormField {
+  id            String   @id @default(cuid())
+  formId        String
+  sectionId     String?
+  form          CustomForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  section       FormSection?  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   label         String
   key           String
   type          FieldType
@@ -133,6 +151,7 @@ model FormField {
 
   @@unique([formId, key])
   @@index([formId, order])
+  @@index([sectionId, order])
 }
 
 model FormResponse {

@@ -18,12 +18,21 @@ interface FormQueryParams {
   search?: string;
 }
 
+interface FormSectionData {
+  id?: string;
+  name: string;
+  description?: string;
+  order?: number;
+  fieldIds?: string[];
+}
+
 interface CreateFormData {
   name: string;
   packageType?: string;
   description?: string;
   successMessage: string;
   isActive?: boolean;
+  sections?: FormSectionData[];
   fields?: Array<{
     label: string;
     key: string;
@@ -36,6 +45,7 @@ interface CreateFormData {
     minValue?: string;
     maxValue?: string;
     order?: number;
+    sectionId?: string;
   }>;
 }
 
@@ -140,7 +150,7 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    // Recuperer les formulaires avec leurs champs
+    // Recuperer les formulaires avec leurs champs et sections
     const [forms, total] = await Promise.all([
       prisma.customForm.findMany({
         where,
@@ -150,6 +160,14 @@ export async function GET(request: NextRequest) {
         include: {
           fields: {
             orderBy: { order: 'asc' },
+          },
+          sections: {
+            orderBy: { order: 'asc' },
+            include: {
+              fields: {
+                orderBy: { order: 'asc' },
+              },
+            },
           },
           _count: {
             select: {
@@ -175,6 +193,13 @@ export async function GET(request: NextRequest) {
       isActive: form.isActive,
       createdAt: form.createdAt,
       updatedAt: form.updatedAt,
+      sections: form.sections.map((section) => ({
+        id: section.id,
+        name: section.name,
+        description: section.description,
+        order: section.order,
+        fieldIds: section.fields.map(f => f.id),
+      })),
       fields: form.fields.map((field) => ({
         id: field.id,
         label: field.label,
@@ -188,6 +213,7 @@ export async function GET(request: NextRequest) {
         minValue: field.minValue,
         maxValue: field.maxValue,
         order: field.order,
+        sectionId: field.sectionId,
       })),
       stats: {
         responsesCount: form._count.responses,
@@ -256,6 +282,23 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Creer les sections si fournies
+    let sections: { id: string }[] = [];
+    if (body.sections && body.sections.length > 0) {
+      sections = await Promise.all(
+        body.sections.map((section, index) =>
+          prisma.formSection.create({
+            data: {
+              formId: form.id,
+              name: section.name,
+              description: section.description,
+              order: section.order !== undefined ? section.order : index,
+            },
+          })
+        )
+      );
+    }
+
     // Creer les champs si fournis
     let fields = [];
     if (body.fields && body.fields.length > 0) {
@@ -269,11 +312,38 @@ export async function POST(request: NextRequest) {
       // Mettre à jour le tableau des clés existantes
       fieldsWithKeys.forEach(f => existingKeys.push(f.key));
       
+      // Trouver la section correspondante pour chaque champ
+      // Créer une map des anciens IDs de section (du client) vers les nouveaux IDs (base de données)
+      const sectionMap = new Map<string, string>();
+      if (sections.length > 0 && body.sections) {
+        body.sections.forEach((section, index) => {
+          if (sections[index]) {
+            // Mapper l'ancien ID (section.id) vers le nouvel ID (sections[index].id)
+            if (section.id) {
+              sectionMap.set(section.id, sections[index].id);
+            }
+          }
+        });
+      }
+
       fields = await Promise.all(
-        fieldsWithKeys.map((field, index) =>
-          prisma.formField.create({
+        fieldsWithKeys.map((field, index) => {
+          // Trouver l'ID de la section pour ce champ
+          let sectionId: string | undefined = undefined;
+          if (field.sectionId) {
+            // Utiliser la map pour trouver le nouvel ID de section
+            sectionId = sectionMap.get(field.sectionId);
+            // Si pas trouvé dans la map, ne pas assigner de section (plutôt que d'utiliser l'ID temporaire)
+            if (!sectionId) {
+              console.warn(`Section ID ${field.sectionId} not found in sectionMap, field will be created without section`);
+              sectionId = undefined;
+            }
+          }
+
+          return prisma.formField.create({
             data: {
               formId: form.id,
+              sectionId: sectionId,
               label: field.label,
               key: field.key,
               type: field.type as FieldType,
@@ -286,17 +356,25 @@ export async function POST(request: NextRequest) {
               maxValue: field.maxValue,
               order: field.order !== undefined ? field.order : index,
             },
-          })
-        )
+          });
+        })
       );
     }
 
-    // Recuperer le formulaire complet avec ses champs
+    // Recuperer le formulaire complet avec ses champs et sections
     const completeForm = await prisma.customForm.findUnique({
       where: { id: form.id },
       include: {
         fields: {
           orderBy: { order: 'asc' },
+        },
+        sections: {
+          orderBy: { order: 'asc' },
+          include: {
+            fields: {
+              orderBy: { order: 'asc' },
+            },
+          },
         },
         _count: {
           select: {
@@ -321,6 +399,13 @@ export async function POST(request: NextRequest) {
           isActive: completeForm!.isActive,
           createdAt: completeForm!.createdAt,
           updatedAt: completeForm!.updatedAt,
+          sections: completeForm!.sections.map((section) => ({
+            id: section.id,
+            name: section.name,
+            description: section.description,
+            order: section.order,
+            fieldIds: section.fields.map(f => f.id),
+          })),
           fields: completeForm!.fields.map((field) => ({
             id: field.id,
             label: field.label,
@@ -334,6 +419,7 @@ export async function POST(request: NextRequest) {
             minValue: field.minValue,
             maxValue: field.maxValue,
             order: field.order,
+            sectionId: field.sectionId,
           })),
           stats: {
             responsesCount: completeForm!._count.responses,

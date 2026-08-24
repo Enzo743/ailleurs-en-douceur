@@ -1,0 +1,135 @@
+.progress-container {
+  margin-bottom: 30px;
+}
+
+.progress-bar-container {
+  background: #f0f0f0;
+  height: 6px;
+  border-radius: 3px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #4a3f2f;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.progress-indicator {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: #888;
+  border: 2px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+
+  &:hover:not(:disabled) {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.active {
+    background: #4a3f2f;
+    color: white;
+    border-color: #4a3f2f;
+  }
+
+  &.completed {
+    background: #2e7d32;
+    color: white;
+    border-color: #2e7d32;
+  }
+
+  // Ligne de connexion entre les indicateurs
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -26px;
+    width: 20px;
+    height: 2px;
+    background: #ddd;
+    z-index: -1;
+  }
+
+  &:last-child::after {
+    display: none;
+  }
+}
+
+.section-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+
+  .current-section {
+    font-size: 16px;
+    font-weight: 600;
+    color: #4a3f2f;
+  }
+
+  .section-counter {
+    font-size: 14px;
+    color: #888;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .progress-indicators {
+    gap: 8px;
+  }
+
+  .progress-indicator {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+
+    &::after {
+      width: 16px;
+      right: -20px;
+    }
+  }
+
+  .section-info {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .progress-indicator {
+    width: 28px;
+    height: 28px;
+
+    &::after {
+      width: 12px;
+      right: -18px;
+    }
+  }
+}

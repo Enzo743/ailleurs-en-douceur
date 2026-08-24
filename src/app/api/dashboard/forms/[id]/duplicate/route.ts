@@ -31,6 +31,7 @@ export async function POST(
       where: { id },
       include: {
         fields: true,
+        sections: true,
         _count: { select: { responses: true, contactRequests: true } },
         contactRequests: {
           where: {
@@ -70,12 +71,41 @@ export async function POST(
       },
     });
 
-    // Copier les champs du formulaire
-    const newFields = await Promise.all(
-      existingForm.fields.map((field, index) =>
-        prisma.formField.create({
+    // Copier les sections du formulaire
+    const sectionMap = new Map<string, string>();
+    const newSections = await Promise.all(
+      existingForm.sections.map((section, index) =>
+        prisma.formSection.create({
           data: {
             formId: newForm.id,
+            name: section.name,
+            description: section.description,
+            order: section.order,
+          },
+        })
+      )
+    );
+
+    // Créer une map des anciens IDs de section vers les nouveaux IDs
+    existingForm.sections.forEach((section, index) => {
+      if (newSections[index]) {
+        sectionMap.set(section.id, newSections[index].id);
+      }
+    });
+
+    // Copier les champs du formulaire avec leurs sections
+    const newFields = await Promise.all(
+      existingForm.fields.map((field, index) => {
+        // Trouver le nouvel ID de section
+        let newSectionId: string | undefined = undefined;
+        if (field.sectionId) {
+          newSectionId = sectionMap.get(field.sectionId);
+        }
+
+        return prisma.formField.create({
+          data: {
+            formId: newForm.id,
+            sectionId: newSectionId,
             label: field.label,
             key: field.key,
             type: field.type,
@@ -85,8 +115,8 @@ export async function POST(
             defaultValue: field.defaultValue,
             order: field.order,
           },
-        })
-      )
+        });
+      })
     );
 
     // Désactiver l'ancien formulaire et ajouter le préfixe [ANCIEN]
@@ -111,12 +141,20 @@ export async function POST(
       });
     }
 
-    // Récupérer le formulaire complet avec ses champs
+    // Récupérer le formulaire complet avec ses champs et sections
     const completeNewForm = await prisma.customForm.findUnique({
       where: { id: newForm.id },
       include: {
         fields: {
           orderBy: { order: 'asc' },
+        },
+        sections: {
+          orderBy: { order: 'asc' },
+          include: {
+            fields: {
+              orderBy: { order: 'asc' },
+            },
+          },
         },
         _count: {
           select: {
@@ -150,6 +188,14 @@ export async function POST(
             options: field.options,
             defaultValue: field.defaultValue,
             order: field.order,
+            sectionId: field.sectionId,
+          })),
+          sections: completeNewForm!.sections.map((section) => ({
+            id: section.id,
+            name: section.name,
+            description: section.description,
+            order: section.order,
+            fieldIds: section.fields.map(f => f.id),
           })),
           stats: {
             responsesCount: completeNewForm!._count.responses,
