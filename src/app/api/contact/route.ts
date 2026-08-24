@@ -307,11 +307,42 @@ Date: ${new Date().toLocaleString('fr-FR')}
   } catch (error: any) {
     console.error("Erreur lors de l'envoi de l'email:", error);
     
+    // Message d'erreur plus détaillé pour le développement
+    let errorMessage = 'Une erreur est survenue lors de l\'envoi du message. Veuillez reessayer plus tard.';
+    let errorDetails: any = undefined;
+    
+    if (process.env.NODE_ENV === 'development') {
+      errorMessage = error.message || error.toString();
+      
+      // Conseils spécifiques pour les erreurs courantes
+      if (error.code === 'EAUTH') {
+        errorMessage = 'Erreur d\'authentification SMTP. Vérifiez vos identifiants.';
+        errorDetails = {
+          code: error.code,
+          response: error.response,
+          responseCode: error.responseCode,
+          help: 'Pour Brevo: 1) Vérifiez que BREVO_API_KEY est correcte, 2) Vérifiez que BREVO_SENDER_EMAIL est vérifié dans votre compte Brevo, 3) Utilisez smtp.brevo.com comme hôte'
+        };
+      } else if (error.code === 'ECONNECTION') {
+        errorMessage = 'Impossible de se connecter au serveur SMTP. Vérifiez l\'hôte et le port.';
+        errorDetails = {
+          code: error.code,
+          help: 'Vérifiez que le serveur SMTP est accessible'
+        };
+      }
+      
+      errorDetails = {
+        ...errorDetails,
+        fullError: error.toString(),
+        stack: error.stack
+      };
+    }
+    
     return NextResponse.json(
       { 
         success: false,
-        error: 'Une erreur est survenue lors de l\'envoi du message. Veuillez reessayer plus tard.',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        error: errorMessage,
+        details: errorDetails
       },
       { status: 500 }
     );
