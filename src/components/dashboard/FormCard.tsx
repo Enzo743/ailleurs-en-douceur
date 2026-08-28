@@ -135,6 +135,9 @@ export default function FormCard({ form }: FormCardProps) {
       </div>
 
       <div className={styles['card-actions']}>
+        <Link href={`/dashboard/forms/${form.id}/preview`} className={styles['preview-button']}>
+          Prévisualiser
+        </Link>
         <Link href={`/dashboard/forms/${form.id}/edit`} className={styles['action-button']}>
           Modifier
         </Link>
