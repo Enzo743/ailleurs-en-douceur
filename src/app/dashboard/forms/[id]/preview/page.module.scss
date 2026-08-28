@@ -12,9 +12,14 @@
 }
 
 .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 40px;
 
   .header-left {
+    flex: 1;
+    
     .back-link {
       display: inline-flex;
       align-items: center;
@@ -45,6 +50,36 @@
       margin: 0;
     }
   }
+
+  .header-actions {
+    margin-left: 20px;
+    
+    .download-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: #4caf50;
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border: 2px solid #4caf50;
+
+      &:hover {
+        background: #388e3c;
+        border-color: #388e3c;
+        text-decoration: none;
+        color: #fff;
+      }
+
+      &:active {
+        transform: translateY(1px);
+      }
+    }
+  }
 }
 
 .description {
@@ -69,9 +104,31 @@
   padding: 40px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #e0e0e0;
+
+  .form-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: $color-brun;
+    margin: 0 0 10px 0;
+    text-align: center;
+    border-bottom: 2px solid $color-brun;
+    padding-bottom: 15px;
+  }
+
+  .form-package {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 20px 0;
+    text-align: center;
+    font-style: italic;
+  }
 }
 
 .preview-form {
+  .progress-container {
+    margin-bottom: 25px;
+  }
+
   .sections-container {
     .current-section {
       .section-description {
@@ -237,6 +294,16 @@
     color: $color-brun;
     padding: 0 10px;
     margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .field-hint {
+    font-size: 12px;
+    color: #888;
+    font-style: italic;
+    font-weight: normal;
   }
 
   .radio-option {
@@ -292,6 +359,16 @@
     color: $color-brun;
     padding: 0 10px;
     margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .field-hint {
+    font-size: 12px;
+    color: #888;
+    font-style: italic;
+    font-weight: normal;
   }
 
   .checkbox-option {
@@ -439,6 +516,312 @@
   }
 }
 
+// ============================================================================
+// Styles pour le rendu PDF (contenu caché pour la génération PDF)
+// ============================================================================
+
+.pdf-preview-content {
+  visibility: hidden;
+  position: absolute;
+  width: 100%;
+  max-width: 800px;
+  background: #fff;
+  padding: 0;
+  box-shadow: none;
+  border: none;
+  overflow: visible;
+}
+
+.pdf-content {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 30px;
+  background: #fff;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  color: #333;
+  page-break-after: avoid;
+}
+
+// En-tête du PDF
+.pdf-header {
+  margin-bottom: 40px;
+  text-align: center;
+  page-break-after: avoid;
+
+  .pdf-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: $color-brun;
+    margin: 0 0 15px 0;
+    text-align: center;
+    border-bottom: 2px solid $color-brun;
+    padding-bottom: 15px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  }
+
+  .pdf-package {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 20px 0;
+    font-style: italic;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  }
+
+  .pdf-description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #555;
+    margin: 0 0 25px 0;
+    text-align: left;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  }
+
+  .pdf-instructions {
+    font-size: 13px;
+    color: #888;
+    margin: 0;
+    font-style: italic;
+    text-align: center;
+    padding: 15px;
+    background: #faf8f5;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  }
+}
+
+// Contenu du formulaire PDF
+.pdf-form-content {
+  margin-top: 30px;
+}
+
+.pdf-fields-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.pdf-field-separator {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 25px;
+  page-break-inside: avoid;
+}
+
+// Sections pour le PDF
+.pdf-section {
+  margin-bottom: 40px;
+  page-break-inside: avoid;
+
+  .pdf-section-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: $color-brun;
+    margin: 0 0 10px 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  }
+
+  .pdf-section-description {
+    font-size: 14px;
+    color: #666;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+    font-style: italic;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  }
+
+  .pdf-section-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+
+.pdf-page-indicator {
+  page-break-before: always;
+}
+
+// Conteneur de champ pour le PDF
+.pdf-field-container {
+  margin-bottom: 20px;
+  page-break-inside: avoid;
+
+  .pdf-field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+
+    .pdf-field-label {
+      font-size: 14px;
+      font-weight: bold;
+      color: $color-brun;
+      flex: 1;
+      font-family: Georgia, 'Times New Roman', Times, serif;
+    }
+
+    .pdf-field-type {
+      font-size: 12px;
+      color: #888;
+      font-style: italic;
+      margin-left: 10px;
+      font-family: Georgia, 'Times New Roman', Times, serif;
+    }
+  }
+
+  .pdf-field-hint {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 12px;
+    font-style: italic;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  }
+
+  // Zone de réponse pour le PDF
+  .pdf-response-area {
+    margin-top: 10px;
+    padding: 10px;
+    background: #faf8f5;
+    border-radius: 4px;
+    min-height: 20px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+
+    // Réponse texte simple
+    .pdf-text-response {
+      font-size: 14px;
+      color: #ccc;
+      border-bottom: 1px solid #ccc;
+      padding: 8px 0;
+      min-height: 24px;
+
+      &::before {
+        content: '';
+        display: block;
+      }
+    }
+
+    // Réponse textarea (plusieurs lignes)
+    .pdf-textarea-response {
+      .pdf-textarea-line {
+        height: 24px;
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 4px;
+        font-size: 14px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    // Zone checkbox pour le PDF
+    .pdf-checkbox-area {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .pdf-checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+
+        .pdf-checkbox {
+          font-size: 16px;
+          color: #333;
+          width: 18px;
+          text-align: center;
+        }
+      }
+    }
+
+    // Zone select pour le PDF
+    .pdf-select-area {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .pdf-option-line {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .pdf-radio {
+          font-size: 16px;
+          color: #333;
+          width: 18px;
+          text-align: center;
+        }
+      }
+    }
+
+    // Zone multiselect pour le PDF
+    .pdf-multiselect-area {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .pdf-checkbox-line {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .pdf-checkbox {
+          font-size: 16px;
+          color: #333;
+          width: 18px;
+          text-align: center;
+        }
+      }
+    }
+
+    // Zone range pour le PDF
+    .pdf-range-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #ccc;
+
+      span {
+        border-bottom: 1px solid #ccc;
+        padding: 4px 0;
+      }
+    }
+
+    .pdf-empty-line {
+      height: 20px;
+      border-bottom: 1px solid #eee;
+      margin: 8px 0;
+    }
+  }
+}
+
+// Pied de page du PDF
+.pdf-footer {
+  margin-top: 50px;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+  text-align: center;
+  font-size: 12px;
+  color: #888;
+  page-break-inside: avoid;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+
+  .pdf-date {
+    margin-top: 8px;
+    font-style: italic;
+    color: #999;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  }
+}
+
+// ============================================================================
+// Fin des styles PDF
+// ============================================================================
+
 // Responsive
 @media (max-width: 768px) {
   .page {
@@ -478,5 +861,19 @@
     .range-separator {
       text-align: center;
     }
+  }
+
+  // Responsive pour le PDF
+  .pdf-content {
+    padding: 20px 15px;
+    font-size: 12px;
+  }
+
+  .pdf-field-container {
+    margin-bottom: 15px;
+  }
+
+  .pdf-section {
+    margin-bottom: 25px;
   }
 }

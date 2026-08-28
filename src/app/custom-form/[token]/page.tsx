@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import styles from './page.module.scss';
 import { getPackageLabel } from '@/lib/constants';
 import { FormSection, FormField as FormFieldType } from '@/lib/form-constants';
-import FormProgressBar from '@/components/FormProgressBar';
+import FormProgressBar from '@/components/dashboard/FormProgressBar';
 
 interface FormField extends Omit<FormFieldType, 'key'> {
   key: string; // Rend la clé obligatoire pour le frontend

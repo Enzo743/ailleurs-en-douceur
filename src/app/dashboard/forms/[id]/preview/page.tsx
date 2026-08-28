@@ -2,8 +2,10 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
-import { FormField as FormFieldType, FormSection } from '@/lib/form-constants';
-import FormProgressBar from '@/components/FormProgressBar';
+import { FormField as FormFieldType, FormSection, FIELD_TYPE_LABELS } from '@/lib/form-constants';
+import DownloadPdfButton from '@/components/dashboard/DownloadPdfButton';
+import FormProgressBar from '@/components/dashboard/FormProgressBar';
+import { getPackageLabel } from '@/lib/constants';
 import styles from './page.module.scss';
 
 interface FormField extends Omit<FormFieldType, 'key'> {
@@ -14,6 +16,7 @@ interface FormField extends Omit<FormFieldType, 'key'> {
 interface CustomFormData {
   id: string;
   name: string;
+  packageType?: string;
   description?: string;
   successMessage: string;
   fields: FormField[];
@@ -68,7 +71,6 @@ export default function PreviewFormPage({ params }: { params: Promise<{ id: stri
         const form: CustomFormData = data.data;
         setCustomForm(form);
         
-        // Initialiser les valeurs par défaut
         const initialValues: FieldValue = {};
         form.fields.forEach((field: FormField) => {
           initialValues[field.key] = field.defaultValue || '';
@@ -108,7 +110,6 @@ export default function PreviewFormPage({ params }: { params: Promise<{ id: stri
   ) => {
     setFormValues(prev => {
       const newValues = { ...prev };
-      
       if (fieldType === 'CHECKBOX') {
         newValues[fieldKey] = value as boolean;
       } else if (fieldType === 'MULTISELECT') {
@@ -118,11 +119,193 @@ export default function PreviewFormPage({ params }: { params: Promise<{ id: stri
       } else {
         newValues[fieldKey] = value;
       }
-      
       return newValues;
     });
   };
 
+  // Fonction pour rendre un champ en mode PDF (avec espace vide pour la réponse)
+  const renderPdfField = (field: FormField) => {
+    const fieldTypeLabel = FIELD_TYPE_LABELS[field.type] || field.type;
+
+    return (
+      <div key={field.id} className={styles['pdf-field-container']}>
+        <div className={styles['pdf-field-header']}>
+          <span className={styles['pdf-field-label']}>
+            {field.label}{field.required && <span className={styles.required}> *</span>}
+          </span>
+          <span className={styles['pdf-field-type']}>({fieldTypeLabel})</span>
+        </div>
+        
+        {field.placeholder && (
+          <div className={styles['pdf-field-hint']}>
+            {field.placeholder}
+          </div>
+        )}
+        
+        {/* Mentions pour SELECT et MULTISELECT */}
+        {field.type === 'SELECT' && (
+          <div className={styles['pdf-field-hint']}>
+            Sélectionnez une seule option
+          </div>
+        )}
+        {field.type === 'MULTISELECT' && (
+          <div className={styles['pdf-field-hint']}>
+            Vous pouvez sélectionner plusieurs options
+          </div>
+        )}
+
+        {/* Espace pour la réponse */}
+        <div className={styles['pdf-response-area']}>
+          {field.type === 'CHECKBOX' ? (
+            <div className={styles['pdf-checkbox-area']}>
+              <label className={styles['pdf-checkbox-label']}>
+                <span className={styles['pdf-checkbox']}>☐</span>
+                <span> Oui</span>
+              </label>
+            </div>
+          ) : field.type === 'SELECT' ? (
+            <div className={styles['pdf-select-area']}>
+              {field.options && field.options.length > 0 ? (
+                field.options.map((option, index) => (
+                  <div key={index} className={styles['pdf-option-line']}>
+                    <span className={styles['pdf-radio']}>◯</span>
+                    <span>{option}</span>
+                  </div>
+                ))
+              ) : (
+                <div className={styles['pdf-empty-line']} />
+              )}
+              {field.allowOtherOption && (
+                <div className={styles['pdf-option-line']}>
+                  <span className={styles['pdf-radio']}>◯</span>
+                  <span>Autre : _______________</span>
+                </div>
+              )}
+            </div>
+          ) : field.type === 'MULTISELECT' ? (
+            <div className={styles['pdf-multiselect-area']}>
+              {field.options && field.options.length > 0 ? (
+                field.options.map((option, index) => (
+                  <div key={index} className={styles['pdf-checkbox-line']}>
+                    <span className={styles['pdf-checkbox']}>☐</span>
+                    <span>{option}</span>
+                  </div>
+                ))
+              ) : (
+                <div className={styles['pdf-empty-line']} />
+              )}
+              {field.allowOtherOption && (
+                <div className={styles['pdf-checkbox-line']}>
+                  <span className={styles['pdf-checkbox']}>☐</span>
+                  <span>Autre : _______________</span>
+                </div>
+              )}
+            </div>
+          ) : field.type === 'RANGE_NUMBER' || field.type === 'RANGE_DATE' ? (
+            <div className={styles['pdf-range-area']}>
+              <span>De : _______________ à : _______________</span>
+            </div>
+          ) : field.type === 'TEXTAREA' ? (
+            <div className={styles['pdf-textarea-response']}>
+              <div className={styles['pdf-textarea-line']} />
+              <div className={styles['pdf-textarea-line']} />
+              <div className={styles['pdf-textarea-line']} />
+              <div className={styles['pdf-textarea-line']} />
+              <div className={styles['pdf-textarea-line']} />
+            </div>
+          ) : (
+            <div className={styles['pdf-text-response']}>
+              ______________________________________________
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Fonction pour rendre une section en mode PDF
+  const renderPdfSection = (section: FormSection) => {
+    const sectionFields = customForm?.fields.filter(field => field.sectionId === section.id) || [];
+    
+    return (
+      <div key={section.id} className={styles['pdf-section']}>
+        {section.name && (
+          <h3 className={styles['pdf-section-title']}>{section.name}</h3>
+        )}
+        
+        {section.description && (
+          <p className={styles['pdf-section-description']}>{section.description}</p>
+        )}
+        
+        <div className={styles['pdf-section-fields']}>
+          {sectionFields
+            .sort((a, b) => a.order - b.order)
+            .map((field, index) => (
+              <div key={field.id} className={index < sectionFields.length - 1 ? styles['pdf-field-separator'] : ''}>
+                {renderPdfField(field)}
+              </div>
+            ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Contenu pour le PDF (toutes les sections visibles)
+  const pdfContent = customForm && (
+    <div className={styles['pdf-content']}>
+      {/* En-tête du formulaire */}
+      <div className={styles['pdf-header']}>
+        <h1 className={styles['pdf-title']}>{customForm.name}</h1>
+        
+        {customForm.packageType && (
+          <p className={styles['pdf-package']}>
+            Formulaire pour : {getPackageLabel(customForm.packageType)}
+          </p>
+        )}
+        
+        {customForm.description && (
+          <div className={styles['pdf-description']}>
+            {customForm.description}
+          </div>
+        )}
+        
+        <p className={styles['pdf-instructions']}>
+          Veuillez remplir ce formulaire en écrivant vos réponses dans les espaces prévus.
+        </p>
+      </div>
+
+      {/* Contenu du formulaire */}
+      <div className={styles['pdf-form-content']}>
+        {customForm.sections && customForm.sections.length > 0 ? (
+          <>
+            {customForm.sections.map((section, sectionIndex) => (
+              <div key={section.id} className={sectionIndex > 0 ? styles['pdf-page-indicator'] : ''}>
+                {renderPdfSection(section)}
+              </div>
+            ))}
+          </>
+        ) : (
+          <div className={styles['pdf-fields-container']}>
+            {customForm.fields
+              .sort((a, b) => a.order - b.order)
+              .map((field, index, array) => (
+                <div key={field.id} className={index < array.length - 1 ? styles['pdf-field-separator'] : ''}>
+                  {renderPdfField(field)}
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* Pied de page */}
+      <div className={styles['pdf-footer']}>
+        <p>Merci d'avoir rempli ce formulaire.</p>
+        <p className={styles['pdf-date']}>Formulaire généré le : {new Date().toLocaleDateString('fr-FR')}</p>
+      </div>
+    </div>
+  );
+
+  // Fonction pour rendre un champ en mode prévisualisation interactive
   const renderField = (field: FormField) => {
     const inputType = getInputType(field.type);
     const value = formValues[field.key] || '';
@@ -153,6 +336,7 @@ export default function PreviewFormPage({ params }: { params: Promise<{ id: stri
             <fieldset className={styles['radio-group']}>
               <legend>
                 {field.label}{field.required && <span className={styles.required}> *</span>}
+                <small className={styles['field-hint']}>Sélectionnez une seule option</small>
               </legend>
               {field.options.map((option, index) => (
                 <div key={index} className={styles['radio-option']}>
@@ -181,6 +365,7 @@ export default function PreviewFormPage({ params }: { params: Promise<{ id: stri
             <fieldset className={styles['checkbox-group']}>
               <legend>
                 {field.label}{field.required && <span className={styles.required}> *</span>}
+                <small className={styles['field-hint']}>Vous pouvez sélectionner plusieurs options</small>
               </legend>
               {field.options.map((option, index) => {
                 const currentValue = Array.isArray(value) ? value : [];
@@ -368,23 +553,47 @@ export default function PreviewFormPage({ params }: { params: Promise<{ id: stri
               Aperçu du formulaire tel que le verront vos clients
             </p>
           </div>
+          
+          <div className={styles['header-actions']}>
+            <DownloadPdfButton
+              formName={customForm.name}
+              targetId="pdf-preview-content"
+            />
+          </div>
         </div>
 
-        {customForm.description && (
-          <div className={styles.description}>
-            <p>{customForm.description}</p>
-          </div>
-        )}
+        {/* Contenu pour le PDF (toutes les sections visibles) */}
+        <div id="pdf-preview-content" className={styles['pdf-preview-content']}>
+          {pdfContent}
+        </div>
 
+        {/* Affichage normal pour la prévisualisation interactive */}
         <div className={styles['preview-container']}>
+          {/* Titre du formulaire */}
+          <h2 className={styles['form-title']}>{customForm.name}</h2>
+          
+          {customForm.packageType && (
+            <p className={styles['form-package']}>
+              Formulaire pour : {getPackageLabel(customForm.packageType)}
+            </p>
+          )}
+          
+          {customForm.description && (
+            <div className={styles.description}>
+              <p>{customForm.description}</p>
+            </div>
+          )}
+
           <div className={styles['preview-form']}>
             {/* Barre de progression si il y a des sections */}
             {customForm.sections && customForm.sections.length > 1 && (
-              <FormProgressBar
-                sections={customForm.sections}
-                currentSectionIndex={currentSectionIndex}
-                onSectionChange={goToSection}
-              />
+              <div className={styles['progress-container']}>
+                <FormProgressBar
+                  sections={customForm.sections}
+                  currentSectionIndex={currentSectionIndex}
+                  onSectionChange={goToSection}
+                />
+              </div>
             )}
 
             {/* Affichage des sections ou des champs simples */}
@@ -396,21 +605,18 @@ export default function PreviewFormPage({ params }: { params: Promise<{ id: stri
                     const currentSection = customForm.sections[currentSectionIndex];
                     if (!currentSection) return null;
 
-                    // Récupérer les champs de cette section
                     const sectionFields = customForm.fields
                       .filter(field => field.sectionId === currentSection.id)
                       .sort((a, b) => a.order - b.order);
 
                     return (
                       <>
-                        {/* Afficher la description de la section si elle existe */}
                         {currentSection.description && (
                           <div className={styles['section-description']}>
                             <p>{currentSection.description}</p>
                           </div>
                         )}
 
-                        {/* Afficher les champs de la section */}
                         <div className={styles['fields-container']}>
                           {sectionFields.map((field, index, array) => (
                             <div key={field.id} className={index < array.length - 1 ? styles['field-separator'] : ''}>
