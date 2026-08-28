@@ -304,13 +304,17 @@ export async function POST(request: NextRequest) {
     if (body.fields && body.fields.length > 0) {
       // Générer les clés pour tous les champs d'un coup pour éviter les doublons
       const existingKeys: string[] = [];
-      const fieldsWithKeys = body.fields.map((field) => ({
-        ...field,
-        key: field.key || generateFieldKey(field.label, existingKeys),
-      }));
-      
-      // Mettre à jour le tableau des clés existantes
-      fieldsWithKeys.forEach(f => existingKeys.push(f.key));
+      const fieldsWithKeys = body.fields.map((field) => {
+        // Si le champ a déjà une clé et qu'elle n'est pas en conflit, la garder
+        if (field.key && !existingKeys.includes(field.key)) {
+          existingKeys.push(field.key);
+          return field;
+        }
+        // Sinon, générer une nouvelle clé unique
+        const generatedKey = generateFieldKey(field.label, existingKeys);
+        existingKeys.push(generatedKey);
+        return { ...field, key: generatedKey };
+      });
       
       // Trouver la section correspondante pour chaque champ
       // Créer une map des anciens IDs de section (du client) vers les nouveaux IDs (base de données)

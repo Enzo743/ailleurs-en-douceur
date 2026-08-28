@@ -271,8 +271,22 @@ export async function PUT(
         }
       });
 
+      // Générer des clés uniques pour tous les champs
+      const existingKeys: string[] = [];
+      const fieldsWithKeys = (formData.fields || []).map((field) => {
+        // Si le champ a déjà une clé et qu'elle n'est pas en conflit, la garder
+        if (field.key && !existingKeys.includes(field.key)) {
+          existingKeys.push(field.key);
+          return field;
+        }
+        // Sinon, générer une nouvelle clé unique
+        const generatedKey = generateFieldKey(field.label, existingKeys);
+        existingKeys.push(generatedKey);
+        return { ...field, key: generatedKey };
+      });
+
       const newFields = await Promise.all(
-        (formData.fields || []).map((field, index) => {
+        fieldsWithKeys.map((field, index) => {
           // Trouver l'ID de la section pour ce champ
           let sectionId: string | undefined = undefined;
           if (field.sectionId) {
@@ -373,7 +387,51 @@ export async function PUT(
         { status: 200 }
       );
     } else {
-      // Mise à jour sans sections (ancien comportement)
+      // Mise à jour sans sections
+      // Si des champs sont fournis, les mettre à jour
+      if (formData.fields && formData.fields.length > 0) {
+        // Supprimer les anciens champs
+        await prisma.formField.deleteMany({
+          where: { formId: id },
+        });
+
+        // Générer des clés uniques pour tous les champs
+        const existingKeys: string[] = [];
+        const fieldsWithKeys = formData.fields.map((field) => {
+          // Si le champ a déjà une clé et qu'elle n'est pas en conflit, la garder
+          if (field.key && !existingKeys.includes(field.key)) {
+            existingKeys.push(field.key);
+            return field;
+          }
+          // Sinon, générer une nouvelle clé unique
+          const generatedKey = generateFieldKey(field.label, existingKeys);
+          existingKeys.push(generatedKey);
+          return { ...field, key: generatedKey };
+        });
+
+        // Créer les nouveaux champs
+        await Promise.all(
+          fieldsWithKeys.map((field, index) =>
+            prisma.formField.create({
+              data: {
+                formId: id,
+                label: field.label,
+                key: field.key,
+                type: field.type as FieldType,
+                placeholder: field.placeholder,
+                required: field.required || false,
+                allowOtherOption: field.allowOtherOption || false,
+                options: field.options || [],
+                defaultValue: field.defaultValue,
+                minValue: field.minValue,
+                maxValue: field.maxValue,
+                order: field.order !== undefined ? field.order : index,
+              },
+            })
+          )
+        );
+      }
+
       const updatedForm = await prisma.customForm.update({
         where: { id },
         data: updateData,
