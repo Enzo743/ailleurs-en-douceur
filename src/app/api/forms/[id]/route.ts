@@ -276,8 +276,10 @@ export async function PUT(
       // avec d'anciens champs qui pourraient avoir les mêmes clés
       const existingKeys: string[] = [];
       const fieldsWithKeys = (formData.fields || []).map((field) => {
-        // Générer une clé unique basée sur le label
-        const generatedKey = generateFieldKey(field.label, existingKeys);
+        // Toujours générer une nouvelle clé unique, en ignorant la clé envoyée par le frontend
+        // Cela évite les conflits avec des clés existantes ou dupliquées
+        const baseLabel = field.label || `champ-${existingKeys.length + 1}`;
+        const generatedKey = generateFieldKey(baseLabel, existingKeys);
         existingKeys.push(generatedKey);
         return { ...field, key: generatedKey };
       });
@@ -396,8 +398,9 @@ export async function PUT(
         // Lors de la mise à jour, on génère TOUJOURS de nouvelles clés pour éviter les conflits
         const existingKeys: string[] = [];
         const fieldsWithKeys = formData.fields.map((field) => {
-          // Générer une clé unique basée sur le label
-          const generatedKey = generateFieldKey(field.label, existingKeys);
+          // Toujours générer une nouvelle clé unique, en ignorant la clé envoyée par le frontend
+          const baseLabel = field.label || `champ-${existingKeys.length + 1}`;
+          const generatedKey = generateFieldKey(baseLabel, existingKeys);
           existingKeys.push(generatedKey);
           return { ...field, key: generatedKey };
         });

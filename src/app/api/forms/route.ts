@@ -305,15 +305,18 @@ export async function POST(request: NextRequest) {
       // Générer les clés pour tous les champs d'un coup pour éviter les doublons
       const existingKeys: string[] = [];
       const fieldsWithKeys = body.fields.map((field) => {
-        // Si le champ a déjà une clé et qu'elle n'est pas en conflit, la garder
-        if (field.key && !existingKeys.includes(field.key)) {
-          existingKeys.push(field.key);
-          return field;
+        // Pour la création, on peut utiliser la clé si elle est fournie et unique
+        // Sinon, on en génère une nouvelle
+        const baseLabel = field.label || `champ-${existingKeys.length + 1}`;
+        let keyToUse = field.key;
+        
+        // Si la clé n'est pas fournie ou est déjà utilisée, en générer une nouvelle
+        if (!keyToUse || existingKeys.includes(keyToUse)) {
+          keyToUse = generateFieldKey(baseLabel, existingKeys);
         }
-        // Sinon, générer une nouvelle clé unique
-        const generatedKey = generateFieldKey(field.label, existingKeys);
-        existingKeys.push(generatedKey);
-        return { ...field, key: generatedKey };
+        
+        existingKeys.push(keyToUse);
+        return { ...field, key: keyToUse };
       });
       
       // Trouver la section correspondante pour chaque champ
