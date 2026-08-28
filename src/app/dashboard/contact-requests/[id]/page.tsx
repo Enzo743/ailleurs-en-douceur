@@ -8,6 +8,7 @@ import { formatDate } from '@/lib/time';
 import { StatusBadge } from '@/components/dashboard';
 import AssignFormClient from '@/components/dashboard/AssignFormClient';
 import ActionFormClient from '@/components/dashboard/ActionFormClient';
+import DownloadFilledFormPdfButton from '@/components/dashboard/DownloadFilledFormPdfButton';
 
 // Formater les valeurs JSON pour affichage
 const formatValue = (value: any, allValues: Record<string, any> = {}, fieldKey?: string): string => {
@@ -50,6 +51,9 @@ export default async function ContactRequestDetailPage({
       form: {
         include: {
           fields: {
+            orderBy: { order: 'asc' },
+          },
+          sections: {
             orderBy: { order: 'asc' },
           },
         },
@@ -215,9 +219,18 @@ export default async function ContactRequestDetailPage({
                 <h3 className={styles['response-title']}>
                   Réponse #{index + 1}
                 </h3>
-                <span className={styles['response-date']}>
-                  {formatDate(formResponse.createdAt, { month: 'long' })}
-                </span>
+                <div className={styles['response-header-actions']}>
+                  <span className={styles['response-date']}>
+                    {formatDate(formResponse.createdAt, { month: 'long' })}
+                  </span>
+                  {contactRequest.form && (
+                    <DownloadFilledFormPdfButton
+                      form={contactRequest.form as any}
+                      formResponse={formResponse as any}
+                      clientName={`${contactRequest.firstName} ${contactRequest.lastName}`}
+                    />
+                  )}
+                </div>
               </div>
               
               {contactRequest.form && (

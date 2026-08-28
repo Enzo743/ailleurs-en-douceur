@@ -295,6 +295,14 @@
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--dashboard-color-background-dark);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.response-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .response-title {

@@ -5,6 +5,7 @@ export { default as CoverImageUpload } from './CoverImageUpload';
 export { default as DashboardHeader } from './DashboardHeader';
 export { default as DeleteArticleButton } from './DeleteArticleButton';
 export { default as DownloadPdfButton } from './DownloadPdfButton';
+export { default as DownloadFilledFormPdfButton } from './DownloadFilledFormPdfButton';
 export { default as EmptyState } from './EmptyState';
 export { default as FilterForm } from './FilterForm';
 export { default as FormCard } from './FormCard';
