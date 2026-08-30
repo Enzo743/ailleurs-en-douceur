@@ -358,8 +358,10 @@
 
     &:disabled {
       background: var(--dashboard-color-border-dark);
+      color: var(--dashboard-color-primary);
       cursor: not-allowed;
       transform: none;
+      opacity: 0.7;
     }
   }
 
