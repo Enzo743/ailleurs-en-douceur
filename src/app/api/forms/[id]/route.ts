@@ -226,13 +226,19 @@ export async function PUT(
       );
     }
 
-    // Mise à jour du formulaire
+    // Mise à jour du formulaire (toujours appliquée, même avec des sections)
     const updateData: any = {};
     if (formData.name !== undefined) updateData.name = formData.name.trim();
     if (formData.packageType !== undefined) updateData.packageType = formData.packageType?.trim();
     if (formData.description !== undefined) updateData.description = formData.description?.trim();
     if (formData.successMessage !== undefined) updateData.successMessage = formData.successMessage;
     if (formData.isActive !== undefined) updateData.isActive = formData.isActive;
+
+    // Appliquer la mise à jour des métadonnées du formulaire d'abord
+    await prisma.customForm.update({
+      where: { id },
+      data: updateData,
+    });
 
     // Gérer les sections et champs
     if (formData.sections) {
@@ -428,9 +434,8 @@ export async function PUT(
         );
       }
 
-      const updatedForm = await prisma.customForm.update({
+      const updatedForm = await prisma.customForm.findUnique({
         where: { id },
-        data: updateData,
         include: {
           fields: {
             orderBy: { order: 'asc' },
