@@ -1,10 +1,11 @@
 'use client';
 
-import { useRef, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import Image from 'next/image';
-import { uploadImage } from '@/app/actions/content';
+import { updateText } from '@/app/actions/content';
 import type { SiteContent } from '@prisma/client';
 import styles from './content-row.module.scss';
+import FileManager from './FileManager';
 
 type Props = { item: SiteContent };
 
@@ -13,27 +14,25 @@ export default function ContentImageRow({ item }: Props) {
     const [status, setStatus]         = useState<'idle' | 'saved' | 'error'>('idle');
     const [errorMsg, setErrorMsg]     = useState('');
     const [isPending, startTransition] = useTransition();
-    const fileRef = useRef<HTMLInputElement>(null);
+    const [showFileManager, setShowFileManager] = useState(false);
 
-    function handleUpload() {
-        const file = fileRef.current?.files?.[0];
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append('file', file);
-
+    // Gérer la sélection d'une image depuis le gestionnaire de fichiers
+    function handleSelectFromFileManager(filePath: string) {
+        // Mettre à jour l'URL avec le chemin du fichier sélectionné
+        setCurrentUrl(filePath);
+        setStatus('saved');
+        
+        // Sauvegarder immédiatement le changement
         startTransition(async () => {
-            const result = await uploadImage(item.key, formData);
-            if (result.success && result.url) {
-                setCurrentUrl(result.url);
-                setStatus('saved');
-                if (fileRef.current) fileRef.current.value = '';
-            } else {
-                setErrorMsg(result.error ?? 'Erreur inconnue.');
+            const result = await updateText(item.key, filePath);
+            if (!result.success) {
+                setErrorMsg(result.error ?? 'Erreur lors de la sauvegarde.');
                 setStatus('error');
+                setTimeout(() => setStatus('idle'), 3000);
             }
-            setTimeout(() => setStatus('idle'), 3000);
         });
+        
+        setTimeout(() => setStatus('idle'), 3000);
     }
 
     return (
@@ -60,21 +59,23 @@ export default function ContentImageRow({ item }: Props) {
             <p className={styles.currentPath}>{currentUrl}</p>
 
             <div className={styles.uploadRow}>
-                <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    className={styles.fileInput}
-                    disabled={isPending}
-                />
                 <button
-                    className={styles.saveButton}
-                    onClick={handleUpload}
+                    type="button"
+                    className={styles.selectButton}
+                    onClick={() => setShowFileManager(true)}
                     disabled={isPending}
                 >
-                    {isPending ? 'Upload…' : 'Remplacer'}
+                    Sélectionner une image
                 </button>
             </div>
+            
+            {/* Gestionnaire de fichiers (permet de sélectionner OU uploader) */}
+            {showFileManager && (
+                <FileManager
+                    onSelect={handleSelectFromFileManager}
+                    onClose={() => setShowFileManager(false)}
+                />
+            )}
 
             <div className={styles.footer}>
                 {status === 'saved' && <span className={styles.statusOk}>✓ Image mise à jour</span>}

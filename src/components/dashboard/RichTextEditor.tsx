@@ -4,9 +4,10 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { uploadArticleImage } from '@/app/actions/articles';
 import styles from './rich-text-editor.module.scss';
+import FileManager from './FileManager';
 
 type Props = {
     value: string;
@@ -16,6 +17,7 @@ type Props = {
 
 export default function RichTextEditor({ value, onChange, disabled = false }: Props) {
     const fileRef = useRef<HTMLInputElement>(null);
+    const [showFileManager, setShowFileManager] = useState(false);
 
     const editor = useEditor({
         extensions: [
@@ -104,11 +106,26 @@ export default function RichTextEditor({ value, onChange, disabled = false }: Pr
                 <button
                     type="button"
                     className={styles.toolbarButton}
-                    onClick={() => fileRef.current?.click()}
+                    onClick={() => setShowFileManager(true)}
                     disabled={disabled}
                 >
                     Image
                 </button>
+                
+                {/* Gestionnaire de fichiers pour sélectionner une image existante */}
+                {showFileManager && (
+                    <FileManager
+                        onSelect={(filePath) => {
+                            if (editor) {
+                                editor.chain().focus().setImage({ src: filePath }).run();
+                            }
+                            setShowFileManager(false);
+                        }}
+                        onClose={() => setShowFileManager(false)}
+                    />
+                )}
+                
+                {/* Upload de nouvelle image (optionnel, à garder si besoin) */}
                 <input
                     ref={fileRef}
                     type="file"

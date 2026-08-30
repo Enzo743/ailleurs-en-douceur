@@ -1,0 +1,286 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.modal {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideIn 0.2s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+  }
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 4px 8px;
+  line-height: 1;
+  border-radius: 4px;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+  }
+}
+
+.path {
+  padding: 12px 20px;
+  background-color: #f3f4f6;
+  font-size: 0.875rem;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.fileList {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.fileItem {
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 4px;
+
+  &:hover {
+    background-color: #f3f4f6;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Conteneur pour l'aperçu + nom du fichier
+.filePreview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+// Aperçu de l'image
+.imagePreview {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: #f3f4f6;
+}
+
+.imageThumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+// Icône pour les fichiers non-image
+.fileIcon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+// Nom du fichier
+.fileName {
+  color: #111827;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+// Style pour les dossiers (obsolète, gardé pour compatibilité)
+.directory {
+  display: block;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+// Style pour les fichiers (obsolète, gardé pour compatibilité)
+.file {
+  display: block;
+  color: #111827;
+}
+
+.loading {
+  padding: 40px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.error {
+  padding: 12px 16px;
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-radius: 6px;
+  margin: 16px;
+  font-size: 0.875rem;
+}
+
+.empty {
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+}
+
+// Zone d'upload
+.uploadArea {
+  padding: 12px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.uploadButton {
+  padding: 0.5rem 1rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #ffffff;
+  background-color: #2563eb;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &:hover {
+    background-color: #1d4ed8;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+// Messages de statut
+.statusMessage {
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 4px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.error {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+// Liste des usages (où le fichier est utilisé)
+.usagesList {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  font-size: 0.875rem;
+
+  ul {
+    margin: 0.25rem 0 0 1rem;
+    padding-left: 1rem;
+  }
+
+  li {
+    margin-bottom: 0.25rem;
+    color: #6b7280;
+  }
+}
+
+// Bouton de suppression
+.deleteButton {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #ef4444;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s;
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 1;
+    background-color: #fee2e2;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}

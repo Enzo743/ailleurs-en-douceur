@@ -193,6 +193,30 @@
   }
 }
 
+.selectButton {
+  padding: 0.5rem 1.125rem;
+  font-family: $font-family-title;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color-brun;
+  background-color: #fdf3e7;
+  border: 1.5px solid $color-caramel;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+
+  @include hover-capable {
+    &:hover:not(:disabled) {
+      background-color: #fce8cc;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
 .statusOk {
   font-size: 0.875rem;
   font-weight: 500;

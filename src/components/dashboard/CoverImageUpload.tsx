@@ -1,9 +1,10 @@
 'use client';
 
-import { useRef, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import Image from 'next/image';
 import { uploadArticleImage } from '@/app/actions/articles';
 import styles from './content-row.module.scss';
+import FileManager from './FileManager';
 
 type Props = {
     value: string | null;
@@ -15,27 +16,41 @@ export default function CoverImageUpload({ value, onChange, disabled = false }: 
     const [status, setStatus] = useState<'idle' | 'saved' | 'error'>('idle');
     const [errorMsg, setErrorMsg] = useState('');
     const [isPending, startTransition] = useTransition();
-    const fileRef = useRef<HTMLInputElement>(null);
+    const [showFileManager, setShowFileManager] = useState(false);
+
+    // Gérer la sélection d'une image depuis le gestionnaire de fichiers
+    function handleSelectFromFileManager(filePath: string) {
+        onChange(filePath);
+        setStatus('saved');
+        setTimeout(() => setStatus('idle'), 3000);
+    }
 
     function handleUpload() {
-        const file = fileRef.current?.files?.[0];
-        if (!file) return;
+        // Cette fonction n'est plus utilisée directement, mais on la garde au cas où
+        // (elle est appelée par le bouton d'upload si on veut le conserver)
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (!file) return;
 
-        const formData = new FormData();
-        formData.append('file', file);
+            const formData = new FormData();
+            formData.append('file', file);
 
-        startTransition(async () => {
-            const result = await uploadArticleImage(formData);
-            if (result.success && result.url) {
-                onChange(result.url);
-                setStatus('saved');
-                if (fileRef.current) fileRef.current.value = '';
-            } else {
-                setErrorMsg(result.error ?? 'Erreur inconnue.');
-                setStatus('error');
-            }
-            setTimeout(() => setStatus('idle'), 3000);
-        });
+            startTransition(async () => {
+                const result = await uploadArticleImage(formData);
+                if (result.success && result.url) {
+                    onChange(result.url);
+                    setStatus('saved');
+                } else {
+                    setErrorMsg(result.error ?? 'Erreur inconnue.');
+                    setStatus('error');
+                }
+                setTimeout(() => setStatus('idle'), 3000);
+            });
+        };
+        fileInput.click();
     }
 
     return (
@@ -59,20 +74,13 @@ export default function CoverImageUpload({ value, onChange, disabled = false }: 
             )}
 
             <div className={styles.uploadRow}>
-                <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    className={styles.fileInput}
-                    disabled={disabled || isPending}
-                />
                 <button
                     type="button"
-                    className={styles.saveButton}
-                    onClick={handleUpload}
+                    className={styles.selectButton}
+                    onClick={() => setShowFileManager(true)}
                     disabled={disabled || isPending}
                 >
-                    {isPending ? 'Upload…' : value ? 'Remplacer' : 'Ajouter'}
+                    {value ? 'Remplacer l\'image' : 'Sélectionner une image'}
                 </button>
                 {value && (
                     <button
@@ -86,6 +94,14 @@ export default function CoverImageUpload({ value, onChange, disabled = false }: 
                     </button>
                 )}
             </div>
+            
+            {/* Gestionnaire de fichiers */}
+            {showFileManager && (
+                <FileManager
+                    onSelect={handleSelectFromFileManager}
+                    onClose={() => setShowFileManager(false)}
+                />
+            )}
 
             <div className={styles.footer}>
                 {status === 'saved' && <span className={styles.statusOk}>✓ Image mise à jour</span>}
