@@ -457,6 +457,13 @@ export async function PUT(
         },
       });
 
+      if (!updatedForm) {
+        return NextResponse.json(
+          { success: false, error: 'Formulaire non trouvé après mise à jour' },
+          { status: 404 }
+        );
+      }
+
       return NextResponse.json(
         {
           success: true,

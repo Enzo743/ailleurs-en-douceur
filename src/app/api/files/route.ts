@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     }
 
     // Convertir en chemin absolu pour fs
-    const absolutePath = path.join(process.cwd(), normalizedPath);
+    const absolutePath = path.join(ROOT_PATH, normalizedPath.substring('/public'.length));
 
     // Vérification de sécurité : s'assurer que le chemin est bien dans /public
     if (!absolutePath.startsWith(ROOT_PATH)) {
@@ -200,7 +200,7 @@ export async function DELETE(request: Request) {
     }
 
     // Chemin absolu du fichier
-    const absolutePath = path.join(process.cwd(), 'public', normalizedPath);
+    const absolutePath = path.join(ROOT_PATH, normalizedPath);
 
     // Vérifier que le fichier existe
     if (!fs.existsSync(absolutePath)) {
