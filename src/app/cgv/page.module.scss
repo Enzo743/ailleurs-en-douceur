@@ -1,0 +1,228 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+// Page Container
+.legalPage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  background-color: $color-creme;
+  font-family: $font-family-base;
+}
+
+// Hero Section
+.heroSection {
+  position: relative;
+  width: 100%;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 100px $spacing-xl 60px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba($color-brun, 0.5);
+    z-index: 0;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 0;
+  }
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+}
+
+.heroTitle {
+  color: $color-creme;
+  text-shadow: 0 4px 4px rgba(30, 30, 30, 0.20);
+  font-family: $font-family-title;
+  font-size: 42px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+
+  em {
+    font-family: $font-family-title;
+    font-style: italic;
+    font-weight: 500;
+  }
+}
+
+.heroSubtitle {
+  font-family: $font-family-base;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 28px;
+  text-shadow: 0 4px 4px rgba(30, 30, 30, 0.2);
+  color: $color-creme;
+  margin: $spacing-md 0;
+}
+
+.heroDivider {
+  width: 72px;
+  height: 2px;
+  margin: $spacing-sm 0;
+  background: $color-caramel;
+}
+
+// Main Content Section
+.mainContent {
+  display: flex;
+  margin: 0 auto;
+  padding: 60px $spacing-lg;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.contentWrapper {
+  width: 100%;
+  background-color: white;
+  border-radius: 15px;
+  padding: $spacing-xl;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.content {
+  font-family: $font-family-base;
+  font-size: 16px;
+  line-height: 1.8;
+  color: $color-brun;
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: $font-family-title;
+    color: $color-brun;
+    margin-top: $spacing-xl;
+    margin-bottom: $spacing-md;
+    font-weight: 500;
+  }
+
+  h1 {
+    font-size: 28px;
+    border-bottom: 2px solid $color-caramel;
+    padding-bottom: $spacing-sm;
+  }
+
+  h2 {
+    font-size: 24px;
+    border-bottom: 1px solid $color-caramel;
+    padding-bottom: $spacing-xs;
+  }
+
+  h3 {
+    font-size: 20px;
+  }
+
+  p {
+    margin-bottom: $spacing-md;
+  }
+
+  ul, ol {
+    margin-bottom: $spacing-md;
+    padding-left: $spacing-lg;
+  }
+
+  li {
+    margin-bottom: $spacing-xs;
+  }
+
+  a {
+    color: $color-caramel;
+    text-decoration: underline;
+
+    &:hover {
+      color: $color-sauge;
+    }
+  }
+}
+
+// Responsive styles
+@include respond-to(lg) {
+  .heroSection {
+    padding: 80px $spacing-lg 60px;
+  }
+
+  .heroTitle {
+    font-size: 36px;
+  }
+
+  .heroSubtitle {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .mainContent {
+    padding: 60px $spacing-md;
+  }
+
+  .contentWrapper {
+    padding: $spacing-lg;
+  }
+}
+
+@include respond-to(md) {
+  .heroSection {
+    padding: 60px $spacing-md 40px;
+  }
+
+  .heroTitle {
+    font-size: 28px;
+  }
+
+  .heroSubtitle {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .mainContent {
+    padding: 40px $spacing-sm;
+  }
+
+  .contentWrapper {
+    padding: $spacing-md;
+  }
+
+  .content {
+    font-size: 15px;
+  }
+}
+
+@include respond-to(sm) {
+  .heroSection {
+    padding: 60px $spacing-sm 40px;
+  }
+
+  .heroTitle {
+    font-size: 24px;
+  }
+
+  .heroSubtitle {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .content {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .contentWrapper {
+    padding: $spacing-sm;
+  }
+}

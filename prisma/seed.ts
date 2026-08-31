@@ -196,6 +196,23 @@ const initialContent: {
     { key: 'offer-impulsion-douce/formula-3-title', type: ContentType.TEXT, value: 'Pack Trio' },
     { key: 'offer-impulsion-douce/formula-3-description', type: ContentType.TEXT, value: '3 Menus au choix' },
     { key: 'offer-impulsion-douce/formula-3-price', type: ContentType.TEXT, value: '140 euros' },
+
+    // ── Pages Légales ──────────────────────────────────────────────
+    // CGV
+    { key: 'cgv/hero-title', type: ContentType.RICHTEXT, value: 'Conditions Générales<br />de Vente' },
+    { key: 'cgv/hero-subtitle', type: ContentType.TEXT, value: 'Découvrez nos conditions de vente et d\'utilisation' },
+    { key: 'cgv/content', type: ContentType.RICHTEXT, value: '<p>Le contenu des conditions générales de vente sera disponible prochainement.</p>' },
+
+    // Privacy
+    { key: 'privacy/hero-title', type: ContentType.RICHTEXT, value: 'Politique de<br />Confidentialité' },
+    { key: 'privacy/hero-subtitle', type: ContentType.TEXT, value: 'Comment nous protégeons vos données personnelles' },
+    { key: 'privacy/content', type: ContentType.RICHTEXT, value: '<p>Le contenu de la politique de confidentialité sera disponible prochainement.</p>' },
+
+    // Legal
+    { key: 'legal/hero-title', type: ContentType.RICHTEXT, value: 'Mentions<br />Légales' },
+    { key: 'legal/hero-subtitle', type: ContentType.TEXT, value: 'Informations légales et mentions obligatoires' },
+    { key: 'legal/hero-image', type: ContentType.IMAGE, value: '/images/image-placeholder-2.png' },
+    { key: 'legal/content', type: ContentType.RICHTEXT, value: '<p>Le contenu des mentions légales sera disponible prochainement.</p>' },
 ];
 
 async function main(): Promise<void> {

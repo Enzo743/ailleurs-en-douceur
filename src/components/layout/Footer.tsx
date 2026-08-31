@@ -15,7 +15,7 @@ export default async function Footer() {
   ];
 
   const informationLinks = [
-    { label: "Condition générale de vente", href: "/cgv" },
+    { label: "Conditions générales de vente", href: "/cgv" },
     { label: "Politique de confidentialité", href: "/privacy" },
     { label: "Mentions légales", href: "/legal" }
   ];
