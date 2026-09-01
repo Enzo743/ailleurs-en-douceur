@@ -66,6 +66,25 @@ const initialContent: {
     { key: 'values/title-4',         type: ContentType.TEXT,     value: 'Eco-responsabilité' },
     { key: 'values/description-4',         type: ContentType.TEXT,     value: 'Des modes de transports doux, des partenaires locaux engagés.' },
 
+    // ── Page À Propos ──────────────────────────────────────────────
+    { key: 'about/tagline',         type: ContentType.TEXT,     value: 'A PROPOS' },
+    { key: 'about/hero-title',         type: ContentType.RICHTEXT,     value: 'Derrière <em>Ailleurs en Douceur</em>' },
+    { key: 'about/hero-image',       type: ContentType.IMAGE,    value: '/images/image-placeholder-1.jpg' },
+    { key: 'about/hero-description-1',         type: ContentType.TEXT,     value: 'Je m\'appelle Nelly, Travel Planner passionnée par les voyages qui ont du sens.' },
+    { key: 'about/hero-description-2',         type: ContentType.TEXT,     value: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
+    { key: 'about/story-tagline',         type: ContentType.TEXT,     value: 'MON HISTOIRE' },
+    { key: 'about/story-title',         type: ContentType.TEXT,     value: 'Le voyage a toujours fait parti de ma vie.' },
+    { key: 'about/story-image',       type: ContentType.IMAGE,    value: '/images/image-placeholder-1.jpg' },
+    { key: 'about/story-description-1',         type: ContentType.TEXT,     value: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
+    { key: 'about/story-description-2',         type: ContentType.TEXT,     value: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.' },
+    { key: 'about/travel-planner-tagline',         type: ContentType.TEXT,     value: "QU'EST CE QU'UN TRAVEL PLANNER ?" },
+    { key: 'about/travel-planner-title',         type: ContentType.TEXT,     value: 'Un voyage qui vous ressemble' },
+    { key: 'about/travel-planner-image',       type: ContentType.IMAGE,    value: '/images/image-placeholder-1.jpg' },
+    { key: 'about/travel-planner-description-1',         type: ContentType.TEXT,     value: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
+    { key: 'about/travel-planner-description-2',         type: ContentType.TEXT,     value: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.' },
+    { key: 'about/commitments-tagline',         type: ContentType.TEXT,     value: 'MES ENGAGEMENTS' },
+    { key: 'about/commitments-title',         type: ContentType.TEXT,     value: 'Des valeurs au cœur de chaque itinéraire.' },
+
     // ── Section Contact ──────────────────────────────────────────────
     { key: 'contact/image',         type: ContentType.IMAGE,     value: '/images/image-placeholder-1.jpg' },
     { key: 'contact/title',         type: ContentType.TEXT,     value: 'Prêt à vivre un voyage qui a du sens ?' },

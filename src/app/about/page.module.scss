@@ -1,0 +1,611 @@
+@use "../../styles/_variables" as *;
+@use "../../styles/_mixins" as *;
+
+// Page Container
+.aboutPage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  background-color: $color-creme;
+  font-family: $font-family-base;
+}
+
+// Container
+.container {
+  display: flex;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+  width: 100%;
+  max-width: 1440px;
+  flex-direction: column;
+}
+
+// Hero Section
+.heroSection {
+  position: relative;
+  padding: 80px 0;
+  background-color: $color-creme;
+  overflow: hidden;
+}
+
+.heroContainer {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xl;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+}
+
+.heroContent {
+  flex: 1;
+  max-width: 600px;
+}
+
+.heroTagline {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-caramel;
+  line-height: 25px;
+  text-transform: uppercase;
+  margin: 0 0 $spacing-md 0;
+  letter-spacing: 0.5px;
+}
+
+.heroTitle {
+  font-family: $font-family-title;
+  font-size: 32px;
+  font-weight: 400;
+  color: $color-brun;
+  line-height: 45px;
+  margin: 0 0 $spacing-lg 0;
+
+  em {
+    font-family: $font-family-title;
+    font-style: italic;
+    font-weight: 500;
+    color: $color-sauge;
+  }
+}
+
+.heroDescription {
+  font-family: $font-family-base;
+  font-size: 15px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 25px;
+  margin: 0 0 $spacing-md 0;
+}
+
+.heroName {
+  color: $color-caramel;
+  font-weight: 600;
+}
+
+.heroImageContainer {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 450px;
+  min-height: 250px;
+  border: 1px solid $color-creme;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.heroDecoration {
+  display: block;
+  margin: $spacing-lg auto $spacing-lg;
+  width: 65px;
+  height: 65px;
+}
+
+.heroSlogan {
+  color: $color-caramel;
+  font-family: $font-family-secondary;
+  font-size: 30px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.heroDividerContainer {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  margin-top: $spacing-lg;
+  justify-content: center;
+}
+
+.heroDivider {
+  flex: 1;
+  max-width: 100px;
+  height: 1px;
+  background: $color-caramel;
+}
+
+.heroSlogan {
+  font-family: $font-family-secondary;
+  font-size: 20px;
+  color: $color-caramel;
+  white-space: nowrap;
+  padding: 0 $spacing-md;
+}
+
+// Story Section
+.storySection {
+  padding: 80px 0;
+  background-color: $color-creme;
+  position: relative;
+}
+
+.storyContainer {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-xl;
+}
+
+.storyContent {
+  flex: 1;
+  max-width: 600px;
+}
+
+.sectionTagline {
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-caramel;
+  line-height: 25px;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.storyTaglineContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.storyTitle {
+  font-family: $font-family-title;
+  font-size: 32px;
+  font-weight: 400;
+  color: $color-brun;
+  line-height: 45px;
+  margin: 0 0 $spacing-lg 0;
+}
+
+.storyDescription {
+  font-family: $font-family-base;
+  font-size: 15px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 25px;
+  margin: 0 0 $spacing-md 0;
+}
+
+.storyImageContainer {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 450px;
+  border: 1px solid $color-creme;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.storyImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.storyDecoration {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+}
+
+.storyDividerContainer {
+  display: flex;
+  justify-content: flex-start;
+  padding-left: calc(33.33% + 8px);
+  margin-top: $spacing-lg;
+}
+
+.storyDivider {
+  width: 50px;
+  height: 1px;
+  background: $color-brun;
+}
+
+// Travel Planner Section
+.travelPlannerSection {
+  padding: 80px 0;
+  background-color: $color-creme;
+  position: relative;
+}
+
+.travelPlannerContainer {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xl;
+}
+
+.travelPlannerImageContainer {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 450px;
+  border: 1px solid $color-creme;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.travelPlannerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.travelPlannerContent {
+  flex: 1;
+  max-width: 600px;
+}
+
+.travelPlannerTitle {
+  font-family: $font-family-title;
+  font-size: 32px;
+  font-weight: 400;
+  color: $color-brun;
+  line-height: 45px;
+  margin: $spacing-md 0 $spacing-lg 0;
+}
+
+.travelPlannerDescription {
+  font-family: $font-family-base;
+  font-size: 15px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 25px;
+  margin: 0 0 $spacing-md 0;
+}
+
+.travelPlannerDecoration {
+  display: block;
+  margin: $spacing-lg auto 0;
+  width: 45.675px;
+  height: 45.675px;
+  transform: rotate(180deg) scaleY(-1);
+}
+
+// Commitments Section
+.commitmentsSection {
+  padding: 80px 0;
+  background-color: $color-creme;
+  position: relative;
+}
+
+.commitmentsHeader {
+  margin-bottom: $spacing-lg;
+}
+
+.commitmentsTitle {
+  font-family: $font-family-title;
+  font-size: 32px;
+  font-weight: 400;
+  color: $color-brun;
+  line-height: 45px;
+  margin: $spacing-md 0 0 0;
+}
+
+.valuesGrid {
+  display: grid;
+  grid-template-columns: auto repeat(4, 1fr) auto;
+  gap: $spacing-lg;
+  width: 100%;
+  align-items: center;
+}
+
+.valueItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 280px;
+  margin: 0 auto;
+  min-height: 100px;
+}
+
+.decorationContainer {
+  min-height: 60px;
+  justify-content: center;
+}
+
+.valueIcon {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: $spacing-sm;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.valueTitle {
+  font-family: $font-family-base;
+  font-size: 16px;
+  font-weight: 600;
+  color: $color-brun;
+  line-height: 25px;
+  margin: 0 0 $spacing-sm 0;
+}
+
+.valueDescription {
+  font-family: $font-family-base;
+  font-size: 13px;
+  font-weight: 400;
+  color: $color-brun;
+  line-height: 20px;
+  margin: 0 0 $spacing-sm 0;
+}
+
+.valueDivider {
+  width: 73px;
+  height: 1px;
+  background: $color-caramel;
+  margin-top: $spacing-sm;
+}
+
+.commitmentsDecorationLeft {
+  display: block;
+  margin: 0 auto;
+  width: 45.675px;
+  height: 45.675px;
+  min-width: 45.675px;
+  min-height: 45.675px;
+  transform: rotate(270deg) scaleY(-1);
+}
+
+.commitmentsDecorationRight {
+  display: block;
+  margin: 0 auto;
+  width: 45.675px;
+  height: 45.675px;
+  min-width: 45.675px;
+  min-height: 45.675px;
+}
+
+// Responsive styles
+@include respond-to(lg) {
+  .heroContainer {
+    flex-direction: column;
+    gap: $spacing-lg;
+  }
+
+  .heroContent {
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .heroImageContainer {
+    width: 100%;
+    height: 400px;
+    min-height: 250px;
+  }
+
+  .storyContainer {
+    flex-direction: column;
+    gap: $spacing-lg;
+  }
+
+  .storyImageContainer,
+  .travelPlannerImageContainer {
+    display: none;
+  }
+
+  .travelPlannerContainer {
+    flex-direction: column;
+    gap: $spacing-lg;
+  }
+
+  .valuesGrid {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+    justify-items: center;
+  }
+
+  .valueItem {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .heroDividerContainer {
+    justify-content: center;
+    padding-right: 0;
+    margin-top: $spacing-lg;
+  }
+
+  .storyDividerContainer {
+    justify-content: center;
+    padding-left: 0;
+  }
+}
+
+@include respond-to(md) {
+  .heroSection {
+    padding: 60px 0;
+  }
+
+  .heroTitle {
+    font-size: 28px;
+    line-height: 36px;
+  }
+
+  .heroDescription {
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .storySection {
+    padding: 60px 0;
+  }
+
+  .storyTitle {
+    font-size: 28px;
+    line-height: 36px;
+  }
+
+  .storyDescription {
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .travelPlannerSection {
+    padding: 60px 0;
+  }
+
+  .travelPlannerTitle {
+    font-size: 28px;
+    line-height: 36px;
+  }
+
+  .travelPlannerDescription {
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .commitmentsSection {
+    padding: 60px 0;
+  }
+
+  .commitmentsTitle {
+    font-size: 28px;
+    line-height: 36px;
+  }
+
+  .valuesGrid {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+    justify-items: center;
+  }
+
+  .valueItem {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .container {
+    padding: 0 $spacing-md;
+  }
+
+  .heroImageContainer {
+    height: 350px;
+    min-height: 250px;
+  }
+
+  .storyImageContainer,
+  .travelPlannerImageContainer {
+    display: none;
+  }
+}
+
+@include respond-to(sm) {
+  .heroSection {
+    padding: 40px 0;
+    min-height: 400px;
+  }
+
+  .heroContainer {
+    min-height: 350px;
+  }
+
+  .heroTitle {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .heroTagline {
+    font-size: 12px;
+  }
+
+  .storySection {
+    padding: 40px 0;
+  }
+
+  .storyTitle {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .sectionTagline {
+    font-size: 12px;
+  }
+
+  .travelPlannerSection {
+    padding: 40px 0;
+  }
+
+  .travelPlannerTitle {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .commitmentsSection {
+    padding: 40px 0;
+  }
+
+  .commitmentsTitle {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .container {
+    padding: 0 $spacing-sm;
+  }
+
+  .heroImageContainer {
+    height: 250px;
+    min-height: 200px;
+  }
+
+  .storyImageContainer,
+  .travelPlannerImageContainer {
+    display: none;
+  }
+
+  .heroDividerContainer {
+    gap: $spacing-sm;
+  }
+
+  .heroImageContainer {
+    min-height: 200px;
+  }
+
+  .heroDivider {
+    width: 30px;
+  }
+
+  .storyDivider {
+    width: 30px;
+  }
+
+  .valueDivider {
+    width: 50px;
+  }
+}
