@@ -216,6 +216,12 @@ const initialContent: {
     { key: 'offer-impulsion-douce/formula-3-description', type: ContentType.TEXT, value: '3 Menus au choix' },
     { key: 'offer-impulsion-douce/formula-3-price', type: ContentType.TEXT, value: '140 euros' },
 
+    // ── Page Blog ──────────────────────────────────────────────
+    { key: 'blog/tagline', type: ContentType.TEXT, value: 'Inspirations' },
+    { key: 'blog/title', type: ContentType.TEXT, value: 'Blog inspirations' },
+    { key: 'blog/subtitle', type: ContentType.TEXT, value: 'Des idées, des récits et des conseils pour voyager autrement.' },
+    { key: 'blog/hero-image', type: ContentType.IMAGE, value: '/images/image-placeholder-1.jpg' },
+
     // ── Pages Légales ──────────────────────────────────────────────
     // CGV
     { key: 'cgv/hero-title', type: ContentType.RICHTEXT, value: 'Conditions Générales<br />de Vente' },

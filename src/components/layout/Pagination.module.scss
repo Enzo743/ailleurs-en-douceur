@@ -1,0 +1,95 @@
+@use "../../styles/_variables" as *;
+@use "sass:color";
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  margin-top: $spacing-lg;
+  padding: $spacing-md 0;
+}
+
+.pageNumbers {
+  display: flex;
+  gap: $spacing-xs;
+}
+
+.paginationButton {
+  min-width: 40px;
+  height: 40px;
+  border: 2px solid $color-sauge;
+  background-color: transparent;
+  color: $color-brun;
+  border-radius: 8px;
+  font-family: $font-family-quaternary;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover:not(:disabled) {
+    background-color: rgba($color-sauge, 0.1);
+    border-color: color.adjust($color-sauge, $lightness: -10%);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.active {
+    background-color: $color-sauge;
+    color: white;
+    border-color: $color-sauge;
+
+    &:hover {
+      background-color: color.adjust($color-sauge, $lightness: -10%);
+      border-color: color.adjust($color-sauge, $lightness: -10%);
+    }
+  }
+
+  &:focus {
+    outline: 2px solid $color-caramel;
+    outline-offset: 2px;
+  }
+}
+
+.arrowButton {
+  padding: 0 12px;
+}
+
+// Responsive
+@media (max-width: $breakpoint-md) {
+  .paginationButton {
+    min-width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .arrowButton {
+    padding: 0 8px;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .pagination {
+    gap: 4px;
+  }
+
+  .paginationButton {
+    min-width: 32px;
+    height: 32px;
+  }
+
+  .pageNumbers {
+    display: none;
+  }
+
+  .arrowButton {
+    padding: 0 12px;
+  }
+}

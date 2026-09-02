@@ -6,3 +6,8 @@ export { default as BlogCard } from "./BlogCard";
 export { default as ValuesSection } from "./ValuesSection";
 export { default as ContactSection } from "./ContactSection";
 export { default as OfferPageTemplate } from "./OfferPageTemplate";
+export { default as TagFilter } from "./TagFilter";
+export { default as SearchBar } from "./SearchBar";
+export { default as Pagination } from "./Pagination";
+export { default as BlogGrid } from "./BlogGrid";
+export { default as BlogFilters } from "./BlogFilters";

@@ -1,0 +1,217 @@
+@use "../../styles/_variables" as *;
+@use "sass:color";
+
+.blogGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-lg;
+  margin-bottom: $spacing-lg;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background-color: $color-creme;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 2px solid $color-sauge;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.cardImageContainer {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.cardImage {
+  object-fit: cover;
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+}
+
+.cardContent {
+  padding: $spacing-md;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: $spacing-xs;
+  font-family: $font-family-quaternary;
+  font-size: 12px;
+  color: $color-brun;
+  line-height: 1.5;
+}
+
+.cardMetaSeparator {
+  color: $color-brun;
+  opacity: 0.6;
+}
+
+.cardDate {
+  font-weight: 500;
+}
+
+.cardReadingTime {
+  font-weight: 400;
+}
+
+.cardTitle {
+  font-family: $font-family-title;
+  font-size: 18px;
+  font-weight: 600;
+  color: $color-brun;
+  line-height: 1.3;
+  margin: 0 0 $spacing-sm;
+  letter-spacing: 0.5px;
+}
+
+.cardLink {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $color-caramel;
+  }
+}
+
+.cardExcerpt {
+  font-family: $font-family-base;
+  font-size: 14px;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  margin: 0 0 $spacing-sm;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: $spacing-sm;
+}
+
+.cardTag {
+  padding: 4px 12px;
+  background-color: rgba($color-sauge, 0.2);
+  color: $color-brun;
+  border-radius: 15px;
+  font-family: $font-family-quaternary;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.readMoreLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: $color-caramel;
+  text-decoration: none;
+  font-family: $font-family-quaternary;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  margin-top: auto;
+
+  &:hover {
+    color: color.adjust($color-caramel, $lightness: -10%);
+    text-decoration: underline;
+  }
+}
+
+.noArticles {
+  text-align: center;
+  padding: $spacing-xl;
+  grid-column: 1 / -1;
+}
+
+.noArticlesText {
+  font-family: $font-family-base;
+  font-size: 16px;
+  color: $color-text-secondary;
+}
+
+// Responsive styles
+@media (max-width: $breakpoint-lg) {
+  .blogGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-md;
+  }
+
+  .cardImageContainer {
+    height: 180px;
+  }
+
+  .cardTitle {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .blogGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardImageContainer {
+    height: 200px;
+  }
+
+  .cardContent {
+    padding: $spacing-sm;
+  }
+
+  .cardTitle {
+    font-size: 16px;
+  }
+
+  .cardExcerpt {
+    font-size: 13px;
+    -webkit-line-clamp: 4;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .blogGrid {
+    gap: $spacing-sm;
+  }
+
+  .cardImageContainer {
+    height: 180px;
+  }
+
+  .cardTitle {
+    font-size: 15px;
+  }
+
+  .cardMeta {
+    font-size: 11px;
+  }
+
+  .readMoreLink {
+    font-size: 12px;
+  }
+}

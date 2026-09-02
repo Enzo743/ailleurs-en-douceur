@@ -1,0 +1,63 @@
+@use "../../styles/_variables" as *;
+@use "sass:color";
+
+.tagFilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.tagButton {
+  padding: 10px 20px;
+  border: 2px solid $color-sauge;
+  background-color: transparent;
+  color: $color-brun;
+  border-radius: 25px;
+  font-family: $font-family-quaternary;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+
+  &:hover {
+    background-color: rgba($color-sauge, 0.1);
+    border-color: color.adjust($color-sauge, $lightness: -10%);
+  }
+
+  &.active {
+    background-color: $color-sauge;
+    color: white;
+    border-color: $color-sauge;
+
+    &:hover {
+      background-color: color.adjust($color-sauge, $lightness: -10%);
+      border-color: color.adjust($color-sauge, $lightness: -10%);
+    }
+  }
+
+  &:focus {
+    outline: 2px solid $color-caramel;
+    outline-offset: 2px;
+  }
+}
+
+// Responsive
+@media (max-width: $breakpoint-md) {
+  .tagFilter {
+    gap: $spacing-xs;
+  }
+
+  .tagButton {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .tagFilter {
+    justify-content: center;
+  }
+}

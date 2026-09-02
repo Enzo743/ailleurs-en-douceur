@@ -1,0 +1,110 @@
+@use "../../styles/_variables" as *;
+@use "sass:color";
+
+.searchBar {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: $spacing-md;
+}
+
+.searchInputContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  color: $color-brun;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border: 2px solid $color-caramel;
+  border-radius: 25px;
+  font-family: $font-family-quaternary;
+  font-size: 14px;
+  color: $color-brun;
+  background-color: white;
+  transition: all 0.3s ease;
+
+  &::placeholder {
+    color: rgba($color-brun, 0.5);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: color.adjust($color-caramel, $lightness: -15%);
+    box-shadow: 0 0 0 3px rgba($color-caramel, 0.1);
+  }
+
+  &:hover {
+    border-color: color.adjust($color-caramel, $lightness: -10%);
+  }
+}
+
+.clearButton {
+  position: absolute;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: $color-brun;
+  opacity: 0.6;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+    color: color.adjust($color-brun, $lightness: -10%);
+  }
+
+  &:focus {
+    outline: 2px solid $color-caramel;
+    outline-offset: 2px;
+    opacity: 1;
+  }
+}
+
+// Responsive
+@media (max-width: $breakpoint-md) {
+  .searchBar {
+    max-width: 300px;
+  }
+
+  .searchInput {
+    padding: 12px 14px 12px 44px;
+    font-size: 13px;
+  }
+
+  .searchIcon {
+    left: 14px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .clearButton {
+    right: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .searchBar {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .searchInput {
+    padding: 12px 14px 12px 44px;
+  }
+}
