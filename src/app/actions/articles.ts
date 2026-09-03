@@ -40,6 +40,13 @@ export async function getArticle(id: string): Promise<ArticleWithTags | null> {
     });
 }
 
+export async function getArticleBySlug(slug: string): Promise<ArticleWithTags | null> {
+    return prisma.article.findUnique({
+        where: { slug },
+        include: { tags: true },
+    });
+}
+
 export async function getAllTags(): Promise<Tag[]> {
     return prisma.tag.findMany({ orderBy: { name: 'asc' } });
 }
