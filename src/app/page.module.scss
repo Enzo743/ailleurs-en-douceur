@@ -916,3 +916,244 @@
     font-size: 28px;
   }
 }
+
+// Not Found Page Styles
+.notFoundPage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  background-color: $color-creme;
+  font-family: $font-family-base;
+}
+
+.notFoundHero {
+  position: relative;
+  width: 100%;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 100px $spacing-xl 80px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba($color-brun, 0.6);
+    z-index: 0;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 0;
+  }
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba($color-brun, 0.7) 100%);
+  z-index: 0;
+}
+
+.notFoundContent {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+}
+
+.notFoundTitle {
+  color: $color-creme;
+  text-shadow: 0 4px 4px rgba(30, 30, 30, 0.3);
+  font-family: $font-family-title;
+  font-size: 42px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: $spacing-md;
+}
+
+.notFoundSubtitle {
+  color: $color-creme;
+  text-shadow: 0 2px 2px rgba(30, 30, 30, 0.2);
+  font-family: $font-family-base;
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: $spacing-lg;
+  max-width: 600px;
+}
+
+.notFoundDecoration {
+  width: 120px;
+  height: 120px;
+  color: $color-caramel;
+  opacity: 0.8;
+  margin: $spacing-md 0;
+  
+  @include respond-to(lg) {
+    display: none;
+  }
+}
+
+.heroDividerContainer {
+  display: flex;
+  align-items: center;
+  margin-top: $spacing-lg;
+}
+
+.heroDivider {
+  width: 72px;
+  height: 2px;
+  background: $color-caramel;
+}
+
+.notFoundActions {
+  background-color: $color-creme;
+  padding: 80px 0;
+}
+
+.notFoundActionsContent {
+  text-align: center;
+}
+
+.notFoundMessage {
+  font-family: $font-family-base;
+  font-size: 16px;
+  line-height: 1.8;
+  color: $color-text-primary;
+  margin-bottom: 2rem;
+}
+
+.notFoundButtons {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+}
+
+.notFoundButtonPrimary {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: $color-caramel;
+  color: $color-creme;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: 500;
+  font-family: $font-family-base;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: darken($color-caramel, 10%);
+    transform: translateY(-2px);
+  }
+}
+
+.notFoundButtonSecondary {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: transparent;
+  color: $color-caramel;
+  text-decoration: none;
+  border: 2px solid $color-caramel;
+  border-radius: 25px;
+  font-weight: 500;
+  font-family: $font-family-base;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: rgba($color-caramel, 0.1);
+    transform: translateY(-2px);
+  }
+}
+
+// Responsive styles for Not Found page
+@include respond-to(lg) {
+  .notFoundHero {
+    padding: 80px $spacing-lg 60px;
+  }
+  
+  .notFoundTitle {
+    font-size: 32px;
+  }
+  
+  .notFoundSubtitle {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  
+  .notFoundActions {
+    padding: 60px 0;
+  }
+}
+
+@include respond-to(md) {
+  .notFoundHero {
+    padding: 60px $spacing-md 40px;
+    min-height: 300px;
+  }
+  
+  .notFoundTitle {
+    font-size: 24px;
+  }
+  
+  .notFoundSubtitle {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  .notFoundActions {
+    padding: 40px 0;
+  }
+  
+  .notFoundMessage {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  
+  .notFoundButtons {
+    gap: $spacing-sm;
+  }
+}
+
+@include respond-to(sm) {
+  .notFoundHero {
+    padding: 60px $spacing-sm 40px;
+    min-height: 250px;
+  }
+  
+  .notFoundTitle {
+    font-size: 20px;
+  }
+  
+  .notFoundSubtitle {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  .notFoundActions {
+    padding: 30px 0;
+  }
+  
+  .notFoundMessage {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  .notFoundButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .notFoundDecoration {
+    display: none;
+  }
+}
