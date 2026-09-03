@@ -1,0 +1,211 @@
+.tableContainer {
+  background: var(--dashboard-color-background);
+  border: 1px solid var(--dashboard-color-border);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--dashboard-color-shadow);
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--dashboard-color-border);
+  background: var(--dashboard-color-background-medium);
+
+  h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dashboard-color-text-primary);
+  }
+}
+
+.showAllHint {
+  font-size: 0.8rem;
+  color: var(--dashboard-color-text-muted);
+  font-style: italic;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+.tableRow {
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--dashboard-color-background-medium);
+  }
+}
+
+.rankColumn,
+.rankCell {
+  width: 40px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--dashboard-color-text-muted);
+  font-size: 0.85rem;
+}
+
+.pageColumn {
+  width: 45%;
+  min-width: 250px;
+}
+
+.pageCell {
+  padding: 0.85rem 1rem;
+}
+
+.pageLink {
+  color: var(--dashboard-color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+
+  &:hover {
+    text-decoration: underline;
+    color: color-mix(in srgb, var(--dashboard-color-primary) 80%, black);
+  }
+}
+
+.viewsColumn,
+.visitorsColumn {
+  width: 100px;
+  text-align: right;
+  min-width: 80px;
+}
+
+.viewsCell,
+.visitorsCell {
+  font-weight: 700;
+  color: var(--dashboard-color-text-primary);
+  font-size: 0.9rem;
+}
+
+.timeColumn {
+  width: 100px;
+  text-align: right;
+  min-width: 80px;
+}
+
+.timeCell {
+  color: var(--dashboard-color-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.rateColumn {
+  width: 80px;
+  text-align: right;
+  min-width: 70px;
+}
+
+.rateCell {
+  color: var(--dashboard-color-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.emptyState {
+  padding: 2rem;
+  text-align: center;
+  color: var(--dashboard-color-text-muted);
+}
+
+// Responsive
+@media (max-width: 1024px) {
+  .pageColumn {
+    width: 35%;
+    min-width: 150px;
+  }
+
+  .viewsColumn,
+  .visitorsColumn {
+    width: 100px;
+  }
+
+  .timeColumn,
+  .rateColumn {
+    width: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tableHeader {
+    padding: 0.75rem 1rem;
+  }
+
+  .pageColumn {
+    width: 40%;
+    min-width: 120px;
+  }
+
+  .viewsColumn,
+  .visitorsColumn,
+  .timeColumn,
+  .rateColumn {
+    width: 70px;
+    font-size: 0.75rem;
+  }
+
+  .rankColumn,
+  .rankCell {
+    width: 30px;
+    font-size: 0.75rem;
+  }
+
+  .pageCell {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .timeCell,
+  .rateCell {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageColumn {
+    width: 45%;
+    min-width: 100px;
+  }
+
+  .viewsColumn,
+  .visitorsColumn,
+  .timeColumn,
+  .rateColumn {
+    width: 60px;
+    font-size: 0.7rem;
+  }
+
+  .rankColumn,
+  .rankCell {
+    width: 25px;
+    font-size: 0.7rem;
+  }
+
+  .pageCell {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .timeCell,
+  .rateCell {
+    font-size: 0.7rem;
+  }
+}

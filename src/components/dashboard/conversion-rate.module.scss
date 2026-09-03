@@ -1,0 +1,50 @@
+.conversionRate {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1rem;
+}
+
+.detailItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: var(--dashboard-color-background-medium);
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.detailLabel {
+  color: var(--dashboard-color-text-secondary);
+}
+
+.detailValue {
+  font-weight: 600;
+  color: var(--dashboard-color-text-primary);
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .details {
+    padding: 0;
+  }
+
+  .detailItem {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .detailItem {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}

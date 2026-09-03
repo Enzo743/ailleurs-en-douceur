@@ -37,6 +37,9 @@ export default async function DashboardLayout({
                     <a href="/dashboard/schedule" className={styles.navLink}>
                         Planning
                     </a>
+                    <a href="/dashboard/site-settings" className={styles.navLink}>
+                        Paramètres du site
+                    </a>
                 </nav>
                 <form action={logout}>
                     <button type="submit" className={styles.logoutButton}>

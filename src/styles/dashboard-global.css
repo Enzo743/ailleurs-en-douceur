@@ -207,27 +207,31 @@
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 8px var(--dashboard-color-shadow);
+  width: 100%;
+  max-width: 100%;
 }
 
 .dashboard-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 700px;
 }
 
 .dashboard-table th,
 .dashboard-table td {
-  padding: 16px 20px;
+  padding: 12px 16px;
   text-align: left;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--dashboard-color-border-light);
 }
 
 .dashboard-table th {
-  background: #faf8f5;
+  background: var(--dashboard-color-background-medium);
   font-size: 12px;
-  font-weight: 600;
-  color: var(--dashboard-color-primary);
+  font-weight: 700;
+  color: var(--dashboard-color-text-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .dashboard-table tr:last-child td {
@@ -235,12 +239,24 @@
 }
 
 .dashboard-table tr:hover td {
-  background: #faf8f5;
+  background: var(--dashboard-color-background-medium);
 }
 
 .dashboard-table td {
-  font-size: 14px;
-  color: #555;
+  font-size: 13.5px;
+  color: var(--dashboard-color-text-primary);
+}
+
+/* Table header styles for analytics tables */
+.dashboard-table thead th {
+  background: var(--dashboard-color-background-medium);
+  color: var(--dashboard-color-text-primary);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+  white-space: nowrap;
 }
 
 /* Badges */
@@ -1079,5 +1095,128 @@
 @media (max-width: 640px) {
   .dashboard-content-pageTitle {
     font-size: 1.375rem;
+  }
+}
+
+/* ==========================================================================
+/* Analytics Specific Styles
+/* ============================================================================ */
+
+/* Analytics Cards Grid */
+.analytics-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Analytics Charts Grid */
+.analytics-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Analytics Tables Grid */
+.analytics-tables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Full width sections */
+.analytics-full-width {
+  width: 100%;
+  grid-column: 1 / -1;
+}
+
+/* Loading state for analytics */
+.analytics-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: var(--dashboard-color-text-muted);
+}
+
+/* Error state for analytics */
+.analytics-error {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 1.5rem;
+  color: #856404;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+/* Info state for analytics */
+.analytics-info {
+  background: #e7f3ff;
+  border: 1px solid #b3d9ff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  color: #004085;
+  margin: 2rem 0;
+}
+
+/* Responsive for analytics */
+@media (max-width: 1200px) {
+  .analytics-charts-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+  
+  .analytics-tables-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .analytics-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+  
+  .analytics-charts-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+  
+  .analytics-tables-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .analytics-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.75rem;
+  }
+  
+  .analytics-charts-grid,
+  .analytics-tables-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .analytics-cards-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  
+  .analytics-charts-grid,
+  .analytics-tables-grid {
+    gap: 0.75rem;
+  }
+  
+  .analytics-loading,
+  .analytics-error,
+  .analytics-info {
+    padding: 1rem;
   }
 }

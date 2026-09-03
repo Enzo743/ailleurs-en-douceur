@@ -25,3 +25,20 @@ export { default as ContactSettings } from './ContactSettings';
 export { ContactSettingsWrapper } from './ContactSettings';
 export { default as BannerSettings } from './BannerSettings';
 export { BannerSettingsWrapper } from './BannerSettings';
+
+// Analytics Components
+export { default as AnalyticsCard } from './AnalyticsCard';
+export { default as AnalyticsChart } from './AnalyticsChart';
+export { default as TopPagesTable } from './TopPagesTable';
+export { default as ReferrersTable } from './ReferrersTable';
+export { default as DeviceChart } from './DeviceChart';
+export { default as ConversionRate } from './ConversionRate';
+export { default as BounceRate } from './BounceRate';
+export { default as BlogArticlesTable } from './BlogArticlesTable';
+export { default as VisitsChart } from './VisitsChart';
+export { default as SessionDuration } from './SessionDuration';
+export { default as PagesPerSession } from './PagesPerSession';
+export { default as ExitPagesTable } from './ExitPagesTable';
+export { default as LandingPagesTable } from './LandingPagesTable';
+export { default as CountryChart } from './CountryChart';
+export { default as TimeOfDayChart } from './TimeOfDayChart';
