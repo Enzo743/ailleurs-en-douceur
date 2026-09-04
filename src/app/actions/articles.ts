@@ -185,7 +185,11 @@ export async function uploadArticleImage(formData: FormData): Promise<UploadImag
 
         const ext: string | undefined = file.name.split('.').pop();
         const safeName = `article-${Date.now()}.${ext}`;
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+        
+        // Dossier pour les uploads - production: /var/www/uploads, développement: public/uploads
+        const uploadDir = process.env.NODE_ENV === 'production'
+          ? '/var/www/uploads'
+          : path.join(process.cwd(), 'public', 'uploads');
 
         await mkdir(uploadDir, { recursive: true });
         await writeFile(
@@ -193,7 +197,12 @@ export async function uploadArticleImage(formData: FormData): Promise<UploadImag
             Buffer.from(await file.arrayBuffer())
         );
 
-        return { success: true, url: `/uploads/${safeName}` };
+        // Retourner le chemin approprié selon l'environnement
+        const url = process.env.NODE_ENV === 'production'
+          ? `/api/files/uploads/${safeName}`
+          : `/uploads/${safeName}`;
+        
+        return { success: true, url };
     } catch (e) {
         console.error(e);
         return { success: false, error: "Erreur lors de l'upload." };

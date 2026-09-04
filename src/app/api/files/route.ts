@@ -27,6 +27,11 @@ export async function GET(request: Request) {
     // Normaliser le chemin et s'assurer qu'il est relatif à /public
     let normalizedPath = path.normalize(dirPath);
     
+    // Gérer /uploads comme alias de /public/uploads
+    if (normalizedPath === '/uploads') {
+      normalizedPath = '/public/uploads';
+    }
+    
     // Si le chemin commence par /public, on le conserve tel quel
     // Sinon, on le place sous /public
     if (!normalizedPath.startsWith('/public')) {
@@ -69,11 +74,14 @@ export async function GET(request: Request) {
       // Lister les fichiers depuis le vrai dossier uploads
       const items = fs.readdirSync(actualUploadsPath, { withFileTypes: true });
       
+      // En production, utiliser /api/files/uploads/, en développement /uploads/
+      const basePath = process.env.NODE_ENV === 'production' ? '/api/files/uploads' : '/uploads';
+      
       const files = items
         .filter((item) => !item.name.startsWith('.'))
         .map((item) => ({
           name: item.name,
-          path: `/uploads/${item.name}`,
+          path: `${basePath}/${item.name}`,
           isDirectory: item.isDirectory(),
         }))
         .sort((a, b) => {
@@ -107,9 +115,15 @@ export async function GET(request: Request) {
       .map((item) => {
         const itemPath = path.join(absolutePath, item.name);
         // Retourner un chemin relatif depuis /public (ex: /uploads/image.jpg)
-        const relativePath = normalizedPath === '/public'
+        let relativePath = normalizedPath === '/public'
           ? `/${item.name}`
           : `${normalizedPath.substring('/public'.length)}/${item.name}`;
+        
+        // Si le chemin contient /uploads/ et qu'on est en production, utiliser /api/files/uploads/
+        if (process.env.NODE_ENV === 'production' && relativePath.includes('/uploads/')) {
+          relativePath = relativePath.replace('/uploads/', '/api/files/uploads/');
+        }
+        
         return {
           name: item.name,
           path: relativePath,
@@ -195,8 +209,11 @@ export async function POST(request: Request) {
     await writeFile(filePath, buffer);
 
     // Retourner le chemin relatif pour l'utiliser dans le frontend
-    // En production: /uploads/filename, en développement: /uploads/filename
-    const relativePath = `/uploads/${filename}`;
+    // En développement: /uploads/filename (servi directement par Next.js)
+    // En production: /api/files/uploads/filename (servi via notre route API)
+    const relativePath = process.env.NODE_ENV === 'production'
+      ? `/api/files/uploads/${filename}`
+      : `/uploads/${filename}`;
 
     return NextResponse.json(
       {
@@ -239,8 +256,14 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Vérifier que le fichier est dans /uploads/
-    const normalizedPath = path.normalize(filePath);
+    // Vérifier que le fichier est dans /uploads/ ou /api/files/uploads/
+    let normalizedPath = path.normalize(filePath);
+    
+    // Gérer les chemins API en production
+    if (normalizedPath.startsWith('/api/files/uploads/')) {
+      normalizedPath = normalizedPath.replace('/api/files/uploads/', '/uploads/');
+    }
+    
     if (!normalizedPath.startsWith('/uploads/')) {
       return NextResponse.json(
         { success: false, error: 'Seuls les fichiers dans /uploads/ peuvent être supprimés' },
@@ -248,11 +271,11 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Chemin absolu du fichier - en production on cherche dans /var/www, en dev dans public
-    let absolutePath = path.join(ROOT_PATH, normalizedPath);
-    if (process.env.NODE_ENV === 'production' && !fs.existsSync(absolutePath)) {
-      absolutePath = path.join('/var/www', normalizedPath);
-    }
+    // Chemin absolu du fichier - en production on cherche dans /var/www/uploads, en dev dans public/uploads
+    const filename = path.basename(normalizedPath);
+    let absolutePath = process.env.NODE_ENV === 'production'
+      ? path.join('/var/www/uploads', filename)
+      : path.join(ROOT_PATH, normalizedPath.replace('/uploads/', 'uploads/'));
 
     // Vérifier que le fichier existe
     if (!fs.existsSync(absolutePath)) {
@@ -314,14 +337,21 @@ export async function DELETE(request: Request) {
 async function checkIfFileIsUsed(filePath: string): Promise<{ isUsed: boolean; usages: string[] }> {
   const { prisma } = await import('@/lib/prisma');
   const usages: string[] = [];
+  
+  // Normaliser le chemin pour la recherche dans la base de données
+  // En production, les chemins peuvent être /api/files/uploads/filename ou /uploads/filename
+  let searchPath = filePath;
+  if (searchPath.startsWith('/api/files/uploads/')) {
+    searchPath = searchPath.replace('/api/files/uploads/', '/uploads/');
+  }
 
   try {
     // Vérifier dans SiteContent (pour les champs IMAGE et RICHTEXT)
     const siteContents = await prisma.siteContent.findMany({
       where: {
         OR: [
-          { value: { contains: filePath } },
-          { value: { contains: filePath.substring(1) } }, // Sans le / au début
+          { value: { contains: searchPath } },
+          { value: { contains: searchPath.substring(1) } }, // Sans le / au début
         ],
       },
     });
@@ -334,10 +364,10 @@ async function checkIfFileIsUsed(filePath: string): Promise<{ isUsed: boolean; u
     const customForms = await prisma.customForm.findMany({
       where: {
         OR: [
-          { successMessage: { contains: filePath } },
-          { successMessage: { contains: filePath.substring(1) } },
-          { description: { contains: filePath } },
-          { description: { contains: filePath.substring(1) } },
+          { successMessage: { contains: searchPath } },
+          { successMessage: { contains: searchPath.substring(1) } },
+          { description: { contains: searchPath } },
+          { description: { contains: searchPath.substring(1) } },
         ],
       },
     });
@@ -350,10 +380,10 @@ async function checkIfFileIsUsed(filePath: string): Promise<{ isUsed: boolean; u
     const formFields = await prisma.formField.findMany({
       where: {
         OR: [
-          { defaultValue: { contains: filePath } },
-          { defaultValue: { contains: filePath.substring(1) } },
-          { placeholder: { contains: filePath } },
-          { placeholder: { contains: filePath.substring(1) } },
+          { defaultValue: { contains: searchPath } },
+          { defaultValue: { contains: searchPath.substring(1) } },
+          { placeholder: { contains: searchPath } },
+          { placeholder: { contains: searchPath.substring(1) } },
         ],
       },
       include: {
@@ -372,10 +402,10 @@ async function checkIfFileIsUsed(filePath: string): Promise<{ isUsed: boolean; u
       const articles = await prisma.article.findMany({
         where: {
           OR: [
-            { content: { contains: filePath } },
-            { content: { contains: filePath.substring(1) } },
-            { coverImage: { contains: filePath } },
-            { coverImage: { contains: filePath.substring(1) } },
+            { content: { contains: searchPath } },
+            { content: { contains: searchPath.substring(1) } },
+            { coverImage: { contains: searchPath } },
+            { coverImage: { contains: searchPath.substring(1) } },
           ],
         },
       });

@@ -51,7 +51,11 @@ export async function uploadImage(
 
         const ext: string | undefined      = file.name.split('.').pop();
         const safeName = `${key.replace(/\//g, '-')}-${Date.now()}.${ext}`;
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+        
+        // Dossier pour les uploads - production: /var/www/uploads, développement: public/uploads
+        const uploadDir = process.env.NODE_ENV === 'production'
+          ? '/var/www/uploads'
+          : path.join(process.cwd(), 'public', 'uploads');
 
         await mkdir(uploadDir, { recursive: true });
         await writeFile(
@@ -59,7 +63,10 @@ export async function uploadImage(
             Buffer.from(await file.arrayBuffer())
         );
 
-        const url = `/uploads/${safeName}`;
+        // Retourner le chemin approprié selon l'environnement
+        const url = process.env.NODE_ENV === 'production'
+          ? `/api/files/uploads/${safeName}`
+          : `/uploads/${safeName}`;
 
         await prisma.siteContent.update({ where: { key }, data: { value: url } });
 

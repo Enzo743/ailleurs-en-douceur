@@ -317,7 +317,7 @@ export default function FileManager({ onSelect, onClose }: FileManagerProps) {
                         </div>
                         <span className={styles.fileName}>{file.name}</span>
                         {/* Bouton Supprimer (uniquement pour les fichiers dans /uploads/) */}
-                        {file.path.startsWith('/uploads/') && (
+                        {(file.path.startsWith('/uploads/') || file.path.startsWith('/api/files/uploads/')) && (
                           <button
                             type="button"
                             className={styles.deleteButton}
