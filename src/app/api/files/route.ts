@@ -6,8 +6,15 @@ import { writeFile } from 'fs/promises';
 
 // Chemin racine autorisé
 const ROOT_PATH = path.resolve(process.cwd(), 'public');
-// Dossier pour les uploads
-const UPLOADS_PATH = path.resolve(process.cwd(), 'public/uploads');
+// Dossier pour les uploads - production: /var/www/uploads, développement: public/uploads
+const UPLOADS_PATH = process.env.NODE_ENV === 'production'
+  ? '/var/www/uploads'
+  : path.resolve(process.cwd(), 'public/uploads');
+
+// Chemin racine pour la vérification de sécurité (en production, on autorise aussi /var/www)
+const ALLOWED_ROOT_PATHS = process.env.NODE_ENV === 'production'
+  ? [ROOT_PATH, '/var/www']
+  : [ROOT_PATH];
 
 export async function GET(request: Request) {
   try {
@@ -29,12 +36,53 @@ export async function GET(request: Request) {
     // Convertir en chemin absolu pour fs
     const absolutePath = path.join(ROOT_PATH, normalizedPath.substring('/public'.length));
 
-    // Vérification de sécurité : s'assurer que le chemin est bien dans /public
-    if (!absolutePath.startsWith(ROOT_PATH)) {
+    // Vérification de sécurité : s'assurer que le chemin est bien dans un chemin autorisé
+    const isPathAllowed = ALLOWED_ROOT_PATHS.some(root => absolutePath.startsWith(root));
+    if (!isPathAllowed) {
       return NextResponse.json(
-        { success: false, error: 'Accès non autorisé : chemin en dehors de /public' },
+        { success: false, error: 'Accès non autorisé : chemin en dehors des répertoires autorisés' },
         { status: 403 }
       );
+    }
+
+    // En production, si on demande /public/uploads, on redirige vers /var/www/uploads
+    if (normalizedPath === '/public/uploads') {
+      const actualUploadsPath = process.env.NODE_ENV === 'production'
+        ? '/var/www/uploads'
+        : path.join(ROOT_PATH, 'uploads');
+      
+      // Vérifier que le chemin existe et est un dossier
+      if (!fs.existsSync(actualUploadsPath)) {
+        return NextResponse.json(
+          { success: false, error: 'Dossier non trouvé' },
+          { status: 404 }
+        );
+      }
+
+      if (!fs.statSync(actualUploadsPath).isDirectory()) {
+        return NextResponse.json(
+          { success: false, error: 'Le chemin spécifié n\'est pas un dossier' },
+          { status: 400 }
+        );
+      }
+
+      // Lister les fichiers depuis le vrai dossier uploads
+      const items = fs.readdirSync(actualUploadsPath, { withFileTypes: true });
+      
+      const files = items
+        .filter((item) => !item.name.startsWith('.'))
+        .map((item) => ({
+          name: item.name,
+          path: `/uploads/${item.name}`,
+          isDirectory: item.isDirectory(),
+        }))
+        .sort((a, b) => {
+          if (a.isDirectory && !b.isDirectory) return -1;
+          if (!a.isDirectory && b.isDirectory) return 1;
+          return a.name.localeCompare(b.name);
+        });
+      
+      return NextResponse.json({ success: true, files });
     }
 
     // Vérifier que le chemin existe et est un dossier
@@ -131,7 +179,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Créer le dossier /public/uploads s'il n'existe pas
+    // Créer le dossier d'uploads s'il n'existe pas
     if (!fs.existsSync(UPLOADS_PATH)) {
       fs.mkdirSync(UPLOADS_PATH, { recursive: true });
     }
@@ -146,7 +194,8 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(filePath, buffer);
 
-    // Retourner le chemin relatif pour l'utiliser dans le frontend (avec / au début)
+    // Retourner le chemin relatif pour l'utiliser dans le frontend
+    // En production: /uploads/filename, en développement: /uploads/filename
     const relativePath = `/uploads/${filename}`;
 
     return NextResponse.json(
@@ -190,7 +239,7 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Vérifier que le fichier est dans /public/uploads/
+    // Vérifier que le fichier est dans /uploads/
     const normalizedPath = path.normalize(filePath);
     if (!normalizedPath.startsWith('/uploads/')) {
       return NextResponse.json(
@@ -199,8 +248,11 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Chemin absolu du fichier
-    const absolutePath = path.join(ROOT_PATH, normalizedPath);
+    // Chemin absolu du fichier - en production on cherche dans /var/www, en dev dans public
+    let absolutePath = path.join(ROOT_PATH, normalizedPath);
+    if (process.env.NODE_ENV === 'production' && !fs.existsSync(absolutePath)) {
+      absolutePath = path.join('/var/www', normalizedPath);
+    }
 
     // Vérifier que le fichier existe
     if (!fs.existsSync(absolutePath)) {
