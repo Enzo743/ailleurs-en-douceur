@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   description: "Contactez-nous pour organiser votre voyage sur mesure",
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function ContactPage() {
   const c = await getSiteContent();
   const contactEnabled = c['contact/form-enabled'] !== 'false';

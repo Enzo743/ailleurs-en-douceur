@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: "Un coup de pouce pour organiser un voyage en toute autonomie - Offre Coup de Pouce",
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function ImpulsionDoucePage() {
   const c = await getSiteContent();
 

@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: "Conditions générales de vente et d'utilisation du site Ailleurs en Douceur",
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function CGVPage() {
   const c = await getSiteContent();
 

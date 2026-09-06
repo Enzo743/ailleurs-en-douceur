@@ -12,6 +12,8 @@ export const metadata: Metadata = {
 };
 
 // SVG Icons pour les valeurs
+export const dynamic = 'force-dynamic';
+
 export default async function AboutPage() {
   const c = await getSiteContent();
   

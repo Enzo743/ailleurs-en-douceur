@@ -7,6 +7,11 @@ const UPLOADS_PATH = process.env.NODE_ENV === 'production'
   ? '/var/www/uploads'
   : path.resolve(process.cwd(), 'public/uploads');
 
+// Chemin racine autorisé pour la vérification de sécurité
+const ALLOWED_ROOT_PATHS = process.env.NODE_ENV === 'production'
+  ? ['/var/www/uploads']
+  : [path.resolve(process.cwd(), 'public/uploads')];
+
 export async function GET(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   try {
     // Attendre la résolution de params
@@ -22,8 +27,26 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       );
     }
 
+    // Gérer le cas où le chemin commence par 'uploads/' (pour les URLs /api/files/uploads/filename)
+    // En production, on veut accéder directement à /var/www/uploads/filename
+    // et non à /var/www/uploads/uploads/filename
+    let actualFilePath = filePath;
+    if (resolvedParams.path.length > 0 && resolvedParams.path[0] === 'uploads') {
+      // Supprimer le premier élément 'uploads' du chemin
+      actualFilePath = path.join(...resolvedParams.path.slice(1));
+    }
+
     // Chemin absolu du fichier
-    const absolutePath = path.join(UPLOADS_PATH, filePath);
+    const absolutePath = path.join(UPLOADS_PATH, actualFilePath);
+    
+    // Vérification de sécurité : s'assurer que le chemin est bien dans un chemin autorisé
+    const isPathAllowed = ALLOWED_ROOT_PATHS.some(root => absolutePath.startsWith(root));
+    if (!isPathAllowed) {
+      return NextResponse.json(
+        { success: false, error: 'Accès non autorisé : chemin en dehors des répertoires autorisés' },
+        { status: 403 }
+      );
+    }
     
     // Vérifier que le fichier existe
     if (!fs.existsSync(absolutePath)) {

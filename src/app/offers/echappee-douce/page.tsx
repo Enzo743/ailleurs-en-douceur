@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: "L'organisation complète d'un voyage sur mesure, de A à Z - Offre premium",
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function EchappeeDoucePage() {
   const c = await getSiteContent();
 

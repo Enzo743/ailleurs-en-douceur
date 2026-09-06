@@ -38,6 +38,8 @@ export const metadata: Metadata = {
   description: "Découvrez nos offres de voyage sur mesure : Impulsion Douce, Échappée Douce et Lune de Douceurs",
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function OffersPage() {
   const c = await getSiteContent();
 

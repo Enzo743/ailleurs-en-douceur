@@ -32,6 +32,8 @@ const ArrowRightIcon = () => (
     </svg>
 );
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const c = await getSiteContent();
   const articles = await getArticles();

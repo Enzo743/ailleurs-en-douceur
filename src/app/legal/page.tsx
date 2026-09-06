@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: "Mentions légales et informations légales du site Ailleurs en Douceur",
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function LegalPage() {
   const c = await getSiteContent();
 

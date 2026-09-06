@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: "Politique de confidentialité et gestion des données personnelles",
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function PrivacyPage() {
   const c = await getSiteContent();
 

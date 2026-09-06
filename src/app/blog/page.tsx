@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "Des idées, des récits et des conseils pour voyager autrement. Découvrez nos articles inspirants sur le slow travel, les voyages en train et bien plus.",
 };
 
+export const dynamic = 'force-dynamic';
+
 const ITEMS_PER_PAGE = 4;
 
 export default async function BlogPage() {

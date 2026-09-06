@@ -62,6 +62,8 @@ export const metadata: Metadata = {
 //   }
 // }
 
+export const dynamic = 'force-dynamic';
+
 // Fonction pour détecter les listes numérotées dans le contenu HTML
 function detectNumberedLists(html: string): boolean {
   // Vérifier la présence de balises <ol> ou de listes avec des numéros

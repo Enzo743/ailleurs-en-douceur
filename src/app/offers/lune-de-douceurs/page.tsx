@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: "Un voyage unique pour célébrer le plus beau des commencements - Offre voyage de noces",
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function LuneDeDouceursPage() {
   const c = await getSiteContent();
 
