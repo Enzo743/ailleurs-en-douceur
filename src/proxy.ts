@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { NextURL } from 'next/dist/server/web/next-url';
 
 export async function proxy(request: NextRequest): Promise<NextResponse> {
     const { pathname } = request.nextUrl;
+
+    // Redirection pour les images uploadées en production
+    // En production, les images /uploads/* doivent être redirigées vers /api/files/uploads/*
+    // car les fichiers sont stockés dans /var/www/uploads/ et non accessibles directement
+    if (process.env.NODE_ENV === 'production' && pathname.startsWith('/uploads/')) {
+        const newPathname = pathname.replace(/^\/uploads\//, '/api/files/uploads/');
+        const newUrl = new NextURL(request.url);
+        newUrl.pathname = newPathname;
+        return NextResponse.redirect(newUrl);
+    }
 
     // Redirection optimiste si absence de cookie sur /dashboard/*
     if (pathname.startsWith('/dashboard')) {
@@ -24,5 +35,5 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-    matcher: ['/dashboard/:path*', '/login'],
+    matcher: ['/dashboard/:path*', '/login', '/uploads/:path*'],
 };
