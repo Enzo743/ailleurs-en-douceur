@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Header, Footer, BotanicalDecoration, ContactSection } from "./index";
+import { Header, Footer, BotanicalDecoration, ContactSection, RichTextDisplay } from "./index";
 import styles from "./offerpagetemplate.module.scss";
 
 interface Formula {
@@ -26,6 +26,7 @@ interface OfferPageProps {
     forWhoDescription: string;
     forWhoLocation: string;
     forWhoImage: string;
+    forWhoRichText?: string;
     includedTitle?: string;
     includedItems?: string[];
     formulasTitle: string;
@@ -92,6 +93,15 @@ export default function OfferPageTemplate({ content, currentPage, siteContent }:
           </div>
         </div>
       </section>
+
+      {/* Texte formaté après For Who Section */}
+      {content.forWhoRichText && (
+        <section className={styles.richTextSection}>
+          <div className={styles.container}>
+            <RichTextDisplay html={content.forWhoRichText} className={styles.richTextContent} />
+          </div>
+        </section>
+      )}
 
       {/* Ce qui est inclus Section */}
       {content.includedTitle && content.includedItems && content.includedItems.length > 0 && (

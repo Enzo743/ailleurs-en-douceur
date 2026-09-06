@@ -22,6 +22,7 @@ export default async function LuneDeDouceursPage() {
     forWhoDescription: c['offer-lune-de-douceurs/for-who-description'],
     forWhoLocation: c['offer-lune-de-douceurs/for-who-location'],
     forWhoImage: c['offer-lune-de-douceurs/for-who-image'],
+    forWhoRichText: c['offer-lune-de-douceurs/for-who-rich-text'],
     includedTitle: c['offer-lune-de-douceurs/included-title'],
     includedItems: [
       c['offer-lune-de-douceurs/included-item-1'],

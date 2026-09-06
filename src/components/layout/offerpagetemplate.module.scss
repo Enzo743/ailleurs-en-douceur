@@ -409,6 +409,69 @@
   pointer-events: none;
 }
 
+// Rich Text Section (après For Who)
+.richTextSection {
+  padding: $spacing-lg 0;
+  background-color: $color-creme;
+}
+
+.richTextContent {
+  font-family: $font-family-base;
+  font-size: 16px;
+  font-weight: 500;
+  color: $color-brun;
+  line-height: 28px;
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: $font-family-base;
+    color: $color-brun;
+    margin: $spacing-md 0 $spacing-sm 0;
+    font-weight: 600;
+  }
+  
+  h2 {
+    font-size: 24px;
+    line-height: 32px;
+  }
+  
+  h3 {
+    font-size: 20px;
+    line-height: 28px;
+  }
+  
+  p {
+    margin: 0 0 $spacing-md 0;
+  }
+  
+  ul, ol {
+    margin: 0 0 $spacing-md 0;
+    padding-left: $spacing-lg;
+  }
+  
+  li {
+    margin: $spacing-xs 0;
+  }
+  
+  strong, b {
+    font-weight: 700;
+    color: $color-brun;
+  }
+  
+  em, i {
+    font-style: italic;
+    color: $color-brun;
+  }
+  
+  a {
+    color: $color-caramel;
+    text-decoration: underline;
+    
+    &:hover {
+      color: $color-brun;
+    }
+  }
+}
+
 // Responsive styles
 @include respond-to(lg) {
   .heroSection {

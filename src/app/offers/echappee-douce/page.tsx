@@ -22,6 +22,7 @@ export default async function EchappeeDoucePage() {
     forWhoDescription: c['offer-echappee-douce/for-who-description'],
     forWhoLocation: c['offer-echappee-douce/for-who-location'],
     forWhoImage: c['offer-echappee-douce/for-who-image'],
+    forWhoRichText: c['offer-echappee-douce/for-who-rich-text'],
     formulasTitle: c['offer-echappee-douce/formulas-title'],
     formulas: [
       {

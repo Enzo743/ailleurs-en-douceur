@@ -22,6 +22,7 @@ export default async function ImpulsionDoucePage() {
     forWhoDescription: c['offer-impulsion-douce/for-who-description'],
     forWhoLocation: c['offer-impulsion-douce/for-who-location'],
     forWhoImage: c['offer-impulsion-douce/for-who-image'],
+    forWhoRichText: c['offer-impulsion-douce/for-who-rich-text'],
     menusTitle: c['offer-impulsion-douce/menus-title'],
     menus: [
       {
