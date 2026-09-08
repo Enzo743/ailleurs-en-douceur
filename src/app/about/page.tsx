@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { Header, Footer, BotanicalDecoration, ContactSection } from "@/components/layout";
 import { getSiteContent } from "@/lib/content";
 import styles from "./page.module.scss";
@@ -101,9 +100,7 @@ export default async function AboutPage() {
               <p className={styles.storyDescription}>
                 {c['about/story-description-1']}
               </p>
-              <p className={styles.storyDescription}>
-                {c['about/story-description-2']}
-              </p>
+              <RichTextDisplay html={c['about/story-description-2']} className={styles.storyDescription} />
             </div>
             <div className={styles.storyImageContainer}>
               <Image 
@@ -135,16 +132,14 @@ export default async function AboutPage() {
               />
             </div>
             <div className={styles.travelPlannerContent}>
-              <p className={styles.sectionTagline}>{c['about/travel-planner-tagline'] || 'QU\'EST CE QU\'UN TRAVEL PLANNER ?'}</p>
+              <p className={styles.sectionTagline}>{c['about/travel-planner-tagline']}</p>
               <h2 className={styles.travelPlannerTitle}>
-                {c['about/travel-planner-title'] || 'Un voyage qui vous ressemble'}
+                {c['about/travel-planner-title']}
               </h2>
               <p className={styles.travelPlannerDescription}>
-                {c['about/travel-planner-description-1'] || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'}
+                {c['about/travel-planner-description-1']}
               </p>
-              <p className={styles.travelPlannerDescription}>
-                {c['about/travel-planner-description-2'] || 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.'}
-              </p>
+              <RichTextDisplay html={c['about/travel-planner-description-2']} className={styles.travelPlannerDescription} />
               <BotanicalDecoration type="botanical-15" className={styles.travelPlannerDecoration} />
             </div>
           </div>
@@ -155,9 +150,9 @@ export default async function AboutPage() {
       <section className={styles.commitmentsSection}>
         <div className={styles.container}>
           <div className={styles.commitmentsHeader}>
-            <p className={styles.sectionTagline}>{c['about/commitments-tagline'] || 'MES ENGAGEMENTS'}</p>
+            <p className={styles.sectionTagline}>{c['about/commitments-tagline']}</p>
             <h2 className={styles.commitmentsTitle}>
-              {c['about/commitments-title'] || 'Des valeurs au cœur de chaque itinéraire.'}
+              {c['about/commitments-title']}
             </h2>
           </div>
           
@@ -170,9 +165,9 @@ export default async function AboutPage() {
               <div className={styles.valueIcon}>
                 <VerifiedUserIcon />
               </div>
-              <h3 className={styles.valueTitle}>{c['values/title-1'] || 'Authenticité & Partage'}</h3>
+              <h3 className={styles.valueTitle}>{c['about/value-title-1']}</h3>
               <p className={styles.valueDescription}>
-                {c['values/description-1'] || 'Des voyages vrais, loin des circuits formatés.'}
+                {c['about/value-description-1']}
               </p>
               <div className={styles.valueDivider} />
             </div>
@@ -182,9 +177,9 @@ export default async function AboutPage() {
               <div className={styles.valueIcon}>
                 <PhoneIcon />
               </div>
-              <h3 className={styles.valueTitle}>{c['values/title-2'] || 'Confiance & Sérénité'}</h3>
+              <h3 className={styles.valueTitle}>{c['about/value-title-2']}</h3>
               <p className={styles.valueDescription}>
-                {c['values/description-2'] || 'Un accompagnement 100% personnalisé.'}
+                {c['about/value-description-2']}
               </p>
               <div className={styles.valueDivider} />
             </div>
@@ -194,9 +189,9 @@ export default async function AboutPage() {
               <div className={styles.valueIcon}>
                 <HandshakeIcon />
               </div>
-              <h3 className={styles.valueTitle}>{c['values/title-3'] || 'Empathie & Écoute'}</h3>
+              <h3 className={styles.valueTitle}>{c['about/value-title-3']}</h3>
               <p className={styles.valueDescription}>
-                {c['values/description-3'] || 'Chaque voyage commence par une vraie conversation.'}
+                {c['about/value-description-3']}
               </p>
               <div className={styles.valueDivider} />
             </div>
@@ -206,9 +201,9 @@ export default async function AboutPage() {
               <div className={styles.valueIcon}>
                 <PublicIcon />
               </div>
-              <h3 className={styles.valueTitle}>{c['values/title-4'] || 'Eco-responsabilité'}</h3>
+              <h3 className={styles.valueTitle}>{c['about/value-title-4']}</h3>
               <p className={styles.valueDescription}>
-                {c['values/description-4'] || 'Des modes de transports doux, des partenaires locaux engagés.'}
+                {c['about/value-description-4']}
               </p>
               <div className={styles.valueDivider} />
             </div>
