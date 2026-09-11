@@ -1,9 +1,14 @@
 import { Metadata } from "next";
 import Image from "next/image";
-import { Header, Footer, BotanicalDecoration, ContactSection } from "@/components/layout";
+import {
+  Header,
+  Footer,
+  BotanicalDecoration,
+  ContactSection,
+  RichTextDisplay
+} from "@/components/layout";
 import { getSiteContent } from "@/lib/content";
 import styles from "./page.module.scss";
-import { RichTextDisplay } from "@/components/layout";
 
 export const metadata: Metadata = {
   title: "A propos - Ailleurs en Douceur",
@@ -65,16 +70,12 @@ export default async function AboutPage() {
           </div>
           <div className={styles.heroContent}>
             <p className={styles.heroTagline}>{c['about/tagline']}</p>
-            <RichTextDisplay 
+            <RichTextDisplay
               html={c['about/hero-title']}
               className={styles.heroTitle}
             />
-            <p className={styles.heroDescription}>
-              {c['about/hero-description-1']}
-            </p>
-            <p className={styles.heroDescription}>
-              {c['about/hero-description-2']}
-            </p>
+            <RichTextDisplay html={c['about/hero-description-1']} className={styles.heroDescription} />
+            <RichTextDisplay html={c['about/hero-description-2']} className={styles.heroDescription} />
             <BotanicalDecoration type="botanical-16" className={styles.heroDecoration} />
             <div className={styles.heroDividerContainer}>
               <div className={styles.heroDivider} />
@@ -97,9 +98,7 @@ export default async function AboutPage() {
               <h2 className={styles.storyTitle}>
                 {c['about/story-title']}
               </h2>
-              <p className={styles.storyDescription}>
-                {c['about/story-description-1']}
-              </p>
+              <RichTextDisplay html={c['about/story-description-1']} className={styles.storyDescription} />
               <RichTextDisplay html={c['about/story-description-2']} className={styles.storyDescription} />
             </div>
             <div className={styles.storyImageContainer}>
@@ -136,9 +135,7 @@ export default async function AboutPage() {
               <h2 className={styles.travelPlannerTitle}>
                 {c['about/travel-planner-title']}
               </h2>
-              <p className={styles.travelPlannerDescription}>
-                {c['about/travel-planner-description-1']}
-              </p>
+              <RichTextDisplay html={c['about/travel-planner-description-1']} className={styles.travelPlannerDescription} />
               <RichTextDisplay html={c['about/travel-planner-description-2']} className={styles.travelPlannerDescription} />
               <BotanicalDecoration type="botanical-15" className={styles.travelPlannerDecoration} />
             </div>

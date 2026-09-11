@@ -65,7 +65,7 @@ export default async function Footer() {
             <h4 className={styles.sectionTitle}>{c['footer/title-3']}</h4>
             <div className={styles.socialIcons}>
               <a
-                href="#"
+                href="https://www.instagram.com/ailleursendouceur/"
                 className={styles.socialIcon}
                 aria-label="Instagram"
                 target="_blank"
@@ -122,7 +122,7 @@ export default async function Footer() {
 
         {/* Copyright */}
         <div className={styles.copyright}>
-          <p>&copy; {currentYear} Ailleurs en Douceur - Tous droits réservés. Site créé par <a href={'https://uxdcheyennedeschamps.framer.website/'}>Cheyenne Deschamps</a> et <a href={'https://www.linkedin.com/in/enzo-bortolussi-7682811aa/'}>Enzo Bortolussi</a></p>
+          <p>&copy; {currentYear} Ailleurs en Douceur - Tous droits réservés. Design du site par <a href={'https://uxdcheyennedeschamps.framer.website/'}>Cheyenne Deschamps</a> et développement par <a href={'https://www.linkedin.com/in/enzo-bortolussi-7682811aa/'}>Enzo Bortolussi</a></p>
         </div>
       </div>
     </footer>
