@@ -1,19 +1,13 @@
 // import 'server-only';
 
 // ============================================================================
-// Time Slot Overlap Detection
+// Time Helpers
 // ============================================================================
 
 declare global {
   interface Window {
     __tempIdCounter?: number;
   }
-}
-
-interface TimeSlot {
-  date: string | Date;
-  startTime: string;
-  endTime: string;
 }
 
 /**
@@ -58,29 +52,6 @@ export function doSlotsOverlap(
 }
 
 /**
- * Vérifie si un créneau se chevauche avec une liste de créneaux existants
- * 
- * @param newSlot - Le nouveau créneau à vérifier
- * @param existingSlots - Liste des créneaux existants
- * @returns true si chevauchement détecté, false sinon
- */
-export function hasSlotOverlap(newSlot: TimeSlot, existingSlots: TimeSlot[]): boolean {
-  for (const existingSlot of existingSlots) {
-    if (doSlotsOverlap(
-      newSlot.date,
-      newSlot.startTime,
-      newSlot.endTime,
-      existingSlot.date,
-      existingSlot.startTime,
-      existingSlot.endTime
-    )) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
  * Calcule la durée en minutes entre deux heures
  * 
  * @param startTime - Heure de début (format HH:MM)
@@ -108,49 +79,6 @@ export function isValidTimeFormat(time: string): boolean {
   return timeRegex.test(time);
 }
 
-/**
- * Convertit une heure HH:MM en minutes depuis minuit
- * 
- * @param time - Heure à convertir (format HH:MM)
- * @returns Nombre de minutes depuis minuit
- */
-export function timeToMinutes(time: string): number {
-  const [hours, minutes] = time.split(':').map(Number);
-  return hours * 60 + minutes;
-}
-
-/**
- * Convertit des minutes depuis minuit en heure HH:MM
- * 
- * @param minutes - Nombre de minutes depuis minuit
- * @returns Heure au format HH:MM
- */
-export function minutesToTime(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-}
-
-/**
- * Génère une liste d'heures pour un créneau (ex: 09:00, 09:30, 10:00, etc.)
- * 
- * @param startTime - Heure de début (format HH:MM)
- * @param endTime - Heure de fin (format HH:MM)
- * @param interval - Intervalle en minutes (default: 30)
- * @returns Tableau d'heures au format HH:MM
- */
-export function generateTimeSlots(startTime: string, endTime: string, interval: number = 30): string[] {
-  const slots: string[] = [];
-  const startMinutes = timeToMinutes(startTime);
-  const endMinutes = timeToMinutes(endTime);
-  
-  for (let current = startMinutes; current < endMinutes; current += interval) {
-    slots.push(minutesToTime(current));
-  }
-  
-  return slots;
-}
-
 // ============================================================================
 // Date Helpers
 // ============================================================================
@@ -162,32 +90,6 @@ export function getTodayAtMidnight(): Date {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return today;
-}
-
-/**
- * Récupère la date et heure actuelle
- */
-export function getNow(): Date {
-  return new Date();
-}
-
-/**
- * Vérifie si une date est dans le passé
- * 
- * @param date - Date à vérifier
- * @param time - Heure à vérifier (format HH:MM), optionnelle
- * @returns true si la date/heure est dans le passé
- */
-export function isInPast(date: Date | string, time?: string): boolean {
-  const dateObj = date instanceof Date ? date : new Date(date);
-  const now = new Date();
-  
-  if (time) {
-    const [hours, minutes] = time.split(':').map(Number);
-    dateObj.setHours(hours, minutes, 0, 0);
-  }
-  
-  return dateObj < now;
 }
 
 /**
@@ -228,19 +130,6 @@ export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOpt
     month: 'short',
     day: 'numeric',
     ...options,
-  });
-}
-
-/**
- * Formate une heure en français (format HH:MM)
- * @param date - Date/heure à formater
- * @returns Heure formatée en français
- */
-export function formatTime(date: Date | string): string {
-  const d = new Date(date);
-  return d.toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
   });
 }
 

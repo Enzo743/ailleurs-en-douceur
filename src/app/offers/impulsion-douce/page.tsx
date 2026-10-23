@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getSiteContent } from "@/lib/content";
+import { getSiteContent, prefixedContent } from "@/lib/content";
 import { OfferPageTemplate } from "@/components/layout";
 
 export const metadata: Metadata = {
@@ -11,60 +11,35 @@ export const dynamic = 'force-dynamic';
 
 export default async function ImpulsionDoucePage() {
   const c = await getSiteContent();
+  const t = prefixedContent(c, 'offer-impulsion-douce');
 
   const content = {
-    heroImage: c['offer-impulsion-douce/hero-image'],
-    heroTitle: c['offer-impulsion-douce/hero-title'],
-    heroSubtitle: c['offer-impulsion-douce/hero-subtitle'],
-    heroTagline: c['offer-impulsion-douce/hero-tagline'],
-    forWhoTitle: c['offer-impulsion-douce/for-who-title'],
-    forWhoPerimeterTitle: c['offer-impulsion-douce/for-who-perimeter-title'],
-    forWhoDescription: c['offer-impulsion-douce/for-who-description'],
-    forWhoLocation: c['offer-impulsion-douce/for-who-location'],
-    forWhoImage: c['offer-impulsion-douce/for-who-image'],
-    forWhoRichText: c['offer-impulsion-douce/for-who-rich-text'],
-    menusTitle: c['offer-impulsion-douce/menus-title'],
-    menus: [
-      {
-        title: c['offer-impulsion-douce/menu-1-title'],
-        description: c['offer-impulsion-douce/menu-1-description'],
-      },
-      {
-        title: c['offer-impulsion-douce/menu-2-title'],
-        description: c['offer-impulsion-douce/menu-2-description'],
-      },
-      {
-        title: c['offer-impulsion-douce/menu-3-title'],
-        description: c['offer-impulsion-douce/menu-3-description'],
-      },
-      {
-        title: c['offer-impulsion-douce/menu-4-title'],
-        description: c['offer-impulsion-douce/menu-4-description'],
-      },
-    ],
-    formulasTitle: c['offer-impulsion-douce/formulas-title'],
-    formulas: [
-      {
-        title: c['offer-impulsion-douce/formula-1-title'],
-        description: c['offer-impulsion-douce/formula-1-description'],
-        price: c['offer-impulsion-douce/formula-1-price'],
-      },
-      {
-        title: c['offer-impulsion-douce/formula-2-title'],
-        description: c['offer-impulsion-douce/formula-2-description'],
-        price: c['offer-impulsion-douce/formula-2-price'],
-      },
-      {
-        title: c['offer-impulsion-douce/formula-3-title'],
-        description: c['offer-impulsion-douce/formula-3-description'],
-        price: c['offer-impulsion-douce/formula-3-price'],
-      },
-    ],
+    heroImage: t('hero-image'),
+    heroTitle: t('hero-title'),
+    heroSubtitle: t('hero-subtitle'),
+    heroTagline: t('hero-tagline'),
+    forWhoTitle: t('for-who-title'),
+    forWhoPerimeterTitle: t('for-who-perimeter-title'),
+    forWhoDescription: t('for-who-description'),
+    forWhoLocation: t('for-who-location'),
+    forWhoImage: t('for-who-image'),
+    forWhoRichText: t('for-who-rich-text'),
+    menusTitle: t('menus-title'),
+    menus: [1, 2, 3, 4].map((n) => ({
+      title: t(`menu-${n}-title`),
+      description: t(`menu-${n}-description`),
+    })),
+    formulasTitle: t('formulas-title'),
+    formulas: [1, 2, 3].map((n) => ({
+      title: t(`formula-${n}-title`),
+      description: t(`formula-${n}-description`),
+      price: t(`formula-${n}-price`),
+    })),
   };
 
   return (
-    <OfferPageTemplate 
-      content={content} 
+    <OfferPageTemplate
+      content={content}
       currentPage="/offers"
       siteContent={c}
     />

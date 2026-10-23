@@ -4,7 +4,7 @@ interface BotanicalDecorationProps {
   className?: string;
 }
 
-export function BotanicalDecoration({
+function BotanicalDecoration({
   type = "botanical-15", color = "#FEFAED",
   className = "",
 }: BotanicalDecorationProps) {

@@ -1,5 +1,5 @@
 import 'server-only';
-import { PACKAGE_TYPES, DEFAULT_VALUES } from './constants';
+import { PACKAGE_TYPES } from './constants';
 
 // ============================================================================
 // Validation Helpers
@@ -32,7 +32,7 @@ export interface ValidationResults {
  * @param fieldName - Nom du champ (pour le message d'erreur)
  * @returns Résultat de validation
  */
-export function validateRequired(value: unknown, fieldName: string): ValidationResult {
+function validateRequired(value: unknown, fieldName: string): ValidationResult {
   if (value === undefined || value === null || value === '') {
     return {
       valid: false,
@@ -58,7 +58,7 @@ export function validateRequired(value: unknown, fieldName: string): ValidationR
  * @param fieldName - Nom du champ
  * @returns Résultat de validation
  */
-export function validateString(value: unknown, fieldName: string): ValidationResult {
+function validateString(value: unknown, fieldName: string): ValidationResult {
   const requiredResult = validateRequired(value, fieldName);
   if (!requiredResult.valid) return requiredResult;
   
@@ -79,7 +79,7 @@ export function validateString(value: unknown, fieldName: string): ValidationRes
  * @param fieldName - Nom du champ
  * @returns Résultat de validation
  */
-export function validateEmail(value: unknown, fieldName: string = 'email'): ValidationResult {
+function validateEmail(value: unknown, fieldName: string = 'email'): ValidationResult {
   const stringResult = validateString(value, fieldName);
   if (!stringResult.valid) return stringResult;
   
@@ -102,7 +102,7 @@ export function validateEmail(value: unknown, fieldName: string = 'email'): Vali
  * @param options - Options (min, max)
  * @returns Résultat de validation
  */
-export function validateNumber(
+function validateNumber(
   value: unknown,
   fieldName: string,
   options: { min?: number; max?: number; integer?: boolean } = {}
@@ -146,28 +146,6 @@ export function validateNumber(
     return {
       valid: false,
       error: `Le champ ${fieldName} doit être inférieur ou égal à ${max}`,
-      field: fieldName,
-    };
-  }
-  
-  return { valid: true };
-}
-
-/**
- * Vérifie qu'une valeur est un boolean
- * @param value - Valeur à vérifier
- * @param fieldName - Nom du champ
- * @returns Résultat de validation
- */
-export function validateBoolean(value: unknown, fieldName: string): ValidationResult {
-  if (value === undefined || value === null) {
-    return { valid: true }; // Les booleans sont optionnels par défaut
-  }
-  
-  if (typeof value !== 'boolean') {
-    return {
-      valid: false,
-      error: `Le champ ${fieldName} doit être un boolean`,
       field: fieldName,
     };
   }
@@ -232,7 +210,7 @@ export function validateTimeRange(startTime: string, endTime: string): Validatio
  * @param fieldName - Nom du champ
  * @returns Résultat de validation
  */
-export function validatePackageType(value: unknown, fieldName: string = 'packageType'): ValidationResult {
+function validatePackageType(value: unknown, fieldName: string = 'packageType'): ValidationResult {
   const stringResult = validateString(value, fieldName);
   if (!stringResult.valid) return stringResult;
   
@@ -249,127 +227,6 @@ export function validatePackageType(value: unknown, fieldName: string = 'package
 }
 
 // ============================================================================
-// File Validators
-// ============================================================================
-
-/**
- * Vérifie qu'un fichier est présent
- * @param file - Fichier à vérifier
- * @param fieldName - Nom du champ
- * @returns Résultat de validation
- */
-export function validateFile(file: File | null | undefined, fieldName: string): ValidationResult {
-  if (!file || file.size === 0) {
-    return {
-      valid: false,
-      error: 'Aucun fichier sélectionné',
-      field: fieldName,
-    };
-  }
-  
-  return { valid: true };
-}
-
-/**
- * Vérifie le type MIME d'un fichier
- * @param file - Fichier à vérifier
- * @param allowedTypes - Types autorisés
- * @param fieldName - Nom du champ
- * @returns Résultat de validation
- */
-export function validateFileType(
-  file: File,
-  allowedTypes: string[] = [...DEFAULT_VALUES.ALLOWED_IMAGE_TYPES],
-  fieldName: string = 'file'
-): ValidationResult {
-  if (!allowedTypes.includes(file.type)) {
-    const typeNames = allowedTypes
-      .map(t => t.replace('image/', ''))
-      .join(', ');
-    return {
-      valid: false,
-      error: `Format non autorisé (${typeNames})`,
-      field: fieldName,
-    };
-  }
-  
-  return { valid: true };
-}
-
-/**
- * Vérifie la taille d'un fichier
- * @param file - Fichier à vérifier
- * @param maxSize - Taille maximale en octets
- * @param fieldName - Nom du champ
- * @returns Résultat de validation
- */
-export function validateFileSize(
-  file: File,
-  maxSize: number = DEFAULT_VALUES.MAX_FILE_SIZE,
-  fieldName: string = 'file'
-): ValidationResult {
-  if (file.size > maxSize) {
-    const maxSizeMb = Math.round(maxSize / (1024 * 1024));
-    return {
-      valid: false,
-      error: `Fichier trop volumineux (max ${maxSizeMb} Mo)`,
-      field: fieldName,
-    };
-  }
-  
-  return { valid: true };
-}
-
-// ============================================================================
-// Array Validators
-// ============================================================================
-
-/**
- * Vérifie qu'un tableau n'est pas vide
- * @param value - Valeur à vérifier
- * @param fieldName - Nom du champ
- * @returns Résultat de validation
- */
-export function validateArrayNotEmpty(value: unknown, fieldName: string): ValidationResult {
-  if (!Array.isArray(value) || value.length === 0) {
-    return {
-      valid: false,
-      error: `Le champ ${fieldName} doit contenir au moins un élément`,
-      field: fieldName,
-    };
-  }
-  
-  return { valid: true };
-}
-
-/**
- * Vérifie que tous les éléments d'un tableau passent une validation
- * @param array - Tableau à vérifier
- * @param validator - Fonction de validation pour chaque élément
- * @param fieldName - Nom du champ
- * @returns Résultat de validation
- */
-export function validateArrayItems<T>(
-  array: T[],
-  validator: (item: T, index: number) => ValidationResult,
-  fieldName: string
-): ValidationResults {
-  const errors: ValidationResult[] = [];
-  
-  for (let i = 0; i < array.length; i++) {
-    const result = validator(array[i], i);
-    if (!result.valid) {
-      errors.push(result);
-    }
-  }
-  
-  return {
-    valid: errors.length === 0,
-    errors,
-  };
-}
-
-// ============================================================================
 // Privacy Validators
 // ============================================================================
 
@@ -378,7 +235,7 @@ export function validateArrayItems<T>(
  * @param accepted - Valeur du checkbox
  * @returns Résultat de validation
  */
-export function validatePrivacyAccepted(accepted: boolean | undefined): ValidationResult {
+function validatePrivacyAccepted(accepted: boolean | undefined): ValidationResult {
   if (accepted !== true) {
     return {
       valid: false,
@@ -504,88 +361,5 @@ export function validateAppointmentSlot(data: AppointmentSlotData): ValidationRe
   return {
     valid: errors.length === 0,
     errors,
-  };
-}
-
-// ============================================================================
-// Form Validation
-// ============================================================================
-
-/**
- * Données d'un formulaire personnalisé
- */
-export interface CustomFormData {
-  name: string;
-  packageType?: string;
-  description?: string;
-  successMessage: string;
-  isActive?: boolean;
-  fields?: Array<{
-    label: string;
-    key: string;
-    type: string;
-    placeholder?: string;
-    required?: boolean;
-    options?: string[];
-    defaultValue?: string;
-    order?: number;
-  }>;
-}
-
-/**
- * Valide les données d'un formulaire personnalisé
- * @param data - Données à valider
- * @returns Résultat de validation
- */
-export function validateCustomForm(data: CustomFormData): ValidationResults {
-  const errors: ValidationResult[] = [];
-  
-  // Nom requis
-  const nameResult = validateRequired(data.name, 'name');
-  if (!nameResult.valid) {
-    errors.push(nameResult);
-  }
-  
-  // Message de succès requis
-  const successMessageResult = validateRequired(data.successMessage, 'successMessage');
-  if (!successMessageResult.valid) {
-    errors.push(successMessageResult);
-  }
-  
-  // Validation du type de package si présent
-  if (data.packageType) {
-    const packageTypeResult = validatePackageType(data.packageType, 'packageType');
-    if (!packageTypeResult.valid) {
-      errors.push(packageTypeResult);
-    }
-  }
-  
-  return {
-    valid: errors.length === 0,
-    errors,
-  };
-}
-
-// ============================================================================
-// Helper: Collect all errors from multiple validations
-// ============================================================================
-
-/**
- * Combine plusieurs résultats de validation
- * @param results - Résultats à combiner
- * @returns Résultat combiné
- */
-export function combineValidationResults(results: ValidationResults[]): ValidationResults {
-  const allErrors: ValidationResult[] = [];
-  
-  for (const result of results) {
-    if (!result.valid) {
-      allErrors.push(...result.errors);
-    }
-  }
-  
-  return {
-    valid: allErrors.length === 0,
-    errors: allErrors,
   };
 }

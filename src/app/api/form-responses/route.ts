@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { serverError } from '@/lib/api';
 
 // Types
 interface FormResponseQueryParams {
@@ -119,15 +120,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result, { status: 200 });
 
   } catch (error: any) {
-    console.error('Error fetching form responses:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la récupération des réponses',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error fetching form responses:',
+      'Une erreur est survenue lors de la récupération des réponses',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -254,15 +251,11 @@ export async function POST(request: NextRequest) {
     );
 
   } catch (error: any) {
-    console.error('Error creating form response:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la soumission du formulaire',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error creating form response:',
+      'Une erreur est survenue lors de la soumission du formulaire',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -330,15 +323,11 @@ export async function GET_BY_ID(request: NextRequest) {
     );
 
   } catch (error: any) {
-    console.error('Error fetching form response:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la récupération de la réponse',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error fetching form response:',
+      'Une erreur est survenue lors de la récupération de la réponse',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -387,15 +376,11 @@ export async function DELETE(request: NextRequest) {
     );
 
   } catch (error: any) {
-    console.error('Error deleting form response:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la suppression de la réponse',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error deleting form response:',
+      'Une erreur est survenue lors de la suppression de la réponse',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }

@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { verifySession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getEmailConfig, getCustomFormUrl, formatDays } from '@/lib/email';
 import { getPackageLabel } from '@/lib/constants';
+import { apiError, apiSuccess, serverError } from '@/lib/api';
 
 /**
  * POST /api/dashboard/contact-requests/[id]/resend-form
@@ -34,26 +35,17 @@ export async function POST(
     });
 
     if (!contactRequest) {
-      return NextResponse.json(
-        { success: false, error: 'Demande de contact non trouvee' },
-        { status: 404 }
-      );
+      return apiError('Demande de contact non trouvee', 404);
     }
 
     if (!contactRequest.formId || !contactRequest.form) {
-      return NextResponse.json(
-        { success: false, error: 'Cette demande n\'a pas de formulaire associe' },
-        { status: 400 }
-      );
+      return apiError('Cette demande n\'a pas de formulaire associe');
     }
 
     // Note: isActive est dans le select maintenant, donc on peut vérifier
     const form = contactRequest.form;
     if (!form.isActive) {
-      return NextResponse.json(
-        { success: false, error: 'Le formulaire associe n\'est pas actif' },
-        { status: 400 }
-      );
+      return apiError('Le formulaire associe n\'est pas actif');
     }
 
     // Configuration email
@@ -152,38 +144,27 @@ Date: ${new Date().toLocaleString('fr-FR')}
       html: emailHtml,
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Lien du formulaire renvoye avec succes',
-        data: {
-          contactRequestId: contactRequest.id,
-          formId: contactRequest.formId,
-          formName: contactRequest.form.name,
-          emailSentTo: contactRequest.email,
-        },
+    return apiSuccess({
+      message: 'Lien du formulaire renvoye avec succes',
+      data: {
+        contactRequestId: contactRequest.id,
+        formId: contactRequest.formId,
+        formName: contactRequest.form.name,
+        emailSentTo: contactRequest.email,
       },
-      { status: 200 }
-    );
+    });
 
   } catch (error: any) {
-    console.error('Error resending form:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: error.message || 'Une erreur est survenue lors du renvoi du formulaire',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error resending form:',
+      error.message || 'Une erreur est survenue lors du renvoi du formulaire',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
 
 // Pour les autres methodes HTTP
 export async function GET() {
-  return NextResponse.json(
-    { success: false, error: 'Methode non autorisee' },
-    { status: 405 }
-  );
+  return apiError('Methode non autorisee', 405);
 }

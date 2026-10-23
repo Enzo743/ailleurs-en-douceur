@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { getPackageLabel } from '@/lib/constants';
-import { DEFAULT_VALUES } from '@/lib/constants';
+import { getPackageLabel, DEFAULT_VALUES } from '@/lib/constants';
+import { serverError } from '@/lib/api';
 import { FieldType } from '@prisma/client';
 import { generateFieldKey } from '@/lib/field-utils';
 
@@ -235,15 +235,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response, { status: 200 });
 
   } catch (error: any) {
-    console.error('Error fetching forms:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la recuperation des formulaires',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error fetching forms:',
+      'Une erreur est survenue lors de la recuperation des formulaires',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -438,15 +434,11 @@ export async function POST(request: NextRequest) {
     );
 
   } catch (error: any) {
-    console.error('Error creating form:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la creation du formulaire',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error creating form:',
+      'Une erreur est survenue lors de la creation du formulaire',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }

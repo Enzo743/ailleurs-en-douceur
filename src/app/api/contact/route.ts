@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/prisma';
+import { serverError } from '@/lib/api';
 import { generateContactRequestToken } from '@/lib/tokens';
 import {
   getEmailConfig,
@@ -305,8 +306,6 @@ Date: ${new Date().toLocaleString('fr-FR')}
     );
 
   } catch (error: any) {
-    console.error("Erreur lors de l'envoi de l'email:", error);
-    
     // Message d'erreur plus détaillé pour le développement
     let errorMessage = 'Une erreur est survenue lors de l\'envoi du message. Veuillez reessayer plus tard.';
     let errorDetails: any = undefined;
@@ -338,14 +337,9 @@ Date: ${new Date().toLocaleString('fr-FR')}
       };
     }
     
-    return NextResponse.json(
-      { 
-        success: false,
-        error: errorMessage,
-        details: errorDetails
-      },
-      { status: 500 }
-    );
+    return serverError("Erreur lors de l'envoi de l'email:", errorMessage, error, {
+      details: errorDetails
+    });
   }
 }
 

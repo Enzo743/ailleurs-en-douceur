@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { serverError } from '@/lib/api';
 import { doSlotsOverlap, cleanupExpiredSlots, getTodayAtMidnight, calculateDuration, isValidTimeFormat } from '@/lib/time';
 import { getEmailConfig, getScheduleUrl } from '@/lib/email';
 import { validateAppointmentSlot, type AppointmentSlotData } from '@/lib/validation';
@@ -130,15 +131,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response, { status: 200 });
 
   } catch (error: any) {
-    console.error('Error fetching appointment slots:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la recuperation des createaux',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error fetching appointment slots:',
+      'Une erreur est survenue lors de la recuperation des createaux',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -264,15 +261,11 @@ export async function POST(request: NextRequest) {
     );
 
   } catch (error: any) {
-    console.error('Error creating appointment slot:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la creation du createau',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error creating appointment slot:',
+      'Une erreur est survenue lors de la creation du createau',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -348,15 +341,11 @@ export async function DELETE(request: NextRequest) {
     );
 
   } catch (error: any) {
-    console.error('Error deleting appointment slot:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la suppression du createau',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error deleting appointment slot:',
+      'Une erreur est survenue lors de la suppression du createau',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }

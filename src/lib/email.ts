@@ -117,24 +117,6 @@ export function getEmailConfig(): EmailConfig {
   };
 }
 
-/**
- * Récupère l'email de l'expéditeur
- */
-export function getEmailFrom(): string {
-  const emailFrom = process.env.EMAIL_FROM;
-  if (!emailFrom) {
-    throw new Error('La variable d\'environnement EMAIL_FROM est requise');
-  }
-  return emailFrom;
-}
-
-/**
- * Récupère l'email du destinataire (Nelly)
- */
-export function getRecipientEmail(): string {
-  return process.env.CONTACT_RECIPIENT_EMAIL || process.env.EMAIL_USER || '';
-}
-
 // ============================================================================
 // Générateurs d'URL
 // ============================================================================
@@ -142,7 +124,7 @@ export function getRecipientEmail(): string {
 /**
  * Génère l'URL de base de l'application
  */
-export function getBaseUrl(): string {
+function getBaseUrl(): string {
   return (
     process.env.NEXT_PUBLIC_BASE_URL ||
     (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : process.env.DOMAIN || 'https://votre-domaine.com')
@@ -172,9 +154,4 @@ export function getScheduleUrl(token: string): string {
  */
 export function formatDays(days: number): string {
   return `${days} jour${days > 1 ? 's' : ''}`;
-}
-
-// Alias pour la compatibilité ascendante
-export function formatNights(nights: number): string {
-  return formatDays(nights);
 }

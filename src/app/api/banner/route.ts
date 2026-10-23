@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { apiSuccess, serverError } from '@/lib/api';
 
 export async function GET(request: Request) {
     try {
@@ -22,21 +22,14 @@ export async function GET(request: Request) {
             endDate: bannerContent.find(item => item.key === 'banner/endDate')?.value || null
         };
 
-        return NextResponse.json(
-            { success: true, ...bannerSettings },
-            { status: 200 }
-        );
+        return apiSuccess(bannerSettings);
 
     } catch (error: any) {
-        console.error('Erreur lors de la récupération des paramètres du bandeau:', error);
-        
-        return NextResponse.json(
-            {
-                success: false,
-                error: 'Une erreur est survenue lors de la récupération des paramètres du bandeau',
-                message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-            },
-            { status: 500 }
+        return serverError(
+            'Erreur lors de la récupération des paramètres du bandeau:',
+            'Une erreur est survenue lors de la récupération des paramètres du bandeau',
+            error,
+            { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
         );
     }
 }
@@ -108,21 +101,14 @@ export async function POST(request: Request) {
         revalidatePath('/');
         revalidatePath('/dashboard');
 
-        return NextResponse.json(
-            { success: true, message: 'Bandeau mis à jour avec succès' },
-            { status: 200 }
-        );
+        return apiSuccess({ message: 'Bandeau mis à jour avec succès' });
 
     } catch (error: any) {
-        console.error('Erreur lors de la mise à jour du bandeau:', error);
-        
-        return NextResponse.json(
-            {
-                success: false,
-                error: 'Une erreur est survenue lors de la mise à jour du bandeau',
-                message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-            },
-            { status: 500 }
+        return serverError(
+            'Erreur lors de la mise à jour du bandeau:',
+            'Une erreur est survenue lors de la mise à jour du bandeau',
+            error,
+            { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
         );
     }
 }

@@ -5,6 +5,7 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { FormSection, FIELD_TYPE_LABELS } from '@/lib/form-constants';
 import { getPackageLabel } from '@/lib/constants';
+import { formatFieldValue } from '@/lib/field-utils';
 import pdfStyles from './DownloadPdfButton.module.scss';
 
 interface DownloadFilledFormPdfButtonProps {
@@ -14,32 +15,10 @@ interface DownloadFilledFormPdfButtonProps {
   className?: string;
 }
 
-// Fonction pour formater les valeurs comme dans la page de détail
-export const formatValue = (value: any, allValues: Record<string, any> = {}, fieldKey?: string): string => {
-  if (value === null || value === undefined) return 'Non renseigné';
-  if (Array.isArray(value)) {
-    const formattedArray = value.map((v: any) => {
-      if (v === '_OTHER_' && fieldKey && allValues[`${fieldKey}_other`]) {
-        return allValues[`${fieldKey}_other`];
-      }
-      return String(v);
-    });
-    return formattedArray.join(', ');
-  }
-  if (typeof value === 'boolean') return value ? 'Oui' : 'Non';
-  if (typeof value === 'object') return JSON.stringify(value);
-  
-  if (value === '_OTHER_' && fieldKey && allValues[`${fieldKey}_other`]) {
-    return String(allValues[`${fieldKey}_other`]);
-  }
-  
-  return String(value);
-};
-
 // Composant pour rendre un champ avec sa réponse - utilise des styles inline
 const renderFilledFormField = (field: any, allValues: Record<string, any>) => {
   const value = allValues[field.key];
-  const formattedValue = formatValue(value, allValues, field.key);
+  const formattedValue = formatFieldValue(value, allValues, field.key);
 
   // Styles communs
   const labelStyle = {

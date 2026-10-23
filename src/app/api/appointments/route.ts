@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { serverError } from '@/lib/api';
 import { createMeetEvent, createCalendarEvent, cancelCalendarEvent } from '@/lib/google';
 import { getEmailConfig } from '@/lib/email';
 import { getPackageLabel } from '@/lib/constants';
@@ -131,15 +132,11 @@ export async function GET(request: NextRequest) {
     );
 
   } catch (error: any) {
-    console.error('Error fetching appointments:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la recuperation des rendez-vous',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error fetching appointments:',
+      'Une erreur est survenue lors de la recuperation des rendez-vous',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -519,13 +516,11 @@ ${contactRequest.message}` : ''}
       console.error('Error resetting slot availability:', resetError);
     }
 
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la confirmation du rendez-vous',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error creating appointment:',
+      'Une erreur est survenue lors de la confirmation du rendez-vous',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -597,15 +592,11 @@ export async function DELETE(request: NextRequest) {
     );
 
   } catch (error: any) {
-    console.error('Error canceling appointment:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de l\'annulation du rendez-vous',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error canceling appointment:',
+      'Une erreur est survenue lors de l\'annulation du rendez-vous',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -685,15 +676,11 @@ export async function GET_BY_ID(request: NextRequest) {
     );
 
   } catch (error: any) {
-    console.error('Error fetching appointment:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la recuperation du rendez-vous',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error fetching appointment:',
+      'Une erreur est survenue lors de la recuperation du rendez-vous',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { serverError } from '@/lib/api';
 import { getEmailConfig, getCustomFormUrl, formatDays } from '@/lib/email';
 import { getPackageLabel } from '@/lib/constants';
 import nodemailer from 'nodemailer';
@@ -190,15 +191,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response, { status: 200 });
 
   } catch (error: any) {
-    console.error('Error fetching contact requests:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la récupération des demandes de contact',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error fetching contact requests:',
+      'Une erreur est survenue lors de la récupération des demandes de contact',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -272,15 +269,11 @@ export async function POST(request: NextRequest) {
     );
 
   } catch (error: any) {
-    console.error('Error creating contact request:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la création de la demande de contact',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error creating contact request:',
+      'Une erreur est survenue lors de la création de la demande de contact',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -497,15 +490,11 @@ Date: ${new Date().toLocaleString('fr-FR')}
     );
 
   } catch (error: any) {
-    console.error('Error updating contact request:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la mise à jour de la demande de contact',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error updating contact request:',
+      'Une erreur est survenue lors de la mise à jour de la demande de contact',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -554,15 +543,11 @@ export async function DELETE(request: NextRequest) {
     );
 
   } catch (error: any) {
-    console.error('Error deleting contact request:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la suppression de la demande de contact',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error deleting contact request:',
+      'Une erreur est survenue lors de la suppression de la demande de contact',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }

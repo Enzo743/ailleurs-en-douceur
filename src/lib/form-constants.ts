@@ -5,7 +5,7 @@
 // Field Types
 // ============================================================================
 
-export const FIELD_TYPES = {
+const FIELD_TYPES = {
   TEXT: 'TEXT',
   TEXTAREA: 'TEXTAREA',
   NUMBER: 'NUMBER',
@@ -17,22 +17,6 @@ export const FIELD_TYPES = {
   RANGE_NUMBER: 'RANGE_NUMBER',
   RANGE_DATE: 'RANGE_DATE',
 } as const;
-
-/**
- * Options pour le select des types de champ
- */
-export const FIELD_TYPE_OPTIONS = [
-  { value: 'TEXT', label: 'Texte court' },
-  { value: 'TEXTAREA', label: 'Texte long' },
-  { value: 'NUMBER', label: 'Nombre' },
-  { value: 'EMAIL', label: 'Email' },
-  { value: 'SELECT', label: 'Sélection unique' },
-  { value: 'MULTISELECT', label: 'Sélection multiple' },
-  { value: 'CHECKBOX', label: 'Case à cocher' },
-  { value: 'DATE', label: 'Date' },
-  { value: 'RANGE_NUMBER', label: 'Plage de nombres' },
-  { value: 'RANGE_DATE', label: 'Plage de dates' },
-] as const;
 
 /**
  * Libellés lisibles pour les types de champs
@@ -99,17 +83,6 @@ export const CONTACT_PREFERENCE_FIELD: Omit<FormField, 'id' | 'order' | 'key'> =
 // Clé spéciale pour identifier ce champ
 export const CONTACT_PREFERENCE_KEY = 'contactPreference';
 
-// Générer un ID unique pour les champs
-let fieldIdCounter = 0;
-
-export const generateFieldId = (): string => {
-  return `field-${++fieldIdCounter}`;
-};
-
-export const resetFieldIdCounter = (): void => {
-  fieldIdCounter = 0;
-};
-
 // ============================================================================
 // Form Sections
 // ============================================================================
@@ -126,14 +99,3 @@ export const DEFAULT_SECTION: Omit<FormSection, 'id' | 'order' | 'fieldIds'> = {
   name: 'Nouvelle section',
   description: '',
 } as const;
-
-// Générer un ID unique pour les sections
-let sectionIdCounter = 0;
-
-export const generateSectionId = (): string => {
-  return `section-${++sectionIdCounter}`;
-};
-
-export const resetSectionIdCounter = (): void => {
-  sectionIdCounter = 0;
-};

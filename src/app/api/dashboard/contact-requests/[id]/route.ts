@@ -1,6 +1,75 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { apiError, apiSuccess, serverError } from "@/lib/api";
+
+/**
+ * Logique commune de suppression d'une demande de contact
+ * Vérifie la session et refuse la suppression si des réponses
+ * ou un rendez-vous sont associés
+ */
+async function deleteContactRequest(id: string) {
+  // Vérification de la session
+  await verifySession();
+
+  if (!id) {
+    return apiError('L\'ID de la demande de contact est requis');
+  }
+
+  // Vérifier que la demande existe
+  const existingRequest = await prisma.contactRequest.findUnique({
+    where: { id },
+    include: {
+      formResponses: { select: { id: true } },
+      appointment: { select: { id: true } },
+    },
+  });
+
+  if (!existingRequest) {
+    return apiError('Demande de contact non trouvée', 404);
+  }
+
+  // Si la demande a des réponses ou un rendez-vous, ne pas supprimer
+  if (existingRequest.formResponses.length > 0 || existingRequest.appointment) {
+    return apiError('Impossible de supprimer cette demande car elle a des réponses ou un rendez-vous associé');
+  }
+
+  // Supprimer
+  await prisma.contactRequest.delete({
+    where: { id },
+  });
+
+  return apiSuccess({ message: 'Demande supprimée avec succès' });
+}
+
+/**
+ * Logique commune de mise à jour d'une demande de contact
+ */
+async function updateContactRequest(id: string, updateData: Record<string, any>) {
+  // Vérification de la session
+  await verifySession();
+
+  if (!id) {
+    return apiError('L\'ID de la demande de contact est requis');
+  }
+
+  // Vérifier que la demande existe
+  const existingRequest = await prisma.contactRequest.findUnique({
+    where: { id },
+  });
+
+  if (!existingRequest) {
+    return apiError('Demande de contact non trouvée', 404);
+  }
+
+  // Mettre à jour
+  await prisma.contactRequest.update({
+    where: { id },
+    data: updateData,
+  });
+
+  return apiSuccess({ message: 'Demande mise à jour avec succès' });
+}
 
 /**
  * POST /dashboard/contact-requests/[id]
@@ -13,60 +82,12 @@ export async function POST(
   try {
     const { id } = await params;
 
-    // Vérification de la session
-    await verifySession();
-
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'L\'ID de la demande de contact est requis' },
-        { status: 400 }
-      );
-    }
-
     const body = await request.formData();
     const method = body.get('_method') as string;
 
     // Gestion de la suppression
     if (method === 'DELETE') {
-      // Vérifier que la demande existe
-      const existingRequest = await prisma.contactRequest.findUnique({
-        where: { id },
-        include: {
-          formResponses: { select: { id: true } },
-          appointment: { select: { id: true } },
-        },
-      });
-
-      if (!existingRequest) {
-        return NextResponse.json(
-          { success: false, error: 'Demande de contact non trouvée' },
-          { status: 404 }
-        );
-      }
-
-      // Si la demande a des réponses ou un rendez-vous, ne pas supprimer
-      if (existingRequest.formResponses.length > 0 || existingRequest.appointment) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Impossible de supprimer cette demande car elle a des réponses ou un rendez-vous associé'
-          },
-          { status: 400 }
-        );
-      }
-
-      // Supprimer
-      await prisma.contactRequest.delete({
-        where: { id },
-      });
-
-      return NextResponse.json(
-        {
-          success: true,
-          message: 'Demande supprimée avec succès',
-        },
-        { status: 200 }
-      );
+      return await deleteContactRequest(id);
     }
 
     // Gestion de la mise à jour (PATCH via POST)
@@ -89,42 +110,14 @@ export async function POST(
     if (status !== undefined) updateData.status = status;
     if (formId !== undefined) updateData.formId = formId;
 
-    // Vérifier que la demande existe
-    const existingRequest = await prisma.contactRequest.findUnique({
-      where: { id },
-    });
-
-    if (!existingRequest) {
-      return NextResponse.json(
-        { success: false, error: 'Demande de contact non trouvée' },
-        { status: 404 }
-      );
-    }
-
-    // Mettre à jour
-    await prisma.contactRequest.update({
-      where: { id },
-      data: updateData,
-    });
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Demande mise à jour avec succès',
-      },
-      { status: 200 }
-    );
+    return await updateContactRequest(id, updateData);
 
   } catch (error: any) {
-    console.error('Error processing contact request:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error processing contact request:',
+      'Une erreur est survenue',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -140,29 +133,7 @@ export async function PATCH(
   try {
     const { id } = await params;
 
-    // Vérification de la session
-    await verifySession();
-
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'L\'ID de la demande de contact est requis' },
-        { status: 400 }
-      );
-    }
-
     const body = await request.json();
-
-    // Vérifier que la demande existe
-    const existingRequest = await prisma.contactRequest.findUnique({
-      where: { id },
-    });
-
-    if (!existingRequest) {
-      return NextResponse.json(
-        { success: false, error: 'Demande de contact non trouvée' },
-        { status: 404 }
-      );
-    }
 
     // Préparer les données de mise à jour
     const updateData: any = {};
@@ -175,30 +146,14 @@ export async function PATCH(
     if (body.status !== undefined) updateData.status = body.status;
     if (body.formId !== undefined) updateData.formId = body.formId;
 
-    // Mettre à jour
-    await prisma.contactRequest.update({
-      where: { id },
-      data: updateData,
-    });
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Demande mise à jour avec succès',
-      },
-      { status: 200 }
-    );
+    return await updateContactRequest(id, updateData);
 
   } catch (error: any) {
-    console.error('Error updating contact request:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la mise à jour',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error updating contact request:',
+      'Une erreur est survenue lors de la mise à jour',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -213,67 +168,14 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-
-    // Vérification de la session
-    await verifySession();
-
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'L\'ID de la demande de contact est requis' },
-        { status: 400 }
-      );
-    }
-
-    // Vérifier que la demande existe
-    const existingRequest = await prisma.contactRequest.findUnique({
-      where: { id },
-      include: {
-        formResponses: { select: { id: true } },
-        appointment: { select: { id: true } },
-      },
-    });
-
-    if (!existingRequest) {
-      return NextResponse.json(
-        { success: false, error: 'Demande de contact non trouvée' },
-        { status: 404 }
-      );
-    }
-
-    // Si la demande a des réponses ou un rendez-vous, ne pas supprimer
-    if (existingRequest.formResponses.length > 0 || existingRequest.appointment) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Impossible de supprimer cette demande car elle a des réponses ou un rendez-vous associé'
-        },
-        { status: 400 }
-      );
-    }
-
-    // Supprimer
-    await prisma.contactRequest.delete({
-      where: { id },
-    });
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Demande supprimée avec succès',
-      },
-      { status: 200 }
-    );
+    return await deleteContactRequest(id);
 
   } catch (error: any) {
-    console.error('Error deleting contact request:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la suppression',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error deleting contact request:',
+      'Une erreur est survenue lors de la suppression',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }

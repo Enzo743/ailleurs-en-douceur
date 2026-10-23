@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { serverError } from '@/lib/api';
 import fs from 'fs';
 import path from 'path';
 
@@ -91,14 +92,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     });
 
   } catch (error: any) {
-    console.error('Error serving file:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Erreur lors du service du fichier',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error serving file:',
+      'Erreur lors du service du fichier',
+      error,
+      { details: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }

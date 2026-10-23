@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { apiError, apiSuccess, serverError } from "@/lib/api";
 
 /**
  * POST /dashboard/forms/[id]/toggle
@@ -17,10 +18,7 @@ export async function POST(
     await verifySession();
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'L\'ID du formulaire est requis' },
-        { status: 400 }
-      );
+      return apiError('L\'ID du formulaire est requis');
     }
 
     // Vérifier que le formulaire existe
@@ -29,10 +27,7 @@ export async function POST(
     });
 
     if (!form) {
-      return NextResponse.json(
-        { success: false, error: 'Formulaire non trouvé' },
-        { status: 404 }
-      );
+      return apiError('Formulaire non trouvé', 404);
     }
 
     // Mettre à jour le statut
@@ -41,28 +36,20 @@ export async function POST(
       data: { isActive: !form.isActive },
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: `Formulaire ${updatedForm.isActive ? 'activé' : 'désactivé'} avec succès`,
-        data: {
-          id: updatedForm.id,
-          isActive: updatedForm.isActive,
-        },
+    return apiSuccess({
+      message: `Formulaire ${updatedForm.isActive ? 'activé' : 'désactivé'} avec succès`,
+      data: {
+        id: updatedForm.id,
+        isActive: updatedForm.isActive,
       },
-      { status: 200 }
-    );
+    });
 
   } catch (error: any) {
-    console.error('Error toggling form:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la mise à jour du formulaire',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error toggling form:',
+      'Une erreur est survenue lors de la mise à jour du formulaire',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }

@@ -35,8 +35,7 @@ const getServiceAccountAuth = () => {
  * Récupère un client authentifié Google Calendar
  * Priorité : Service Account > OAuth2 avec tokens stockés
  */
-export const getCalendarClient = async (tokens?: GoogleTokens) => {
-  // Essayer Service Account d'abord (meilleur pour server-side)
+const getCalendarClient = async (tokens?: GoogleTokens) => {  // Essayer Service Account d'abord (meilleur pour server-side)
   const serviceAuth = getServiceAccountAuth();
   if (serviceAuth) {
     return google.calendar({ version: 'v3', auth: serviceAuth });
@@ -202,38 +201,6 @@ export const createCalendarEvent = async (
 };
 
 /**
- * Vérifie la disponibilité d'un créneau
- */
-export const checkTimeSlotAvailability = async (
-  startDateTime: Date | string,
-  endDateTime: Date | string,
-  tokens?: GoogleTokens
-): Promise<boolean> => {
-  const calendar = await getCalendarClient(tokens);
-  const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
-
-  const startIso = new Date(startDateTime).toISOString();
-  const endIso = new Date(endDateTime).toISOString();
-
-  try {
-    const response = await calendar.events.list({
-      calendarId,
-      timeMin: startIso,
-      timeMax: endIso,
-      singleEvents: true,
-    });
-
-    // Si des événements existent dans ce créneau, il n'est pas disponible
-    return response.data.items?.length === 0;
-  } catch (error) {
-    console.error('Error checking time slot availability:', error);
-    // En cas d'erreur, on considère que le créneau est disponible
-    // (pour éviter de bloquer la réservation)
-    return true;
-  }
-};
-
-/**
  * Annule un événement Google Calendar
  */
 export const cancelCalendarEvent = async (eventId: string, tokens?: GoogleTokens): Promise<void> => {
@@ -248,69 +215,6 @@ export const cancelCalendarEvent = async (eventId: string, tokens?: GoogleTokens
   } catch (error) {
     console.error('Error canceling Google Calendar event:', error);
     throw new Error(`Failed to cancel Google Calendar event: ${(error as Error).message}`);
-  }
-};
-
-/**
- * Met à jour un événement Google Calendar
- */
-export const updateCalendarEvent = async (
-  eventId: string,
-  updates: {
-    summary?: string;
-    description?: string;
-    startDateTime?: Date | string;
-    endDateTime?: Date | string;
-  },
-  tokens?: GoogleTokens
-): Promise<any> => {
-  const calendar = await getCalendarClient(tokens);
-  const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
-
-  const updateBody: any = {};
-  
-  if (updates.summary) {
-    updateBody.summary = updates.summary;
-  }
-  if (updates.description) {
-    updateBody.description = updates.description;
-  }
-  if (updates.startDateTime) {
-    updateBody.start = { dateTime: new Date(updates.startDateTime).toISOString(), timeZone: 'Europe/Paris' };
-  }
-  if (updates.endDateTime) {
-    updateBody.end = { dateTime: new Date(updates.endDateTime).toISOString(), timeZone: 'Europe/Paris' };
-  }
-
-  try {
-    const response = await calendar.events.update({
-      calendarId,
-      eventId,
-      requestBody: updateBody,
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error updating Google Calendar event:', error);
-    throw new Error(`Failed to update Google Calendar event: ${(error as Error).message}`);
-  }
-};
-
-/**
- * Récupère un événement Google Calendar
- */
-export const getCalendarEvent = async (eventId: string, tokens?: GoogleTokens): Promise<any> => {
-  const calendar = await getCalendarClient(tokens);
-  const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
-
-  try {
-    const response = await calendar.events.get({
-      calendarId,
-      eventId,
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error getting Google Calendar event:', error);
-    throw new Error(`Failed to get Google Calendar event: ${(error as Error).message}`);
   }
 };
 

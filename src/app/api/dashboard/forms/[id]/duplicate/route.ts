@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { apiError, apiSuccess, serverError } from "@/lib/api";
 
 /**
  * POST /api/dashboard/forms/[id]/duplicate
@@ -20,10 +21,7 @@ export async function POST(
     const { id } = await params;
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'L\'ID du formulaire est requis' },
-        { status: 400 }
-      );
+      return apiError('L\'ID du formulaire est requis');
     }
 
     // Vérifier que le formulaire existe
@@ -43,21 +41,12 @@ export async function POST(
     });
 
     if (!existingForm) {
-      return NextResponse.json(
-        { success: false, error: 'Formulaire non trouvé' },
-        { status: 404 }
-      );
+      return apiError('Formulaire non trouvé', 404);
     }
 
     // Si le formulaire n'a pas de réponses, on peut le modifier directement
     if (existingForm._count.responses === 0) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Ce formulaire n\'a pas de réponses, vous pouvez le modifier directement sans le dupliquer.'
-        },
-        { status: 400 }
-      );
+      return apiError('Ce formulaire n\'a pas de réponses, vous pouvez le modifier directement sans le dupliquer.');
     }
 
     // Créer la copie du formulaire
@@ -165,84 +154,67 @@ export async function POST(
       },
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Formulaire dupliqué avec succès. L\'ancien formulaire a été désactivé.',
-        data: {
-          id: completeNewForm!.id,
-          name: completeNewForm!.name,
-          packageType: completeNewForm!.packageType,
-          description: completeNewForm!.description,
-          successMessage: completeNewForm!.successMessage,
-          isActive: completeNewForm!.isActive,
-          createdAt: completeNewForm!.createdAt,
-          updatedAt: completeNewForm!.updatedAt,
-          fields: completeNewForm!.fields.map((field) => ({
-            id: field.id,
-            label: field.label,
-            key: field.key,
-            type: field.type,
-            placeholder: field.placeholder,
-            required: field.required,
-            options: field.options,
-            defaultValue: field.defaultValue,
-            order: field.order,
-            sectionId: field.sectionId,
-          })),
-          sections: completeNewForm!.sections.map((section) => ({
-            id: section.id,
-            name: section.name,
-            description: section.description,
-            order: section.order,
-            fieldIds: section.fields.map(f => f.id),
-          })),
-          stats: {
-            responsesCount: completeNewForm!._count.responses,
-            requestsCount: completeNewForm!._count.contactRequests,
-          },
-          oldForm: {
-            id: existingForm.id,
-            name: `[ANCIEN] ${existingForm.name}`,
-            isActive: false,
-          },
+    return apiSuccess({
+      message: 'Formulaire dupliqué avec succès. L\'ancien formulaire a été désactivé.',
+      data: {
+        id: completeNewForm!.id,
+        name: completeNewForm!.name,
+        packageType: completeNewForm!.packageType,
+        description: completeNewForm!.description,
+        successMessage: completeNewForm!.successMessage,
+        isActive: completeNewForm!.isActive,
+        createdAt: completeNewForm!.createdAt,
+        updatedAt: completeNewForm!.updatedAt,
+        fields: completeNewForm!.fields.map((field) => ({
+          id: field.id,
+          label: field.label,
+          key: field.key,
+          type: field.type,
+          placeholder: field.placeholder,
+          required: field.required,
+          options: field.options,
+          defaultValue: field.defaultValue,
+          order: field.order,
+          sectionId: field.sectionId,
+        })),
+        sections: completeNewForm!.sections.map((section) => ({
+          id: section.id,
+          name: section.name,
+          description: section.description,
+          order: section.order,
+          fieldIds: section.fields.map(f => f.id),
+        })),
+        stats: {
+          responsesCount: completeNewForm!._count.responses,
+          requestsCount: completeNewForm!._count.contactRequests,
+        },
+        oldForm: {
+          id: existingForm.id,
+          name: `[ANCIEN] ${existingForm.name}`,
+          isActive: false,
         },
       },
-      { status: 201 }
-    );
+    }, 201);
 
   } catch (error: any) {
-    console.error('Error duplicating form:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la duplication du formulaire',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error duplicating form:',
+      'Une erreur est survenue lors de la duplication du formulaire',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
 
 // Pour les autres méthodes HTTP
 export async function GET() {
-  return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée' },
-    { status: 405 }
-  );
+  return apiError('Méthode non autorisée', 405);
 }
 
 export async function PUT() {
-  return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée' },
-    { status: 405 }
-  );
+  return apiError('Méthode non autorisée', 405);
 }
 
 export async function DELETE() {
-  return NextResponse.json(
-    { success: false, error: 'Méthode non autorisée' },
-    { status: 405 }
-  );
+  return apiError('Méthode non autorisée', 405);
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { serverError } from '@/lib/api';
 import { FieldType } from "@prisma/client";
 import { generateFieldKey } from '@/lib/field-utils';
 
@@ -177,15 +178,11 @@ export async function GET(
     return NextResponse.json(response, { status: 200 });
 
   } catch (error: any) {
-    console.error('Error fetching form:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la récupération du formulaire',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error fetching form:',
+      'Une erreur est survenue lors de la récupération du formulaire',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -510,15 +507,11 @@ export async function PUT(
     }
 
   } catch (error: any) {
-    console.error('Error updating form:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la mise à jour du formulaire',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error updating form:',
+      'Une erreur est survenue lors de la mise à jour du formulaire',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -708,15 +701,11 @@ export async function PATCH(
     );
 
   } catch (error: any) {
-    console.error('Error updating form with fields:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la mise à jour du formulaire ou des champs',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error updating form with fields:',
+      'Une erreur est survenue lors de la mise à jour du formulaire ou des champs',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -780,15 +769,11 @@ export async function DELETE(
     );
 
   } catch (error: any) {
-    console.error('Error deleting form:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la suppression du formulaire',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error deleting form:',
+      'Une erreur est survenue lors de la suppression du formulaire',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }

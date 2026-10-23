@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './section-card.module.scss';
 
-export default function ContactSettings({ initialState }: { initialState: boolean }) {
+function ContactSettings({ initialState }: { initialState: boolean }) {
     const [isEnabled, setIsEnabled] = useState(initialState);
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);

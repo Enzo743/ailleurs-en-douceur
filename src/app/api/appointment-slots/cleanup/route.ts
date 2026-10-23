@@ -1,14 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { verifySession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { cleanupExpiredSlots } from '@/lib/time';
-
-interface ApiResponse {
-  success: boolean;
-  data?: any;
-  error?: string;
-  message?: string;
-}
+import { apiError, apiSuccess, serverError } from '@/lib/api';
 
 /**
  * POST /api/appointment-slots/cleanup
@@ -27,37 +21,26 @@ export async function POST(request: NextRequest) {
       const expectedSecret = process.env.CRON_SECRET;
       
       if (!expectedSecret || secret !== expectedSecret) {
-        return NextResponse.json(
-          { success: false, error: 'Non autorise' },
-          { status: 401 }
-        );
+        return apiError('Non autorise', 401);
       }
     }
 
     // Nettoyer automatiquement les createaux passes non reserves
     const deletedCount = await cleanupExpiredSlots(prisma);
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: `Nettoyage termine: ${deletedCount} createau(x) passe(s) non reserve(s) supprime(s)`,
-        data: {
-          deletedCount,
-        },
+    return apiSuccess({
+      message: `Nettoyage termine: ${deletedCount} createau(x) passe(s) non reserve(s) supprime(s)`,
+      data: {
+        deletedCount,
       },
-      { status: 200 }
-    );
+    });
 
   } catch (error: any) {
-    console.error('Error cleaning up appointment slots:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors du nettoyage des createaux',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error cleaning up appointment slots:',
+      'Une erreur est survenue lors du nettoyage des createaux',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }

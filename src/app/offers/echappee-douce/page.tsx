@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getSiteContent } from "@/lib/content";
+import { getSiteContent, prefixedContent } from "@/lib/content";
 import { OfferPageTemplate } from "@/components/layout";
 
 export const metadata: Metadata = {
@@ -11,51 +11,35 @@ export const dynamic = 'force-dynamic';
 
 export default async function EchappeeDoucePage() {
   const c = await getSiteContent();
+  const t = prefixedContent(c, 'offer-echappee-douce');
 
   const content = {
-    heroImage: c['offer-echappee-douce/hero-image'],
-    heroTitle: c['offer-echappee-douce/hero-title'],
-    heroSubtitle: c['offer-echappee-douce/hero-subtitle'],
-    heroTagline: c['offer-echappee-douce/hero-tagline'],
-    forWhoTitle: c['offer-echappee-douce/for-who-title'],
-    forWhoBaseTitle: c['offer-echappee-douce/for-who-base-title'],
-    forWhoDescription: c['offer-echappee-douce/for-who-description'],
-    forWhoLocation: c['offer-echappee-douce/for-who-location'],
-    forWhoImage: c['offer-echappee-douce/for-who-image'],
-    forWhoRichText: c['offer-echappee-douce/for-who-rich-text'],
-    formulasTitle: c['offer-echappee-douce/formulas-title'],
-    formulas: [
-      {
-        title: c['offer-echappee-douce/formula-1-title'],
-        duration: c['offer-echappee-douce/formula-1-duration'],
-        price: c['offer-echappee-douce/formula-1-price'],
-      },
-      {
-        title: c['offer-echappee-douce/formula-2-title'],
-        duration: c['offer-echappee-douce/formula-2-duration'],
-        price: c['offer-echappee-douce/formula-2-price'],
-      },
-      {
-        title: c['offer-echappee-douce/formula-3-title'],
-        duration: c['offer-echappee-douce/formula-3-duration'],
-        price: c['offer-echappee-douce/formula-3-price'],
-      },
-      {
-        title: c['offer-echappee-douce/formula-4-title'],
-        duration: c['offer-echappee-douce/formula-4-duration'],
-        price: c['offer-echappee-douce/formula-4-price'],
-      },
-    ],
-    optionsTitle: c['offer-echappee-douce/options-title'],
+    heroImage: t('hero-image'),
+    heroTitle: t('hero-title'),
+    heroSubtitle: t('hero-subtitle'),
+    heroTagline: t('hero-tagline'),
+    forWhoTitle: t('for-who-title'),
+    forWhoBaseTitle: t('for-who-base-title'),
+    forWhoDescription: t('for-who-description'),
+    forWhoLocation: t('for-who-location'),
+    forWhoImage: t('for-who-image'),
+    forWhoRichText: t('for-who-rich-text'),
+    formulasTitle: t('formulas-title'),
+    formulas: [1, 2, 3, 4].map((n) => ({
+      title: t(`formula-${n}-title`),
+      duration: t(`formula-${n}-duration`),
+      price: t(`formula-${n}-price`),
+    })),
+    optionsTitle: t('options-title'),
     options: [
-      c['offer-echappee-douce/option-1'],
-      c['offer-echappee-douce/option-2'],
+      t('option-1'),
+      t('option-2'),
     ],
   };
 
   return (
-    <OfferPageTemplate 
-      content={content} 
+    <OfferPageTemplate
+      content={content}
       currentPage="/offers"
       siteContent={c}
     />

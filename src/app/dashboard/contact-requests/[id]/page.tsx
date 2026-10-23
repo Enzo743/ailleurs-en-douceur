@@ -9,30 +9,7 @@ import { StatusBadge } from '@/components/dashboard';
 import AssignFormClient from '@/components/dashboard/AssignFormClient';
 import ActionFormClient from '@/components/dashboard/ActionFormClient';
 import DownloadFilledFormPdfButton from '@/components/dashboard/DownloadFilledFormPdfButton';
-
-// Formater les valeurs JSON pour affichage
-const formatValue = (value: any, allValues: Record<string, any> = {}, fieldKey?: string): string => {
-  if (value === null || value === undefined) return 'Non renseigné';
-  if (Array.isArray(value)) {
-    // Pour les tableaux, vérifier si '_OTHER_' est présent et remplacer par la valeur personnalisée
-    const formattedArray = value.map((v: any) => {
-      if (v === '_OTHER_' && fieldKey && allValues[`${fieldKey}_other`]) {
-        return allValues[`${fieldKey}_other`];
-      }
-      return String(v);
-    });
-    return formattedArray.join(', ');
-  }
-  if (typeof value === 'boolean') return value ? 'Oui' : 'Non';
-  if (typeof value === 'object') return JSON.stringify(value);
-  
-  // Cas spécial : si la valeur est '_OTHER_', afficher la valeur personnalisée
-  if (value === '_OTHER_' && fieldKey && allValues[`${fieldKey}_other`]) {
-    return String(allValues[`${fieldKey}_other`]);
-  }
-  
-  return String(value);
-};
+import { formatFieldValue as formatValue } from '@/lib/field-utils';
 
 export default async function ContactRequestDetailPage({
   params,

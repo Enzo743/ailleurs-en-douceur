@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { serverError } from '@/lib/api';
 import { doSlotsOverlap, cleanupExpiredSlots, calculateDuration } from '@/lib/time';
 import { validateAppointmentSlot, validateTimeFormat, validateTimeRange, type AppointmentSlotData } from '@/lib/validation';
 
@@ -186,15 +187,11 @@ export async function POST(request: NextRequest) {
     );
 
   } catch (error: any) {
-    console.error('Error creating batch appointment slots:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de la creation des createaux',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error creating batch appointment slots:',
+      'Une erreur est survenue lors de la creation des createaux',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }

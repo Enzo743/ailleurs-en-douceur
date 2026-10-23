@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifySession } from '@/lib/auth';
+import { serverError } from '@/lib/api';
 import fs from 'fs';
 import path from 'path';
 import { writeFile } from 'fs/promises';
@@ -144,14 +145,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: true, files });
 
   } catch (error: any) {
-    console.error('Error listing files:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Erreur lors de la lecture des fichiers',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error listing files:',
+      'Erreur lors de la lecture des fichiers',
+      error,
+      { details: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -225,14 +223,11 @@ export async function POST(request: Request) {
     );
 
   } catch (error: any) {
-    console.error('Error uploading file:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Erreur lors de l\'upload du fichier',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error uploading file:',
+      'Erreur lors de l\'upload du fichier',
+      error,
+      { details: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }
@@ -318,14 +313,11 @@ export async function DELETE(request: Request) {
     );
 
   } catch (error: any) {
-    console.error('Error deleting file:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Erreur lors de la suppression du fichier',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error deleting file:',
+      'Erreur lors de la suppression du fichier',
+      error,
+      { details: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }

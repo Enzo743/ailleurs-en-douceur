@@ -30,17 +30,6 @@ export function getPackageLabel(value: string): string {
 }
 
 // ============================================================================
-// Contact Request Status
-// ============================================================================
-
-export const CONTACT_REQUEST_STATUS = {
-  PENDING: 'PENDING',
-  FORM_SENT: 'FORM_SENT',
-  COMPLETED: 'COMPLETED',
-  CANCELLED: 'CANCELLED',
-} as const;
-
-// ============================================================================
 // Package Types Options
 // ============================================================================
 
@@ -52,33 +41,6 @@ export const PACKAGE_TYPE_OPTIONS = [
   { value: 'voyage-sur-mesure', label: 'Voyage sur-mesure' },
   { value: 'voyage-de-noces', label: 'Voyage de noces' },
 ] as const;
-
-/**
- * Options pour le select des statuts de demande de contact
- */
-export const CONTACT_REQUEST_STATUS_OPTIONS = [
-  { value: 'PENDING', label: 'En attente' },
-  { value: 'FORM_SENT', label: 'Formulaire rempli' },
-  { value: 'COMPLETED', label: 'Terminé' },
-] as const;
-
-// ============================================================================
-// Article Status
-// ============================================================================
-
-export const ARTICLE_STATUS = {
-  PUBLISHED: 'published',
-  DRAFT: 'draft',
-} as const;
-
-// ============================================================================
-// Form Status
-// ============================================================================
-
-export const FORM_STATUS = {
-  ACTIVE: 'active',
-  INACTIVE: 'inactive',
-} as const;
 
 // ============================================================================
 // Default Values

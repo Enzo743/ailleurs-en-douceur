@@ -24,3 +24,34 @@ export function generateFieldKey(label: string, existingKeys: string[] = []): st
   
   return finalKey;
 }
+
+/**
+ * Formate la valeur d'un champ de formulaire pour l'affichage
+ * (utilisé par la page de détail d'une demande et le PDF rempli)
+ */
+export function formatFieldValue(
+  value: any,
+  allValues: Record<string, any> = {},
+  fieldKey?: string
+): string {
+  if (value === null || value === undefined) return 'Non renseigné';
+  if (Array.isArray(value)) {
+    // Pour les tableaux, vérifier si '_OTHER_' est présent et remplacer par la valeur personnalisée
+    const formattedArray = value.map((v: any) => {
+      if (v === '_OTHER_' && fieldKey && allValues[`${fieldKey}_other`]) {
+        return allValues[`${fieldKey}_other`];
+      }
+      return String(v);
+    });
+    return formattedArray.join(', ');
+  }
+  if (typeof value === 'boolean') return value ? 'Oui' : 'Non';
+  if (typeof value === 'object') return JSON.stringify(value);
+
+  // Cas spécial : si la valeur est '_OTHER_', afficher la valeur personnalisée
+  if (value === '_OTHER_' && fieldKey && allValues[`${fieldKey}_other`]) {
+    return String(allValues[`${fieldKey}_other`]);
+  }
+
+  return String(value);
+}

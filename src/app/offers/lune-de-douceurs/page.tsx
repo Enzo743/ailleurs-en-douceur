@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getSiteContent } from "@/lib/content";
+import { getSiteContent, prefixedContent } from "@/lib/content";
 import { OfferPageTemplate } from "@/components/layout";
 
 export const metadata: Metadata = {
@@ -11,44 +11,33 @@ export const dynamic = 'force-dynamic';
 
 export default async function LuneDeDouceursPage() {
   const c = await getSiteContent();
+  const t = prefixedContent(c, 'offer-lune-de-douceurs');
 
   const content = {
-    heroImage: c['offer-lune-de-douceurs/hero-image'],
-    heroTitle: c['offer-lune-de-douceurs/hero-title'],
-    heroSubtitle: c['offer-lune-de-douceurs/hero-subtitle'],
-    heroTagline: c['offer-lune-de-douceurs/hero-tagline'],
-    forWhoTitle: c['offer-lune-de-douceurs/for-who-title'],
-    forWhoBaseTitle: c['offer-lune-de-douceurs/for-who-base-title'],
-    forWhoDescription: c['offer-lune-de-douceurs/for-who-description'],
-    forWhoLocation: c['offer-lune-de-douceurs/for-who-location'],
-    forWhoImage: c['offer-lune-de-douceurs/for-who-image'],
-    forWhoRichText: c['offer-lune-de-douceurs/for-who-rich-text'],
-    includedTitle: c['offer-lune-de-douceurs/included-title'],
-    includedItems: [
-      c['offer-lune-de-douceurs/included-item-1'],
-      c['offer-lune-de-douceurs/included-item-2'],
-      c['offer-lune-de-douceurs/included-item-3'],
-      c['offer-lune-de-douceurs/included-item-4'],
-    ],
-    formulasTitle: c['offer-lune-de-douceurs/formulas-title'],
-    formulas: [
-      {
-        title: c['offer-lune-de-douceurs/formula-1-title'],
-        duration: c['offer-lune-de-douceurs/formula-1-duration'],
-        price: c['offer-lune-de-douceurs/formula-1-price'],
-      },
-      {
-        title: c['offer-lune-de-douceurs/formula-2-title'],
-        duration: c['offer-lune-de-douceurs/formula-2-duration'],
-        price: c['offer-lune-de-douceurs/formula-2-price'],
-      },
-    ],
-    asteriskNote: c['offer-lune-de-douceurs/asterisk-note'],
+    heroImage: t('hero-image'),
+    heroTitle: t('hero-title'),
+    heroSubtitle: t('hero-subtitle'),
+    heroTagline: t('hero-tagline'),
+    forWhoTitle: t('for-who-title'),
+    forWhoBaseTitle: t('for-who-base-title'),
+    forWhoDescription: t('for-who-description'),
+    forWhoLocation: t('for-who-location'),
+    forWhoImage: t('for-who-image'),
+    forWhoRichText: t('for-who-rich-text'),
+    includedTitle: t('included-title'),
+    includedItems: [1, 2, 3, 4].map((n) => t(`included-item-${n}`)),
+    formulasTitle: t('formulas-title'),
+    formulas: [1, 2].map((n) => ({
+      title: t(`formula-${n}-title`),
+      duration: t(`formula-${n}-duration`),
+      price: t(`formula-${n}-price`),
+    })),
+    asteriskNote: t('asterisk-note'),
   };
 
   return (
-    <OfferPageTemplate 
-      content={content} 
+    <OfferPageTemplate
+      content={content}
       currentPage="/offers"
       siteContent={c}
     />

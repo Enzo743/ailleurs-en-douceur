@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './section-card.module.scss';
 
-export default function BannerSettings({ initialState }: {
+function BannerSettings({ initialState }: {
     initialState: {
         isEnabled: boolean;
         text: string;

@@ -515,4 +515,3 @@ export function useFormWithSections({
   };
 }
 
-export default useFormWithSections;

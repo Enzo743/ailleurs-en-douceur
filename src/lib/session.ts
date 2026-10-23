@@ -20,7 +20,7 @@ function getSecretKey(): Uint8Array {
     return new TextEncoder().encode(secret);
 }
 
-export async function encrypt(payload: SessionPayload): Promise<string> {
+async function encrypt(payload: SessionPayload): Promise<string> {
     return new SignJWT({ ...payload })
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()

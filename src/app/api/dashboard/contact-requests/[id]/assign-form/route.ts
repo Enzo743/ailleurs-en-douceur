@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getEmailConfig, getCustomFormUrl, formatDays } from '@/lib/email';
 import { getPackageLabel } from '@/lib/constants';
+import { apiError, apiSuccess, serverError } from '@/lib/api';
 
 /**
  * POST /api/dashboard/contact-requests/[id]/assign-form
@@ -19,10 +20,7 @@ export async function POST(
     await verifySession();
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'L\'ID de la demande de contact est requis' },
-        { status: 400 }
-      );
+      return apiError('L\'ID de la demande de contact est requis');
     }
 
     // Récupérer les données du formulaire
@@ -30,10 +28,7 @@ export async function POST(
     const formId = body.get('formId') as string;
 
     if (!formId) {
-      return NextResponse.json(
-        { success: false, error: 'L\'ID du formulaire est requis' },
-        { status: 400 }
-      );
+      return apiError('L\'ID du formulaire est requis');
     }
 
     // Vérifier que le formulaire existe et est actif
@@ -42,17 +37,11 @@ export async function POST(
     });
 
     if (!form) {
-      return NextResponse.json(
-        { success: false, error: 'Formulaire non trouvé' },
-        { status: 404 }
-      );
+      return apiError('Formulaire non trouvé', 404);
     }
 
     if (!form.isActive) {
-      return NextResponse.json(
-        { success: false, error: 'Le formulaire doit être actif pour être associé' },
-        { status: 400 }
-      );
+      return apiError('Le formulaire doit être actif pour être associé');
     }
 
     // Vérifier que la demande de contact existe
@@ -61,10 +50,7 @@ export async function POST(
     });
 
     if (!contactRequest) {
-      return NextResponse.json(
-        { success: false, error: 'Demande de contact non trouvée' },
-        { status: 404 }
-      );
+      return apiError('Demande de contact non trouvée', 404);
     }
 
     // Associer le formulaire
@@ -170,28 +156,20 @@ Date: ${new Date().toLocaleString('fr-FR')}
       // Ne pas échouer la requête à cause de l'email
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Formulaire associé avec succès ! Le client a reçu un email avec le lien pour compléter le formulaire.',
-        data: {
-          contactRequestId: id,
-          formId: form.id,
-        },
+    return apiSuccess({
+      message: 'Formulaire associé avec succès ! Le client a reçu un email avec le lien pour compléter le formulaire.',
+      data: {
+        contactRequestId: id,
+        formId: form.id,
       },
-      { status: 200 }
-    );
+    });
 
   } catch (error: any) {
-    console.error('Error assigning form:', error);
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Une erreur est survenue lors de l\'association du formulaire',
-        message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
+    return serverError(
+      'Error assigning form:',
+      'Une erreur est survenue lors de l\'association du formulaire',
+      error,
+      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'server-only';
 import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
-import { ContentType } from '@prisma/client';
 
 export type SiteContentMap = Record<string, string>;
 
@@ -17,14 +16,13 @@ export const getSiteContent: () => Promise<SiteContentMap> = cache(async (): Pro
 });
 
 /**
- * Filtre uniquement les contenus d'un type donné.
+ * Retourne un accesseur de contenu pour un préfixe donné.
+ * Ex: prefixedContent(c, 'offer-echappee-douce')('hero-title')
+ * lit la clé 'offer-echappee-douce/hero-title'.
  */
-export const getSiteContentByType = cache(
-    async (type: ContentType): Promise<SiteContentMap> => {
-        const rows = await prisma.siteContent.findMany({ where: { type } });
-        return Object.fromEntries(rows.map((r) => [r.key, r.value]));
-    }
-);
+export function prefixedContent(content: SiteContentMap, prefix: string): (key: string) => string {
+    return (key: string) => content[`${prefix}/${key}`];
+}
 
 /**
  * Version non-cachée de getSiteContent pour les composants qui ont besoin de données fraîches.
