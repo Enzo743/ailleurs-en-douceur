@@ -13,6 +13,7 @@ interface FormField extends Omit<FormFieldType, 'key'> {
 }
 
 interface CustomFormData {
+  isActive?: boolean;
   id: string;
   name: string;
   description?: string;
@@ -117,7 +118,7 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
           const formsData = await formsResponse.json();
 
           if (formsData.success && formsData.data && formsData.data.length > 0) {
-            const activeForm = formsData.data.find((f: any) => f.isActive);
+            const activeForm = formsData.data.find((f: CustomFormData) => f.isActive);
             if (activeForm) {
               setCustomForm(activeForm);
               // Initialiser les valeurs par défaut
@@ -306,7 +307,7 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
 
     try {
       // Préparer les données à envoyer
-      const valuesToSend: Record<string, any> = {};
+      const valuesToSend: FieldValue = {};
       Object.entries(formValues).forEach(([key, value]) => {
         // Ne pas envoyer les valeurs vides pour les champs non requis
         if (value !== undefined && value !== null && value !== '') {
@@ -346,7 +347,7 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
         });
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error submitting form:', error);
       setSubmitStatus({
         success: false,
@@ -659,7 +660,7 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
         <div className={styles.container}>
           <div className={styles['error-box']}>
             <h2>Formulaire non disponible</h2>
-            <p>Aucun formulaire personnalisé n'est configuré pour cette demande.</p>
+            <p>Aucun formulaire personnalisé n&apos;est configuré pour cette demande.</p>
             <p>Vous serez contacté directement par notre équipe.</p>
           </div>
         </div>
@@ -842,7 +843,7 @@ export default function CustomFormPage({ params }: { params: Promise<{ token: st
 
         <div className={styles.footer}>
           <p>
-            Besoin d'aide ? Contactez-nous à l'adresse indiquée sur notre site.
+            Besoin d&apos;aide ? Contactez-nous à l&apos;adresse indiquée sur notre site.
           </p>
         </div>
       </div>

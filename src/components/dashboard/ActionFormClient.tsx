@@ -72,7 +72,7 @@ export default function ActionFormClient({
         });
       }
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error submitting action:', error);
       setSubmitStatus({
         success: false,

@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import { Header, Footer, ContactSection, BotanicalDecoration } from "@/components/layout";
-import { getArticles, getAllTags, ArticleWithTags } from "@/app/actions/articles";
+import { Header, Footer, ContactSection } from "@/components/layout";
+import { getArticles, getAllTags } from "@/app/actions/articles";
 import { getSiteContent } from "@/lib/content";
 import BlogClientPage from "./BlogClientPage";
 import styles from "./page.module.scss";

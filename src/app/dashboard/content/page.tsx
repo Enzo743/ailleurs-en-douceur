@@ -2,7 +2,7 @@ import { verifySession } from '@/lib/auth';
 import { getAllContent } from '@/app/actions/content';
 import { DashboardHeader, SectionCard } from '@/components/dashboard';
 import type { SiteContent } from '@prisma/client';
-import styles from './content.module.scss';
+
 
 // Clés de contenu à exclure de l'interface de modification
 const EXCLUDED_CONTENT_KEYS = new Set([

@@ -1,21 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { serverError } from '@/lib/api';
+import { serverError, devErrorDetail } from '@/lib/api';
 import { doSlotsOverlap, cleanupExpiredSlots, calculateDuration } from '@/lib/time';
-import { validateAppointmentSlot, validateTimeFormat, validateTimeRange, type AppointmentSlotData } from '@/lib/validation';
+import { validateTimeFormat, validateTimeRange, type AppointmentSlotData } from '@/lib/validation';
 
 // ============================================================================
 // Types
-// ============================================================================
-
-interface ApiResponse {
-  success: boolean;
-  data?: any;
-  error?: string;
-  message?: string;
-}
-
 // ============================================================================
 // POST /api/appointment-slots/batch
 // ============================================================================
@@ -41,13 +32,20 @@ export async function POST(request: NextRequest) {
 
     // Valider tous les createaux avant creation
     const errors: string[] = [];
-    const createdSlots: any[] = [];
+    const createdSlots: Array<{
+      id: string;
+      date: string;
+      startTime: string;
+      endTime: string;
+      duration: number;
+      isAvailable: boolean;
+    }> = [];
 
     // D'abord, recuperer tous les createaux existants pour verifier les chevauchements
     const existingSlots = await prisma.appointmentSlot.findMany();
 
     // Verifier chaque nouveau createau
-    const validSlots: any[] = [];
+    const validSlots: AppointmentSlotData[] = [];
     
     for (let i = 0; i < slotsData.length; i++) {
       const slotData = slotsData[i];
@@ -76,8 +74,6 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        // Calculer la duree
-        const duration = calculateDuration(slotData.startTime, slotData.endTime);
         const timeRangeResult = validateTimeRange(slotData.startTime, slotData.endTime);
         
         if (!timeRangeResult.valid) {
@@ -129,8 +125,8 @@ export async function POST(request: NextRequest) {
         // Si on arrive ici, le createau est valide
         validSlots.push(slotData);
 
-      } catch (error: any) {
-        errors.push(`Erreur pour un createau: ${error.message}`);
+      } catch (error) {
+        errors.push(`Erreur pour un createau: ${(error as Error).message}`);
       }
     }
 
@@ -186,12 +182,12 @@ export async function POST(request: NextRequest) {
       { status: errors.length === 0 ? 201 : 207 } // 207 = Multi-Status
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error creating batch appointment slots:',
       'Une erreur est survenue lors de la creation des createaux',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }

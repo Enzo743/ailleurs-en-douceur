@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import AnalyticsChart from './AnalyticsChart';
 
 interface TimeOfDayData {
@@ -58,8 +59,8 @@ export default function TimeOfDayChart({
           color: 'rgba(0, 0, 0, 0.05)',
         },
         ticks: {
-          callback: (value: number) => {
-            if (value >= 1000) {
+          callback: (value: string | number) => {
+            if (typeof value === "number" && value >= 1000) {
               return (value / 1000).toFixed(1) + 'k';
             }
             return value.toLocaleString('fr-FR');

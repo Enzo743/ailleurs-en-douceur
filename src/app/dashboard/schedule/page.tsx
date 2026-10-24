@@ -1,16 +1,14 @@
 'use client';
 
 import { useState, useEffect, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+
+
 import styles from './page.module.scss';
 import { DashboardHeader, EmptyState } from '@/components/dashboard';
 import {
   formatLongDate,
-  formatShortDate,
   formatTimeString as formatTime,
   calculateEndTime,
-  generateTempId
 } from '@/lib/time';
 
 interface AppointmentSlot {
@@ -42,8 +40,6 @@ const defaultSlot: Omit<AppointmentSlot, 'id' | 'createdAt' | 'appointment'> = {
 };
 
 export default function SchedulePage() {
-  const router = useRouter();
-  
   // États
   const [slots, setSlots] = useState<AppointmentSlot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,15 +59,13 @@ export default function SchedulePage() {
   // Fonction pour recharger les créneaux
   const fetchSlots = async () => {
     try {
-      setIsLoading(true);
-      
       // Récupérer tous les créneaux (y compris ceux non disponibles)
       const response = await fetch('/api/appointment-slots?limit=200');
       const data = await response.json();
 
       if (data.success && data.data) {
         // Trier par date puis par heure de début
-        const sortedSlots = data.data.sort((a: any, b: any) => {
+        const sortedSlots = data.data.sort((a: AppointmentSlot, b: AppointmentSlot) => {
           const dateA = new Date(a.date + 'T' + a.startTime);
           const dateB = new Date(b.date + 'T' + b.startTime);
           return dateA.getTime() - dateB.getTime();
@@ -86,22 +80,17 @@ export default function SchedulePage() {
     }
   };
 
-  // Charger les créneaux existants au montage
+  // Charger les créneaux existants au montage et rafraîchir toutes les minutes
+  // pour supprimer les créneaux passés
   useEffect(() => {
-    fetchSlots();
-    
-    // Rafraîchir automatiquement toutes les minutes pour supprimer les créneaux passés
-    const intervalId = setInterval(() => {
-      fetchSlots();
-    }, 60000); // 60 secondes = 1 minute
-    
-    return () => clearInterval(intervalId);
-  }, []);
+    const timeoutId = setTimeout(fetchSlots, 0);
+    const intervalId = setInterval(fetchSlots, 60000);
 
-  // Ajouter un nouveau créneau
-  const addSlot = () => {
-    setNewSlots(prev => [...prev, { ...defaultSlot }]);
-  };
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
+  }, []);
 
   // Supprimer un nouveau créneau
   const removeNewSlot = (index: number) => {
@@ -168,7 +157,7 @@ export default function SchedulePage() {
   };
 
   // Valider un créneau
-  const validateSlot = (slot: any): { valid: boolean; errors: Record<string, string> } => {
+  const validateSlot = (slot: Omit<AppointmentSlot, "id" | "createdAt" | "appointment">): { valid: boolean; errors: Record<string, string> } => {
     const errors: Record<string, string> = {};
     
     if (!slot.date) {
@@ -206,7 +195,7 @@ export default function SchedulePage() {
   const validateAllNewSlots = (): boolean => {
     let allValid = true;
     
-    newSlots.forEach((slot, index) => {
+    newSlots.forEach((slot) => {
       const validation = validateSlot(slot);
       if (!validation.valid) {
         allValid = false;
@@ -261,7 +250,7 @@ export default function SchedulePage() {
         });
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating slot:', error);
       setSubmitStatus({
         success: false,
@@ -311,7 +300,7 @@ export default function SchedulePage() {
       // Générer les créneaux
       const startDate = new Date(batchData.startDate);
       const endDate = new Date(batchData.endDate);
-      const generatedSlots: any[] = [];
+      const generatedSlots: Array<{ date: string; startTime: string; endTime: string; duration: number }> = [];
 
       const dayNames: Record<string, number> = {
         'Lundi': 1,
@@ -402,7 +391,7 @@ export default function SchedulePage() {
         });
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating batch slots:', error);
       setSubmitStatus({
         success: false,
@@ -418,7 +407,7 @@ export default function SchedulePage() {
     const grouped: Record<string, AppointmentSlot[]> = {};
     
     slots
-      .sort((a: any, b: any) => {
+      .sort((a, b) => {
         const dateA = new Date(a.date + 'T' + a.startTime);
         const dateB = new Date(b.date + 'T' + b.startTime);
         return dateA.getTime() - dateB.getTime();
@@ -437,11 +426,6 @@ export default function SchedulePage() {
   const sortedDates = Object.keys(groupSlotsByDate()).sort((a, b) => {
     return new Date(a).getTime() - new Date(b).getTime();
   });
-
-  // Vérifier si une date a déjà des créneaux
-  const hasSlotsOnDate = (date: string): boolean => {
-    return slots.some(slot => slot.date === date);
-  };
 
   return (
     <section className="dashboard-page">

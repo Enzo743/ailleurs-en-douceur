@@ -123,7 +123,7 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
           const now = new Date();
           now.setHours(0, 0, 0, 0);
           
-          const futureSlots = slotsData.data.filter((slot: any) => {
+          const futureSlots = slotsData.data.filter((slot: AppointmentSlot) => {
             const slotDate = new Date(slot.date + 'T' + slot.startTime);
             return slotDate >= now;
           });
@@ -187,7 +187,7 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
         });
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error confirming appointment:', error);
       setConfirmation({
         success: false,
@@ -228,7 +228,7 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
             <p>{confirmation.message}</p>
             {shouldShowFormNotice && (
               <>
-                <p>Il semble que vous n'avez pas encore rempli le formulaire personnalisé.</p>
+                <p>Il semble que vous n&apos;avez pas encore rempli le formulaire personnalisé.</p>
                 <button 
                   onClick={() => router.push(`/custom-form/${token}`)}
                   className={styles['back-button']}
@@ -253,8 +253,8 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
         <div className={styles.container}>
           <div className={styles['info-box']}>
             <h2>Aucun créneau disponible</h2>
-            <p>Il n'y a actuellement aucun créneau de rendez-vous disponible.</p>
-            <p>Nous vous contacterons directement pour convenir d'une date.</p>
+            <p>Il n&apos;y a actuellement aucun créneau de rendez-vous disponible.</p>
+            <p>Nous vous contacterons directement pour convenir d&apos;une date.</p>
             
             {shouldShowFormNotice && (
               <button 
@@ -324,7 +324,7 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
                 onClick={() => router.push('/')}
                 className={styles['secondary-button']}
               >
-                Retour à l'accueil
+                Retour à l&apos;accueil
               </button>
             </div>
 
@@ -356,7 +356,7 @@ export default function SchedulePage({ params }: { params: Promise<{ token: stri
         {shouldShowFormNotice && (
           <div className={styles['warning-box']}>
             <p>
-              <strong>Attention :</strong> Il semble que vous n'avez pas encore rempli 
+              <strong>Attention :</strong> Il semble que vous n&apos;avez pas encore rempli 
               le formulaire personnalisé. Nous vous recommandons de le faire avant de 
               choisir un rendez-vous.
             </p>

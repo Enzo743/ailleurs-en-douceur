@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { serverError } from '@/lib/api';
-import { FieldType } from "@prisma/client";
+import { serverError, devErrorDetail } from '@/lib/api';
+import { FieldType, Prisma } from "@prisma/client";
 import { generateFieldKey } from '@/lib/field-utils';
 
 interface FormSectionData {
@@ -57,7 +57,7 @@ interface FormFieldUpdate {
 
 interface ApiResponse {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
   message?: string;
 }
@@ -177,12 +177,12 @@ export async function GET(
 
     return NextResponse.json(response, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error fetching form:',
       'Une erreur est survenue lors de la récupération du formulaire',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -224,7 +224,7 @@ export async function PUT(
     }
 
     // Mise à jour du formulaire (toujours appliquée, même avec des sections)
-    const updateData: any = {};
+    const updateData: Prisma.CustomFormUpdateInput = {};
     if (formData.name !== undefined) updateData.name = formData.name.trim();
     if (formData.packageType !== undefined) updateData.packageType = formData.packageType?.trim();
     if (formData.description !== undefined) updateData.description = formData.description?.trim();
@@ -287,7 +287,7 @@ export async function PUT(
         return { ...field, key: generatedKey };
       });
 
-      const newFields = await Promise.all(
+      await Promise.all(
         fieldsWithKeys.map((field, index) => {
           // Trouver l'ID de la section pour ce champ
           let sectionId: string | undefined = undefined;
@@ -506,12 +506,12 @@ export async function PUT(
       );
     }
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error updating form:',
       'Une erreur est survenue lors de la mise à jour du formulaire',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -571,7 +571,7 @@ export async function PATCH(
     }
 
     // Mise à jour du formulaire
-    const updateData: any = {};
+    const updateData: Prisma.CustomFormUpdateInput = {};
     if (formData.name !== undefined) updateData.name = formData.name.trim();
     if (formData.packageType !== undefined) updateData.packageType = formData.packageType?.trim();
     if (formData.description !== undefined) updateData.description = formData.description?.trim();
@@ -610,10 +610,10 @@ export async function PATCH(
           if (!fieldUpdate.id) {
             throw new Error('Field ID is required for update');
           }
-          const updateFieldData: any = {};
+          const updateFieldData: Prisma.FormFieldUpdateInput = {};
           if (fieldUpdate.label !== undefined) updateFieldData.label = fieldUpdate.label;
           // La clé n'est pas modifiable pour éviter les conflits
-          if (fieldUpdate.type !== undefined) updateFieldData.type = fieldUpdate.type;
+          if (fieldUpdate.type !== undefined) updateFieldData.type = fieldUpdate.type as FieldType;
           if (fieldUpdate.placeholder !== undefined) updateFieldData.placeholder = fieldUpdate.placeholder;
           if (fieldUpdate.required !== undefined) updateFieldData.required = fieldUpdate.required;
           if (fieldUpdate.allowOtherOption !== undefined) updateFieldData.allowOtherOption = fieldUpdate.allowOtherOption;
@@ -700,12 +700,12 @@ export async function PATCH(
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error updating form with fields:',
       'Une erreur est survenue lors de la mise à jour du formulaire ou des champs',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -768,12 +768,12 @@ export async function DELETE(
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error deleting form:',
       'Une erreur est survenue lors de la suppression du formulaire',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }

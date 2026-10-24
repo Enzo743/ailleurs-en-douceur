@@ -1,5 +1,5 @@
 import { revalidatePath } from 'next/cache';
-import { apiError, apiSuccess, serverError } from '@/lib/api';
+import { apiError, apiSuccess, serverError, devErrorDetail } from '@/lib/api';
 
 export async function POST(request: Request) {
     try {
@@ -14,12 +14,12 @@ export async function POST(request: Request) {
 
         return apiSuccess({ revalidated: path });
 
-    } catch (error: any) {
+    } catch (error) {
         return serverError(
             'Erreur lors de la revalidation:',
             'Une erreur est survenue lors de la revalidation',
             error,
-            { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+            { message: devErrorDetail(error) }
         );
     }
 }

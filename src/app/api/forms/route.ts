@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getPackageLabel, DEFAULT_VALUES } from '@/lib/constants';
-import { serverError } from '@/lib/api';
-import { FieldType } from '@prisma/client';
+import { serverError, devErrorDetail } from '@/lib/api';
+import { FieldType, Prisma } from '@prisma/client';
 import { generateFieldKey } from '@/lib/field-utils';
 
 // ============================================================================
@@ -49,40 +49,9 @@ interface CreateFormData {
   }>;
 }
 
-interface UpdateFormData extends Partial<CreateFormData> {
-  fieldsToAdd?: Array<{
-    label: string;
-    key: string;
-    type: FieldType | string;
-    placeholder?: string;
-    required?: boolean;
-    allowOtherOption?: boolean;
-    options?: string[];
-    defaultValue?: string;
-    minValue?: string;
-    maxValue?: string;
-    order?: number;
-  }>;
-  fieldsToUpdate?: Array<{
-    id: string;
-    label?: string;
-    key?: string;
-    type?: FieldType | string;
-    placeholder?: string;
-    required?: boolean;
-    allowOtherOption?: boolean;
-    options?: string[];
-    defaultValue?: string;
-    minValue?: string;
-    maxValue?: string;
-    order?: number;
-  }>;
-  fieldsToRemove?: string[];
-}
-
 interface ApiResponse {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
   message?: string;
   pagination?: {
@@ -133,7 +102,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Construire la condition de filtrage
-    const where: any = {};
+    const where: Prisma.CustomFormWhereInput = {};
     
     if (query.packageType) {
       where.packageType = query.packageType;
@@ -234,12 +203,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error fetching forms:',
       'Une erreur est survenue lors de la recuperation des formulaires',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -296,7 +265,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Creer les champs si fournis
-    let fields = [];
+
     if (body.fields && body.fields.length > 0) {
       // Générer les clés pour tous les champs d'un coup pour éviter les doublons
       const existingKeys: string[] = [];
@@ -329,7 +298,7 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      fields = await Promise.all(
+      await Promise.all(
         fieldsWithKeys.map((field, index) => {
           // Trouver l'ID de la section pour ce champ
           let sectionId: string | undefined = undefined;
@@ -433,12 +402,12 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error creating form:',
       'Une erreur est survenue lors de la creation du formulaire',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }

@@ -79,9 +79,6 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
     toggleSectionExpand,
     validateFields,
     validateSections,
-    validateAll,
-    setFieldErrors,
-    setSectionErrors,
     getFieldsForSection,
     getUnassignedFields,
     getSectionById,
@@ -195,7 +192,15 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
 
     try {
       // Préparer les données à envoyer
-      const dataToSend: any = {
+      const dataToSend: {
+        name: string;
+        packageType?: string;
+        description?: string;
+        successMessage: string;
+        isActive: boolean;
+        fields: Omit<FormFieldType, 'id'>[];
+        sections?: { id: string; name: string; description?: string; order: number }[];
+      } = {
         name: formData.name.trim(),
         packageType: formData.packageType?.trim(),
         description: formData.description?.trim(),
@@ -212,9 +217,9 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
           description: section.description,
           order: section.order,
         }));
-        
+
         // Ajouter sectionId aux champs
-        dataToSend.fields = dataToSend.fields.map((field: any) => ({
+        dataToSend.fields = dataToSend.fields.map((field) => ({
           ...field,
           sectionId: field.sectionId,
         }));
@@ -248,7 +253,7 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
         });
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating form:', error);
       setSubmitStatus({
         success: false,
@@ -283,7 +288,7 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
         });
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error duplicating form:', error);
       setSubmitStatus({
         success: false,
@@ -295,9 +300,9 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
   };
 
   // Trouver l'erreur pour un champ spécifique
-  const getFieldError = (fieldId: string, property: string): string | undefined => {
+  const getFieldError = useCallback((fieldId: string, property: string): string | undefined => {
     return fieldErrors[`${fieldId}-${property}`];
-  };
+  }, [fieldErrors]);
 
   // Trouver l'erreur pour une section spécifique
   const getSectionError = (sectionId: string, property: string): string | undefined => {
@@ -334,7 +339,6 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
 
   // Rendre une section
   const renderSection = (section: FormSection, sectionIndex: number) => {
-    const sectionFields = getFieldsForSection(section.id);
     const isExpanded = expandedSections.has(section.id);
 
     return (
@@ -348,7 +352,6 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
         onMoveUp={() => moveSectionUp(section.id)}
         onMoveDown={() => moveSectionDown(section.id)}
         onRemove={() => removeSection(section.id)}
-        onAssignField={(fieldId) => assignFieldToSection(fieldId, section.id)}
         onUnassignField={(fieldId) => assignFieldToSection(fieldId, null)}
         canMoveUp={sectionIndex > 0}
         canMoveDown={sectionIndex < sections.length - 1}
@@ -406,7 +409,7 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
         <div className={styles.container}>
           <div className={styles['error-box']}>
             <h2>Formulaire non trouvé</h2>
-            <p>Le formulaire que vous cherchez n'existe pas ou a été supprimé.</p>
+            <p>Le formulaire que vous cherchez n&apos;existe pas ou a été supprimé.</p>
             <Link href="/dashboard/forms" className={styles['back-link']}>
               Retour à la liste des formulaires
             </Link>
@@ -585,7 +588,7 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
 
             {sections.length === 0 && (
               <div className={styles['empty-state']}>
-                <p>Aucune section créée. Cliquez sur "Ajouter une section" pour commencer.</p>
+                <p>Aucune section créée. Cliquez sur &quot;Ajouter une section&quot; pour commencer.</p>
               </div>
             )}
 
@@ -648,12 +651,12 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
 
             {fields.length === 0 && (
               <div className={styles['empty-state']}>
-                <p>Aucune question créée. Cliquez sur "Ajouter une question" pour commencer.</p>
+                <p>Aucune question créée. Cliquez sur &quot;Ajouter une question&quot; pour commencer.</p>
               </div>
             )}
 
             <div className={styles['fields-list']}>
-              {fields.map((field, index) => renderField(field))}
+              {fields.map((field) => renderField(field))}
             </div>
           </div>
         )}

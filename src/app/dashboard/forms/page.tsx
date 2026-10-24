@@ -1,9 +1,10 @@
 import { verifySession } from '@/lib/auth';
-import Link from 'next/link';
+
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import styles from './page.module.scss';
 import { getPackageLabel, PACKAGE_TYPE_OPTIONS } from '@/lib/constants';
-import { formatDate } from '@/lib/time';
+
 import {
   DashboardHeader,
   EmptyState,
@@ -11,7 +12,6 @@ import {
   FormCard,
   Pagination,
   StatsGrid,
-  StatusBadge
 } from '@/components/dashboard';
 
 
@@ -32,7 +32,7 @@ export default async function FormsPage({
   const page = typeof params.page === 'string' ? parseInt(params.page) : 1;
 
   // Construire la condition de filtrage pour Prisma
-  const where: any = {};
+  const where: Prisma.CustomFormWhereInput = {};
   if (packageType) where.packageType = packageType;
   if (isActive) where.isActive = isActive === 'true';
   if (search) {

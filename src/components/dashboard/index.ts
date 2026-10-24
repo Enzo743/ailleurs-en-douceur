@@ -15,8 +15,8 @@ export { ContactSettingsWrapper } from './ContactSettings';
 export { BannerSettingsWrapper } from './BannerSettings';
 
 // Analytics Components
+
 export { default as AnalyticsCard } from './AnalyticsCard';
-export { default as AnalyticsChart } from './AnalyticsChart';
 export { default as TopPagesTable } from './TopPagesTable';
 export { default as ReferrersTable } from './ReferrersTable';
 export { default as DeviceChart } from './DeviceChart';

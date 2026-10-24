@@ -4,6 +4,7 @@
 'use client';
 
 import { jsPDF } from 'jspdf';
+import { devErrorDetail } from '@/lib/api';
 import html2canvas from 'html2canvas';
 
 /**
@@ -85,7 +86,7 @@ async function generatePdfBlob(
     const pdf = new jsPDF({
       orientation,
       unit: 'mm',
-      format: mergedOptions.pageSize as any,
+      format: mergedOptions.pageSize,
     });
     
     // Calculer les dimensions
@@ -115,12 +116,12 @@ async function generatePdfBlob(
       message: 'PDF généré avec succès',
     };
     
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error generating PDF blob:', error);
     return {
       success: false,
       error: 'Une erreur est survenue lors de la génération du PDF',
-      message: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      message: devErrorDetail(error),
     };
   }
 }

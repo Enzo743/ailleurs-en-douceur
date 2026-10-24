@@ -136,7 +136,7 @@ export default function EditContactRequestPage({ params }: { params: Promise<{ i
         });
       }
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating contact request:', error);
       setSubmitStatus({
         success: false,
@@ -176,7 +176,7 @@ export default function EditContactRequestPage({ params }: { params: Promise<{ i
           <h1 className={styles.pageTitle}>Demande non trouvée</h1>
         </div>
         <div className={styles['error-box']}>
-          <p>La demande de contact que vous cherchez n'existe pas ou a été supprimée.</p>
+          <p>La demande de contact que vous cherchez n&apos;existe pas ou a été supprimée.</p>
           <Link href="/dashboard/contact-requests" className={styles['back-button']}>
             Retour à la liste
           </Link>
@@ -253,7 +253,7 @@ export default function EditContactRequestPage({ params }: { params: Promise<{ i
             </div>
 
             <div className={styles['form-group']}>
-              <label htmlFor="packageType">Type d'offre *</label>
+              <label htmlFor="packageType">Type d&apos;offre *</label>
               <select
                 id="packageType"
                 name="packageType"
@@ -347,7 +347,7 @@ export default function EditContactRequestPage({ params }: { params: Promise<{ i
           
           <div className={styles['info-note']}>
             <p>
-              <strong>Note:</strong> Le token permet d'accéder au formulaire personnalisé et au planning pour ce client.
+              <strong>Note:</strong> Le token permet d&apos;accéder au formulaire personnalisé et au planning pour ce client.
             </p>
             <p>
               <strong>Liens:</strong>

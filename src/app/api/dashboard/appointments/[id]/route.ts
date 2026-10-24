@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { cancelCalendarEvent } from "@/lib/google";
-import { apiError, apiSuccess, serverError } from "@/lib/api";
+import { apiError, apiSuccess, serverError, devErrorDetail } from "@/lib/api";
 
 /**
  * Logique commune d'annulation d'un rendez-vous
@@ -76,12 +76,12 @@ export async function POST(
 
     return await cancelAppointment(id);
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error canceling appointment:',
       'Une erreur est survenue lors de l\'annulation du rendez-vous',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -98,12 +98,12 @@ export async function DELETE(
     const { id } = await params;
     return await cancelAppointment(id);
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error canceling appointment:',
       'Une erreur est survenue lors de l\'annulation du rendez-vous',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }

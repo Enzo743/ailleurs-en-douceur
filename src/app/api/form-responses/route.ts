@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { serverError } from '@/lib/api';
+import { serverError, devErrorDetail } from '@/lib/api';
+import type { FormValues } from '@/lib/field-utils';
 
 // Types
 interface FormResponseQueryParams {
@@ -13,12 +15,12 @@ interface FormResponseQueryParams {
 interface CreateFormResponseData {
   contactRequestId: string;
   formId: string;
-  values: Record<string, any>;
+  values: FormValues;
 }
 
 interface ApiResponse {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
   message?: string;
   pagination?: {
@@ -52,7 +54,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Construire la condition de filtrage
-    const where: any = {};
+    const where: Prisma.FormResponseWhereInput = {};
     
     if (query.formId) {
       where.formId = query.formId;
@@ -100,7 +102,7 @@ export async function GET(request: NextRequest) {
       id: response.id,
       formId: response.formId,
       contactRequestId: response.contactRequestId,
-      values: (response.values as Record<string, any>) || {},
+      values: (response.values as FormValues) || {},
       createdAt: response.createdAt,
       contactRequest: response.contactRequest,
       form: response.form,
@@ -119,12 +121,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error fetching form responses:',
       'Une erreur est survenue lors de la récupération des réponses',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -242,7 +244,7 @@ export async function POST(request: NextRequest) {
           id: response.id,
           formId: response.formId,
           contactRequestId: response.contactRequestId,
-          values: (response.values as Record<string, any>) || {},
+          values: (response.values as FormValues) || {},
           createdAt: response.createdAt,
           form: response.form,
         },
@@ -250,12 +252,12 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error creating form response:',
       'Une erreur est survenue lors de la soumission du formulaire',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -313,7 +315,7 @@ export async function GET_BY_ID(request: NextRequest) {
           id: response.id,
           formId: response.formId,
           contactRequestId: response.contactRequestId,
-          values: (response.values as Record<string, any>) || {},
+          values: (response.values as FormValues) || {},
           createdAt: response.createdAt,
           contactRequest: response.contactRequest,
           form: response.form,
@@ -322,12 +324,12 @@ export async function GET_BY_ID(request: NextRequest) {
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error fetching form response:',
       'Une erreur est survenue lors de la récupération de la réponse',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -375,12 +377,12 @@ export async function DELETE(request: NextRequest) {
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error deleting form response:',
       'Une erreur est survenue lors de la suppression de la réponse',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }

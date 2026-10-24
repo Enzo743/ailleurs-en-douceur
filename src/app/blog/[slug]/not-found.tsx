@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Header, Footer, ContactSection, BotanicalDecoration } from "@/components/layout";
+import { Header, Footer, ContactSection } from "@/components/layout";
 import { getSiteContent } from "@/lib/content";
 import styles from "./page.module.scss";
 
@@ -18,7 +18,7 @@ export default async function NotFound() {
         <div className={styles.heroContent}>
           <h1 className={styles.articleTitle}>Article introuvable</h1>
           <p className={styles.articleExcerpt}>
-            Désolé, l'article que vous cherchez n'existe pas ou n'est plus disponible.
+            Désolé, l&apos;article que vous cherchez n&apos;existe pas ou n&apos;est plus disponible.
           </p>
 
           <div className={styles.heroDividerContainer}>
@@ -32,7 +32,7 @@ export default async function NotFound() {
         <div className={styles.container}>
           <div className={styles.richTextContent}>
             <p style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              L'article demandé n'a pas été trouvé. Il a peut-être été supprimé ou le lien est incorrect.
+              L&apos;article demandé n&apos;a pas été trouvé. Il a peut-être été supprimé ou le lien est incorrect.
             </p>
             
             <div style={{ 
@@ -73,7 +73,7 @@ export default async function NotFound() {
                   transition: 'all 0.2s ease'
                 }}
               >
-                Retour à l'accueil
+                Retour à l&apos;accueil
               </Link>
             </div>
           </div>

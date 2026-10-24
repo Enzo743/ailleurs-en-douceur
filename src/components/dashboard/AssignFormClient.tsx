@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+
 import styles from '@/app/dashboard/contact-requests/[id]/page.module.scss';
 
 interface Form {
@@ -16,7 +16,6 @@ interface AssignFormClientProps {
 }
 
 export default function AssignFormClient({ contactRequestId, availableForms }: AssignFormClientProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ success?: boolean; message: string } | null>(null);
 
@@ -63,7 +62,7 @@ export default function AssignFormClient({ contactRequestId, availableForms }: A
         });
       }
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error assigning form:', error);
       setSubmitStatus({
         success: false,

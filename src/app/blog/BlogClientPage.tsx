@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Tag, Article } from '@prisma/client';
 import BlogFilters from "@/components/layout/BlogFilters";
 import Pagination from "@/components/layout/Pagination";
@@ -24,11 +24,11 @@ export default function BlogClientPage({
   const [currentPage, setCurrentPage] = useState(1);
 
   // Compter le nombre d'articles par tag pour trier par popularité
-  const getTagUsageCount = (tagSlug: string): number => {
-    return articles.filter(article => 
+  const getTagUsageCount = useCallback((tagSlug: string): number => {
+    return articles.filter(article =>
       article.tags.some(tag => tag.slug === tagSlug)
     ).length;
-  };
+  }, [articles]);
 
   // Trier les tags par nombre d'utilisation (les plus utilisés en premier)
   const sortedTags = useMemo(() => {
@@ -37,7 +37,7 @@ export default function BlogClientPage({
       const countA = getTagUsageCount(a.slug);
       return countB - countA; // Tri décroissant
     });
-  }, [tags, articles]);
+  }, [tags, getTagUsageCount]);
 
   // Filtrer les articles en fonction des tags sélectionnés et de la recherche
   const filteredArticles = useMemo(() => {
@@ -65,17 +65,12 @@ export default function BlogClientPage({
   }, [filteredArticles.length, itemsPerPage]);
 
   // Articles à afficher pour la page courante
+  // La page est bornée au nombre de pages disponibles (dérivé, sans effet)
+  const effectivePage = totalPages > 0 ? Math.min(currentPage, totalPages) : 1;
   const paginatedArticles = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
+    const startIndex = (effectivePage - 1) * itemsPerPage;
     return filteredArticles.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredArticles, currentPage, itemsPerPage]);
-
-  // Réinitialiser la page à 1 quand les filtres changent
-  useMemo(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(1);
-    }
-  }, [totalPages, currentPage]);
+  }, [filteredArticles, effectivePage, itemsPerPage]);
 
   const handleTagClick = (tagSlug: string) => {
     setSelectedTags(prev => {
@@ -130,7 +125,7 @@ export default function BlogClientPage({
       {/* Pagination */}
       {totalPages > 1 && (
         <Pagination 
-          currentPage={currentPage} 
+          currentPage={effectivePage} 
           totalPages={totalPages} 
           onPageChange={handlePageChange}
         />

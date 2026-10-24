@@ -1,22 +1,23 @@
 'use client';
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
-import { FormSection, FIELD_TYPE_LABELS } from '@/lib/form-constants';
-import { getPackageLabel } from '@/lib/constants';
+
+
 import { formatFieldValue } from '@/lib/field-utils';
+import type { FormValues } from '@/lib/field-utils';
+import type { CustomForm, FormField as PrismaFormField, FormResponse, FormSection as PrismaFormSection } from '@prisma/client';
 import pdfStyles from './DownloadPdfButton.module.scss';
 
 interface DownloadFilledFormPdfButtonProps {
-  form: any;
-  formResponse: any;
+  form: CustomForm & { fields: PrismaFormField[]; sections: PrismaFormSection[] };
+  formResponse: Omit<FormResponse, 'values'> & { values: FormValues };
   clientName: string;
   className?: string;
 }
 
 // Composant pour rendre un champ avec sa réponse - utilise des styles inline
-const renderFilledFormField = (field: any, allValues: Record<string, any>) => {
+const renderFilledFormField = (field: PrismaFormField, allValues: FormValues) => {
   const value = allValues[field.key];
   const formattedValue = formatFieldValue(value, allValues, field.key);
 
@@ -80,7 +81,7 @@ const renderFilledFormField = (field: any, allValues: Record<string, any>) => {
             </small>
           )}
           {field.options && field.options.length > 0 ? (
-            (field.options as any[]).map((option: any, index: number) => (
+            field.options.map((option, index: number) => (
               <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                 <input
                   type="radio"
@@ -132,8 +133,8 @@ const renderFilledFormField = (field: any, allValues: Record<string, any>) => {
             </small>
           )}
           {field.options && field.options.length > 0 ? (
-            (field.options as any[]).map((option: any, index: number) => {
-              const isSelected = Array.isArray(value) ? (value as any[]).includes(option) : value === option;
+            field.options.map((option, index: number) => {
+              const isSelected = Array.isArray(value) ? value.includes(option) : value === option;
               return (
                 <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                   <input
@@ -156,7 +157,7 @@ const renderFilledFormField = (field: any, allValues: Record<string, any>) => {
           ) : (
             <div style={inputStyle}>{formattedValue}</div>
           )}
-          {field.allowOtherOption && value?.includes('_OTHER_') && allValues[`${field.key}_other`] && (
+          {field.allowOtherOption && Array.isArray(value) && value.includes('_OTHER_') && allValues[`${field.key}_other`] && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
               <input
                 type="checkbox"
@@ -179,14 +180,14 @@ const renderFilledFormField = (field: any, allValues: Record<string, any>) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <input
             type={field.type === 'RANGE_NUMBER' ? 'number' : 'date'}
-            value={allValues[`${field.key}_min`] || ''}
+            value={String(allValues[`${field.key}_min`] || "")}
             style={inputStyle}
             readOnly
           />
           <span style={{ color: '#666', fontWeight: 500, fontSize: '15px' }}>à</span>
           <input
             type={field.type === 'RANGE_NUMBER' ? 'number' : 'date'}
-            value={allValues[`${field.key}_max`] || ''}
+            value={String(allValues[`${field.key}_max`] || "")}
             style={inputStyle}
             readOnly
           />
@@ -261,11 +262,11 @@ export default function DownloadFilledFormPdfButton({
       targetElement.style.pointerEvents = 'auto';
 
       // Forcer le reflow
-      document.body.offsetHeight;
+      void document.body.offsetHeight;
       await new Promise(resolve => setTimeout(resolve, 100)); // Attendre que le rendu soit prêt
 
       // Forcer le reflow pour s'assurer que les styles sont appliqués
-      document.body.offsetHeight;
+      void document.body.offsetHeight;
       await new Promise(resolve => setTimeout(resolve, 50));
 
       // Capturer avec html2canvas
@@ -355,9 +356,9 @@ export default function DownloadFilledFormPdfButton({
       // Sauvegarder le PDF
       pdf.save(fileName);
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error generating filled form PDF:', error);
-      setError(error.message || 'Une erreur est survenue lors de la génération du PDF');
+      setError((error as Error).message || 'Une erreur est survenue lors de la génération du PDF');
     } finally {
       setIsGenerating(false);
     }
@@ -409,7 +410,7 @@ export default function DownloadFilledFormPdfButton({
       <div style={{ width: '100%', display: 'block' }}>
         {form.sections && form.sections.length > 0 ? (
           <>
-            {(form.sections as any[]).map((section: any, sectionIndex: number) => (
+            {form.sections.map((section, sectionIndex: number) => (
               <div key={section.id} style={{ marginBottom: '20px' }}>
                 {section.description && (
                   <div style={{
@@ -426,21 +427,21 @@ export default function DownloadFilledFormPdfButton({
                 )}
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                  {((form.fields as any[]).filter(f => f.sectionId === section.id) as any[])
-                    .sort((a: any, b: any) => a.order - b.order)
-                    .map((field: any, index: number, array: any[]) => (
+                  {form.fields.filter(f => f.sectionId === section.id)
+                    .sort((a, b) => a.order - b.order)
+                    .map((field, index: number, array) => (
                       <div key={field.id} style={index < array.length - 1 ? { 
                         paddingBottom: '12px', 
                         marginBottom: '12px',
                         borderBottom: '1px dashed #eee' 
                       } : {}}>
-                        {renderFilledFormField(field, formResponse.values as Record<string, any>)}
+                        {renderFilledFormField(field, formResponse.values)}
                       </div>
                     ))}
                 </div>
                 
                 {/* Saut de page entre sections (sauf pour la dernière) */}
-                {sectionIndex < (form.sections as any[]).length - 1 && (
+                {sectionIndex < form.sections.length - 1 && (
                   <div style={{ pageBreakAfter: 'always' }} />
                 )}
               </div>
@@ -448,15 +449,15 @@ export default function DownloadFilledFormPdfButton({
           </>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            {(form.fields as any[])
-              .sort((a: any, b: any) => a.order - b.order)
-              .map((field: any, index: number, array: any[]) => (
+            {form.fields
+              .sort((a, b) => a.order - b.order)
+              .map((field, index: number, array) => (
                 <div key={field.id} style={index < array.length - 1 ? { 
                   paddingBottom: '12px', 
                   marginBottom: '12px',
                   borderBottom: '1px dashed #eee' 
                 } : {}}>
-                  {renderFilledFormField(field, formResponse.values as Record<string, any>)}
+                  {renderFilledFormField(field, formResponse.values)}
                 </div>
               ))}
           </div>

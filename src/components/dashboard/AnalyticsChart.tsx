@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Bar, Line, Pie, Doughnut } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement, ArcElement } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement, ArcElement, type ChartOptions } from 'chart.js';
 import styles from './analytics-chart.module.scss';
 
 // Enregistrer les composants Chart.js
@@ -34,7 +34,7 @@ interface AnalyticsChartProps {
   data: ChartData;
   title?: string;
   height?: number;
-  options?: any;
+  options?: ChartOptions;
   className?: string;
 }
 
@@ -67,7 +67,7 @@ export default function AnalyticsChart({
         padding: 12,
         titleFont: {
           size: 14,
-          weight: 'bold',
+          weight: 'bold' as const,
         },
         bodyFont: {
           size: 13,
@@ -130,7 +130,9 @@ export default function AnalyticsChart({
   };
 
   // Options spécifiques selon le type de graphique
-  const chartOptions = {
+  // Note: les options par défaut inférées ne s'alignent pas sur les types
+  // profonds de Chart.js, d'où le cast explicite
+  const chartOptions: ChartOptions = {
     ...defaultOptions,
     ...options,
     plugins: {
@@ -141,7 +143,7 @@ export default function AnalyticsChart({
         text: title,
         font: {
           size: 16,
-          weight: '600',
+          weight: 600,
         },
         padding: {
           top: 10,
@@ -149,21 +151,21 @@ export default function AnalyticsChart({
         },
       },
     },
-  };
+  } as unknown as ChartOptions;
 
   // Rendu selon le type de graphique
   const renderChart = () => {
     switch (type) {
       case 'bar':
-        return <Bar data={chartData} options={chartOptions} height={height} />;
+        return <Bar data={chartData} options={chartOptions as ChartOptions<"bar">} height={height} />;
       case 'line':
-        return <Line data={chartData} options={chartOptions} height={height} />;
+        return <Line data={chartData} options={chartOptions as ChartOptions<"line">} height={height} />;
       case 'pie':
-        return <Pie data={chartData} options={chartOptions} height={height} />;
+        return <Pie data={chartData} options={chartOptions as ChartOptions<"pie">} height={height} />;
       case 'doughnut':
-        return <Doughnut data={chartData} options={chartOptions} height={height} />;
+        return <Doughnut data={chartData} options={chartOptions as ChartOptions<"doughnut">} height={height} />;
       default:
-        return <Bar data={chartData} options={chartOptions} height={height} />;
+        return <Bar data={chartData} options={chartOptions as ChartOptions<"bar">} height={height} />;
     }
   };
 

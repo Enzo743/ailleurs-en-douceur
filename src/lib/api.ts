@@ -38,3 +38,10 @@ export function serverError(
     { status: 500 }
   );
 }
+
+/**
+ * Message d'erreur détaillé, uniquement en développement
+ */
+export function devErrorDetail(error: unknown): string | undefined {
+  return process.env.NODE_ENV === 'development' ? (error as Error).message : undefined;
+}

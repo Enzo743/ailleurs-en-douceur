@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './section-card.module.scss';
 
@@ -18,19 +18,10 @@ function BannerSettings({ initialState }: {
     const [color, setColor] = useState(initialState.color || '#d4a373');
     const [duration, setDuration] = useState<"permanent" | "temporary">(initialState.duration);
     const [endDate, setEndDate] = useState<string | null>(initialState.endDate || '');
-    const [isPending, startTransition] = useTransition();
+    const [isPending] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const router = useRouter();
-
-    // Synchroniser l'état avec les props si elles changent (après un refresh)
-    useEffect(() => {
-        setIsEnabled(initialState.isEnabled);
-        setText(initialState.text);
-        setColor(initialState.color);
-        setDuration(initialState.duration);
-        setEndDate(initialState.endDate || '');
-    }, [initialState]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -148,7 +139,7 @@ function BannerSettings({ initialState }: {
                             </div>
                             
                             <div className={styles.formGroup}>
-                                <label className={styles.formLabel}>Durée d'affichage</label>
+                                <label className={styles.formLabel}>Durée d&apos;affichage</label>
                                 <div className={styles.radioGroup}>
                                     <label>
                                         <input
@@ -158,7 +149,7 @@ function BannerSettings({ initialState }: {
                                             checked={duration === 'permanent'}
                                             onChange={() => setDuration('permanent')}
                                         />
-                                        Permanent (jusqu'à désactivation manuelle)
+                                        Permanent (jusqu&apos;à désactivation manuelle)
                                     </label>
                                     <label>
                                         <input
@@ -168,7 +159,7 @@ function BannerSettings({ initialState }: {
                                             checked={duration === 'temporary'}
                                             onChange={() => setDuration('temporary')}
                                         />
-                                        Temporaire (jusqu'à une date spécifique)
+                                        Temporaire (jusqu&apos;à une date spécifique)
                                     </label>
                                 </div>
                             </div>
@@ -220,5 +211,11 @@ interface BannerSettingsWrapperProps {
 
 // Composant serveur qui passe les données au composant client
 export function BannerSettingsWrapper({ initialState }: BannerSettingsWrapperProps) {
-    return <BannerSettings initialState={initialState} />;
+    // La key force un remontage quand l'état initial change après un refresh
+    return (
+        <BannerSettings
+            key={`${initialState.isEnabled}-${initialState.text}-${initialState.color}-${initialState.duration}-${initialState.endDate ?? ''}`}
+            initialState={initialState}
+        />
+    );
 }

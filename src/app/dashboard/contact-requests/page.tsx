@@ -1,5 +1,6 @@
 import { verifySession } from '@/lib/auth';
 import Link from 'next/link';
+import { ContactRequestStatus, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import styles from './page.module.scss';
 import { getPackageLabel } from '@/lib/constants';
@@ -39,8 +40,8 @@ export default async function ContactRequestsPage({
   const page = typeof params.page === 'string' ? parseInt(params.page) : 1;
 
   // Construire la condition de filtrage pour Prisma
-  const where: any = {};
-  if (status) where.status = status;
+  const where: Prisma.ContactRequestWhereInput = {};
+  if (status) where.status = status as ContactRequestStatus;
   if (packageType) where.packageType = packageType;
   if (search) {
     where.OR = [
@@ -169,7 +170,7 @@ export default async function ContactRequestsPage({
           </div>
 
           <div className={styles['filter-group']}>
-            <label htmlFor="packageType">Type d'offre :</label>
+            <label htmlFor="packageType">Type d&apos;offre :</label>
             <select id="packageType" name="packageType" defaultValue={packageType || ''}>
               <option value="">Toutes les offres</option>
               <option value="escapade-en-douceur">Escapade en douceur</option>

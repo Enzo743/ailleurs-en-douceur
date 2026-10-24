@@ -79,32 +79,32 @@ async function verifyUmamiToken(token: string): Promise<boolean> {
 }
 
 // Fonction générique pour appeler l'API Umami
-async function callUmamiApi(
+async function callUmamiApi<T>(
   endpoint: string,
   websiteId: string,
   params: Record<string, string | number> = {}
-): Promise<any> {
+): Promise<T | null> {
   try {
     let baseUrl = process.env.UMAMI_API_URL || 'https://analytics.ailleurs-en-douceur.com';
     baseUrl = baseUrl.replace(/\/api$/, '');
-    
+
     const url = new URL(`${baseUrl}/api/${endpoint}`);
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         url.searchParams.set(key, String(value));
       }
     });
-    
+
     let token = await getUmamiToken();
     if (!token) throw new Error('No Umami token');
-    
+
     const isTokenValid = await verifyUmamiToken(token);
     if (!isTokenValid) {
       umamiTokenCache = null;
       token = await getUmamiToken();
       if (!token) throw new Error('Invalid Umami token');
     }
-    
+
     const response = await fetch(url.toString(), {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -113,13 +113,13 @@ async function callUmamiApi(
       },
       next: { revalidate: 300 },
     });
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Umami API error: ${response.status} - ${errorText.substring(0, 100)}`);
     }
-    
-    return await response.json();
+
+    return (await response.json()) as T;
   } catch (error) {
     console.error('Error in callUmamiApi:', error);
     return null;
@@ -143,7 +143,7 @@ export async function getGeneralStats(websiteId: string, days: number = 30) {
   const endAt = Date.now();
   
   try {
-    const stats: UmamiStatsData = await callUmamiApi(
+    const stats: UmamiStatsData | null = await callUmamiApi<UmamiStatsData>(
       `websites/${websiteId}/stats`,
       websiteId,
       { startAt, endAt }
@@ -181,7 +181,7 @@ export async function getTopPages(websiteId: string, limit: number = 10) {
   const endAt = Date.now();
   
   try {
-    const metrics: UmamiMetricData[] = await callUmamiApi(
+    const metrics: UmamiMetricData[] | null = await callUmamiApi<UmamiMetricData[]>(
       `websites/${websiteId}/metrics`,
       websiteId,
       { startAt, endAt, type: 'path', limit }
@@ -207,7 +207,7 @@ export async function getReferrers(websiteId: string, limit: number = 10) {
   const endAt = Date.now();
   
   try {
-    const metrics: UmamiMetricData[] = await callUmamiApi(
+    const metrics: UmamiMetricData[] | null = await callUmamiApi<UmamiMetricData[]>(
       `websites/${websiteId}/metrics`,
       websiteId,
       { startAt, endAt, type: 'referrer', limit }
@@ -233,7 +233,7 @@ export async function getDevices(websiteId: string) {
   const endAt = Date.now();
   
   try {
-    const metrics: UmamiMetricData[] = await callUmamiApi(
+    const metrics: UmamiMetricData[] | null = await callUmamiApi<UmamiMetricData[]>(
       `websites/${websiteId}/metrics`,
       websiteId,
       { startAt, endAt, type: 'device' }
@@ -259,7 +259,7 @@ export async function getCountries(websiteId: string, limit: number = 10) {
   const endAt = Date.now();
   
   try {
-    const metrics: UmamiMetricData[] = await callUmamiApi(
+    const metrics: UmamiMetricData[] | null = await callUmamiApi<UmamiMetricData[]>(
       `websites/${websiteId}/metrics`,
       websiteId,
       { startAt, endAt, type: 'country', limit }
@@ -285,7 +285,7 @@ export async function getExitPages(websiteId: string, limit: number = 10) {
   const endAt = Date.now();
   
   try {
-    const metrics: UmamiMetricData[] = await callUmamiApi(
+    const metrics: UmamiMetricData[] | null = await callUmamiApi<UmamiMetricData[]>(
       `websites/${websiteId}/metrics`,
       websiteId,
       { startAt, endAt, type: 'exit', limit }
@@ -312,7 +312,7 @@ export async function getLandingPages(websiteId: string, limit: number = 10) {
   const endAt = Date.now();
   
   try {
-    const metrics: UmamiMetricData[] = await callUmamiApi(
+    const metrics: UmamiMetricData[] | null = await callUmamiApi<UmamiMetricData[]>(
       `websites/${websiteId}/metrics`,
       websiteId,
       { startAt, endAt, type: 'entry', limit }
@@ -339,7 +339,7 @@ export async function getTimeOfDayStats(websiteId: string) {
   const endAt = Date.now();
   
   try {
-    const data = await callUmamiApi(
+    const data = await callUmamiApi<Record<string, unknown>>(
       `websites/${websiteId}/pageviews`,
       websiteId,
       { startAt, endAt, unit: 'hour' }
@@ -355,7 +355,7 @@ export async function getTimeOfDayStats(websiteId: string) {
 export async function getConversionRate(websiteId: string, days: number = 30) {
   try {
     const stats = await getGeneralStats(websiteId, days);
-    const totalUniqueVisitors = stats.uniqueVisitors?.reduce((sum: number, day: any) => sum + day.value, 0) || 0;
+    const totalUniqueVisitors = stats.uniqueVisitors?.reduce((sum: number, day) => sum + day.value, 0) || 0;
     
     const formSubmissions = await prisma.contactRequest.count({
       where: { createdAt: { gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000) } },
@@ -378,7 +378,7 @@ export async function getConversionRate(websiteId: string, days: number = 30) {
 export async function getTopBlogArticles(websiteId: string, limit: number = 10) {
   try {
     const pages = await getTopPages(websiteId, limit * 2);
-    const blogArticles = pages.filter((page: any) => 
+    const blogArticles = pages.filter((page) => 
       page.page.startsWith('/blog/') && !page.page.endsWith('/blog')
     );
     return blogArticles.slice(0, limit);
@@ -420,12 +420,12 @@ export async function GET(request: NextRequest) {
       getTopBlogArticles(websiteId, limit),
     ]);
     
-    const totalPageviews = generalStats.pageviews?.reduce((sum: number, day: any) => sum + day.value, 0) || 0;
-    const totalUniqueVisitors = generalStats.uniqueVisitors?.reduce((sum: number, day: any) => sum + day.value, 0) || 0;
-    const totalSessions = generalStats.sessions?.reduce((sum: number, day: any) => sum + day.value, 0) || 0;
-    const avgBounceRate = generalStats.bounceRate?.reduce((sum: number, day: any) => sum + day.value, 0) / generalStats.bounceRate?.length || 0;
-    const avgSessionDuration = generalStats.avgSessionDuration?.reduce((sum: number, day: any) => sum + day.value, 0) / generalStats.avgSessionDuration?.length || 0;
-    const avgPagesPerSession = generalStats.pagesPerSession?.reduce((sum: number, day: any) => sum + day.value, 0) / generalStats.pagesPerSession?.length || 0;
+    const totalPageviews = generalStats.pageviews?.reduce((sum: number, day) => sum + day.value, 0) || 0;
+    const totalUniqueVisitors = generalStats.uniqueVisitors?.reduce((sum: number, day) => sum + day.value, 0) || 0;
+    const totalSessions = generalStats.sessions?.reduce((sum: number, day) => sum + day.value, 0) || 0;
+    const avgBounceRate = generalStats.bounceRate?.reduce((sum: number, day) => sum + day.value, 0) / generalStats.bounceRate?.length || 0;
+    const avgSessionDuration = generalStats.avgSessionDuration?.reduce((sum: number, day) => sum + day.value, 0) / generalStats.avgSessionDuration?.length || 0;
+    const avgPagesPerSession = generalStats.pagesPerSession?.reduce((sum: number, day) => sum + day.value, 0) / generalStats.pagesPerSession?.length || 0;
     
     return NextResponse.json({
       success: true,

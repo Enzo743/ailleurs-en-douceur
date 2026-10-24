@@ -4,7 +4,6 @@ import { getArticleCount } from '@/app/actions/articles';
 import { prisma } from '@/lib/prisma';
 import {
   AnalyticsCard,
-  AnalyticsChart,
   TopPagesTable,
   ReferrersTable,
   DeviceChart,
@@ -34,34 +33,33 @@ import {
   getTopBlogArticles,
 } from '@/app/api/analytics/route';
 
-// Type pour les données analytics
-interface AnalyticsData {
-  totals: {
-    pageviews: number;
-    uniqueVisitors: number;
-    sessions: number;
-    bounceRate: number;
-    avgSessionDuration: number;
-    avgPagesPerSession: number;
-  };
-  stats: {
-    pageviews: { value: number; date: string }[];
-    uniqueVisitors: { value: number; date: string }[];
-    sessions: { value: number; date: string }[];
-  };
-  topPages: any[];
-  referrers: any[];
-  devices: any[];
-  countries: any[];
-  exitPages: any[];
-  landingPages: any[];
-  timeOfDayStats: any;
-  conversionRate: {
-    totalUniqueVisitors: number;
-    formSubmissions: number;
-    conversionRate: number;
-  };
-  topBlogArticles: any[];
+interface TimeOfDayPoint {
+  date: string;
+  value: number;
+}
+
+interface TimeOfDayStats {
+  pageviews?: TimeOfDayPoint[];
+  uniqueVisitors?: TimeOfDayPoint[];
+}
+
+// Charger toutes les données analytics en parallèle
+async function loadAnalyticsData(websiteId: string) {
+  return Promise.all([
+    getArticleCount(),
+    prisma.contactRequest.count(),
+    prisma.appointment.count({ where: { status: 'CONFIRMED' } }),
+    getGeneralStats(websiteId, 30),
+    getTopPages(websiteId, 10),
+    getReferrers(websiteId, 10),
+    getDevices(websiteId),
+    getCountries(websiteId, 10),
+    getExitPages(websiteId, 10),
+    getLandingPages(websiteId, 10),
+    getTimeOfDayStats(websiteId),
+    getConversionRate(websiteId, 30),
+    getTopBlogArticles(websiteId, 10),
+  ]);
 }
 
 export default async function AnalyticsPage() {
@@ -80,58 +78,67 @@ export default async function AnalyticsPage() {
           <h3>⚠️ Configuration Umami manquante</h3>
           <p>Impossible de se connecter à votre instance Umami. Veuillez vérifier :</p>
           <ul>
-            <li><strong>UMAMI_WEBSITE_ID</strong> : L'ID de votre site dans Umami</li>
+            <li><strong>UMAMI_WEBSITE_ID</strong> : L&apos;ID de votre site dans Umami</li>
             <li><strong>UMAMI_USERNAME</strong> : Un utilisateur Umami valide</li>
             <li><strong>UMAMI_PASSWORD</strong> : Le mot de passe de cet utilisateur</li>
-            <li><strong>UMAMI_API_URL</strong> : L'URL de votre API Umami (ex: https://analytics.ailleurs-en-douceur.com/api)</li>
+            <li><strong>UMAMI_API_URL</strong> : L&apos;URL de votre API Umami (ex: https://analytics.ailleurs-en-douceur.com/api)</li>
           </ul>
-          <p><strong>Astuce :</strong> Si vous avez installé Umami sur votre VPS, assurez-vous que l'URL est accessible depuis votre application Next.js.</p>
+          <p><strong>Astuce :</strong> Si vous avez installé Umami sur votre VPS, assurez-vous que l&apos;URL est accessible depuis votre application Next.js.</p>
         </div>
       </section>
     );
   }
 
+  let data: Awaited<ReturnType<typeof loadAnalyticsData>> | null = null;
+  let loadError: string | null = null;
+
   try {
-    // Récupérer les statistiques du site et les données Umami en parallèle
-    const [
-      articleCount,
-      contactRequests,
-      totalTrips,
-      confirmedAppointments,
-      generalStats,
-      topPages,
-      referrers,
-      devices,
-      countries,
-      exitPages,
-      landingPages,
-      timeOfDayStats,
-      conversionRate,
-      topBlogArticles,
-    ] = await Promise.all([
-      getArticleCount(),
-      prisma.contactRequest.findMany(),
-      prisma.contactRequest.count(),
-      prisma.appointment.count({ where: { status: 'CONFIRMED' } }),
-      getGeneralStats(websiteId, 30),
-      getTopPages(websiteId, 10),
-      getReferrers(websiteId, 10),
-      getDevices(websiteId),
-      getCountries(websiteId, 10),
-      getExitPages(websiteId, 10),
-      getLandingPages(websiteId, 10),
-      getTimeOfDayStats(websiteId),
-      getConversionRate(websiteId, 30),
-      getTopBlogArticles(websiteId, 10),
-    ]);
+    data = await loadAnalyticsData(websiteId);
+  } catch (error) {
+    console.error('Error fetching analytics data:', error);
+    loadError = String(error);
+  }
+
+  if (loadError || !data) {
+    return (
+      <section className="dashboard-page">
+        <DashboardHeader
+          title="Analytics"
+          subtitle="Statistiques du site"
+        />
+        <div className={styles.errorMessage}>
+          <h3>⚠️ Erreur de connexion à Umami</h3>
+          <p>Impossible de récupérer les données analytics.</p>
+          <p><strong>Détails :</strong> {loadError}</p>
+          <p><strong>Astuce :</strong> Vérifiez que votre instance Umami est accessible et que vos identifiants sont corrects.</p>
+        </div>
+      </section>
+    );
+  }
+
+  const [
+    articleCount,
+    totalTrips,
+    confirmedAppointments,
+    generalStats,
+    topPages,
+    referrers,
+    devices,
+    countries,
+    exitPages,
+    landingPages,
+    timeOfDayStats,
+    conversionRate,
+    topBlogArticles,
+  ] = data;
 
     // Calculer les totaux
-    const totalPageviews = generalStats.pageviews?.reduce((sum: number, day: any) => sum + day.value, 0) || 0;
-    const totalUniqueVisitors = generalStats.uniqueVisitors?.reduce((sum: number, day: any) => sum + day.value, 0) || 0;
-    const totalSessions = generalStats.sessions?.reduce((sum: number, day: any) => sum + day.value, 0) || 0;
-    const avgBounceRate = generalStats.bounceRate?.reduce((sum: number, day: any) => sum + day.value, 0) / generalStats.bounceRate?.length || 0;
-    const avgSessionDuration = generalStats.avgSessionDuration?.reduce((sum: number, day: any) => sum + day.value, 0) / generalStats.avgSessionDuration?.length || 0;
-    const avgPagesPerSession = generalStats.pagesPerSession?.reduce((sum: number, day: any) => sum + day.value, 0) / generalStats.pagesPerSession?.length || 0;
+    const totalPageviews = generalStats.pageviews?.reduce((sum: number, day) => sum + day.value, 0) || 0;
+    const totalUniqueVisitors = generalStats.uniqueVisitors?.reduce((sum: number, day) => sum + day.value, 0) || 0;
+    const totalSessions = generalStats.sessions?.reduce((sum: number, day) => sum + day.value, 0) || 0;
+    const avgBounceRate = generalStats.bounceRate?.reduce((sum: number, day) => sum + day.value, 0) / generalStats.bounceRate?.length || 0;
+    const avgSessionDuration = generalStats.avgSessionDuration?.reduce((sum: number, day) => sum + day.value, 0) / generalStats.avgSessionDuration?.length || 0;
+    const avgPagesPerSession = generalStats.pagesPerSession?.reduce((sum: number, day) => sum + day.value, 0) / generalStats.pagesPerSession?.length || 0;
 
     return (
       <section className="dashboard-page">
@@ -262,34 +269,15 @@ export default async function AnalyticsPage() {
         </div>
       </section>
     );
-    
-  } catch (error) {
-    console.error('Error fetching analytics data:', error);
-    
-    return (
-      <section className="dashboard-page">
-        <DashboardHeader
-          title="Analytics"
-          subtitle="Statistiques du site"
-        />
-        <div className={styles.errorMessage}>
-          <h3>⚠️ Erreur de connexion à Umami</h3>
-          <p>Impossible de récupérer les données analytics.</p>
-          <p><strong>Détails :</strong> {String(error)}</p>
-          <p><strong>Astuce :</strong> Vérifiez que votre instance Umami est accessible et que vos identifiants sont corrects.</p>
-        </div>
-      </section>
-    );
-  }
 }
 
 // Fonction pour formater les données "Heures de pointe"
-function formatTimeOfDayData(timeOfDayStats: any) {
+function formatTimeOfDayData(timeOfDayStats: TimeOfDayStats) {
   if (!timeOfDayStats?.pageviews) return [];
   
-  return timeOfDayStats.pageviews.map((item: any) => ({
+  return timeOfDayStats.pageviews.map((item) => ({
     hour: new Date(item.date).getHours(),
     pageviews: item.value,
-    uniqueVisitors: timeOfDayStats.uniqueVisitors?.find((u: any) => u.date === item.date)?.value || 0,
+    uniqueVisitors: timeOfDayStats.uniqueVisitors?.find((u) => u.date === item.date)?.value || 0,
   }));
 }

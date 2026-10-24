@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+
 import { prisma } from '@/lib/prisma';
 import { serverError } from '@/lib/api';
 import { generateContactRequestToken } from '@/lib/tokens';
@@ -305,38 +305,44 @@ Date: ${new Date().toLocaleString('fr-FR')}
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     // Message d'erreur plus détaillé pour le développement
     let errorMessage = 'Une erreur est survenue lors de l\'envoi du message. Veuillez reessayer plus tard.';
-    let errorDetails: any = undefined;
-    
+    let errorDetails: Record<string, unknown> | undefined = undefined;
+
     if (process.env.NODE_ENV === 'development') {
-      errorMessage = error.message || error.toString();
-      
+      const smtpError = error as Error & {
+        code?: string;
+        response?: string;
+        responseCode?: number;
+        stack?: string;
+      };
+      errorMessage = smtpError.message || smtpError.toString();
+
       // Conseils spécifiques pour les erreurs courantes
-      if (error.code === 'EAUTH') {
+      if (smtpError.code === 'EAUTH') {
         errorMessage = 'Erreur d\'authentification SMTP. Vérifiez vos identifiants.';
         errorDetails = {
-          code: error.code,
-          response: error.response,
-          responseCode: error.responseCode,
+          code: smtpError.code,
+          response: smtpError.response,
+          responseCode: smtpError.responseCode,
           help: 'Pour Brevo: 1) Vérifiez que BREVO_API_KEY est correcte, 2) Vérifiez que BREVO_SENDER_EMAIL est vérifié dans votre compte Brevo, 3) Utilisez smtp.brevo.com comme hôte'
         };
-      } else if (error.code === 'ECONNECTION') {
+      } else if (smtpError.code === 'ECONNECTION') {
         errorMessage = 'Impossible de se connecter au serveur SMTP. Vérifiez l\'hôte et le port.';
         errorDetails = {
-          code: error.code,
+          code: smtpError.code,
           help: 'Vérifiez que le serveur SMTP est accessible'
         };
       }
-      
+
       errorDetails = {
         ...errorDetails,
-        fullError: error.toString(),
-        stack: error.stack
+        fullError: smtpError.toString(),
+        stack: smtpError.stack
       };
     }
-    
+
     return serverError("Erreur lors de l'envoi de l'email:", errorMessage, error, {
       details: errorDetails
     });

@@ -9,7 +9,7 @@ import { StatusBadge } from '@/components/dashboard';
 import AssignFormClient from '@/components/dashboard/AssignFormClient';
 import ActionFormClient from '@/components/dashboard/ActionFormClient';
 import DownloadFilledFormPdfButton from '@/components/dashboard/DownloadFilledFormPdfButton';
-import { formatFieldValue as formatValue } from '@/lib/field-utils';
+import { formatFieldValue as formatValue, type FormValues } from '@/lib/field-utils';
 
 export default async function ContactRequestDetailPage({
   params,
@@ -107,7 +107,7 @@ export default async function ContactRequestDetailPage({
             </div>
           </div>
           <div className={styles['info-item']}>
-            <div className={styles['info-label']}>Type d'offre:</div>
+            <div className={styles['info-label']}>Type d&apos;offre:</div>
             <div className={styles['info-value']}>
               {getPackageLabel(contactRequest.packageType)}
             </div>
@@ -174,7 +174,7 @@ export default async function ContactRequestDetailPage({
               {contactRequest.status === 'PENDING' && availableForms.length === 0 && (
                 <p>
                   <Link href="/dashboard/forms/new" className={styles['create-link']}>
-                    Créez d'abord un formulaire
+                    Créez d&apos;abord un formulaire
                   </Link>
                 </p>
               )}
@@ -202,8 +202,8 @@ export default async function ContactRequestDetailPage({
                   </span>
                   {contactRequest.form && (
                     <DownloadFilledFormPdfButton
-                      form={contactRequest.form as any}
-                      formResponse={formResponse as any}
+                      form={contactRequest.form}
+                      formResponse={{ ...formResponse, values: (formResponse.values as FormValues) || {} }}
                       clientName={`${contactRequest.firstName} ${contactRequest.lastName}`}
                     />
                   )}
@@ -213,7 +213,7 @@ export default async function ContactRequestDetailPage({
               {contactRequest.form && (
                 <div className={styles['response-grid']}>
                   {contactRequest.form.fields.map((field) => {
-                    const allValues = (formResponse.values as Record<string, any>) || {};
+                    const allValues = (formResponse.values as FormValues) || {};
                     const value = allValues[field.key];
                     return (
                       <div key={field.id} className={styles['response-item']}>
@@ -336,7 +336,7 @@ export default async function ContactRequestDetailPage({
               
               {contactRequest.status === 'PENDING' && (
                 <p>
-                  Le client doit d'abord remplir le formulaire avant de pouvoir planifier un rendez-vous.
+                  Le client doit d&apos;abord remplir le formulaire avant de pouvoir planifier un rendez-vous.
                 </p>
               )}
             </div>

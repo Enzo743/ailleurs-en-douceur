@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { apiError, apiSuccess, serverError } from "@/lib/api";
+import { apiError, apiSuccess, serverError, devErrorDetail } from "@/lib/api";
 
 /**
  * POST /api/dashboard/forms/[id]/duplicate
@@ -63,7 +63,7 @@ export async function POST(
     // Copier les sections du formulaire
     const sectionMap = new Map<string, string>();
     const newSections = await Promise.all(
-      existingForm.sections.map((section, index) =>
+      existingForm.sections.map((section) =>
         prisma.formSection.create({
           data: {
             formId: newForm.id,
@@ -83,8 +83,8 @@ export async function POST(
     });
 
     // Copier les champs du formulaire avec leurs sections
-    const newFields = await Promise.all(
-      existingForm.fields.map((field, index) => {
+    await Promise.all(
+      existingForm.fields.map((field) => {
         // Trouver le nouvel ID de section
         let newSectionId: string | undefined = undefined;
         if (field.sectionId) {
@@ -196,12 +196,12 @@ export async function POST(
       },
     }, 201);
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error duplicating form:',
       'Une erreur est survenue lors de la duplication du formulaire',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }

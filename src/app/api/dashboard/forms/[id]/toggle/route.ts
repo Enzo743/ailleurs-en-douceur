@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { apiError, apiSuccess, serverError } from "@/lib/api";
+import { apiError, apiSuccess, serverError, devErrorDetail } from "@/lib/api";
 
 /**
  * POST /dashboard/forms/[id]/toggle
@@ -44,12 +44,12 @@ export async function POST(
       },
     });
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error toggling form:',
       'Une erreur est survenue lors de la mise à jour du formulaire',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }

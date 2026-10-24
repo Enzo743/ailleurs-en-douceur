@@ -1,4 +1,5 @@
 import 'server-only';
+import type { calendar_v3 } from 'googleapis';
 import { google } from 'googleapis';
 
 // Type pour les tokens OAuth2 stockés en session ou base de données
@@ -68,7 +69,7 @@ export interface MeetEventResult {
   eventId: string;
   meetLink: string;
   htmlLink: string;
-  calendarEvent: any;
+  calendarEvent: calendar_v3.Schema$Event;
 }
 
 export const createMeetEvent = async (
@@ -86,7 +87,7 @@ export const createMeetEvent = async (
   ];
 
   // Construire l'objet eventRequest en fonction de la préférence
-  const eventRequest: any = {
+  const eventRequest: calendar_v3.Schema$Event = {
     summary: params.summary,
     description: params.description || '',
     start: { dateTime: startDateTime, timeZone: 'Europe/Paris' },
@@ -128,9 +129,9 @@ export const createMeetEvent = async (
       htmlLink: event.htmlLink || '',
       calendarEvent: event,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating Google Calendar event:', error);
-    throw new Error(`Failed to create Google Calendar event: ${error.message}`);
+    throw new Error(`Failed to create Google Calendar event: ${(error as Error).message}`);
   }
 };
 
@@ -150,7 +151,7 @@ export interface CalendarEventResult {
   eventId: string;
   meetLink: string;
   htmlLink: string;
-  calendarEvent: any;
+  calendarEvent: calendar_v3.Schema$Event;
 }
 
 export const createCalendarEvent = async (
@@ -194,9 +195,9 @@ export const createCalendarEvent = async (
       htmlLink: event.htmlLink || '',
       calendarEvent: event,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating Google Calendar event:', error);
-    throw new Error(`Failed to create Google Calendar event: ${error.message}`);
+    throw new Error(`Failed to create Google Calendar event: ${(error as Error).message}`);
   }
 };
 

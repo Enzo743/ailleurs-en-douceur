@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
+import { ContactRequestStatus, Prisma } from "@prisma/client";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { apiError, apiSuccess, serverError } from "@/lib/api";
+import { apiError, apiSuccess, serverError, devErrorDetail } from "@/lib/api";
 
 /**
  * Logique commune de suppression d'une demande de contact
@@ -45,7 +46,7 @@ async function deleteContactRequest(id: string) {
 /**
  * Logique commune de mise à jour d'une demande de contact
  */
-async function updateContactRequest(id: string, updateData: Record<string, any>) {
+async function updateContactRequest(id: string, updateData: Prisma.ContactRequestUncheckedUpdateInput) {
   // Vérification de la session
   await verifySession();
 
@@ -91,7 +92,7 @@ export async function POST(
     }
 
     // Gestion de la mise à jour (PATCH via POST)
-    const updateData: any = {};
+    const updateData: Prisma.ContactRequestUncheckedUpdateInput = {};
     const firstName = body.get('firstName') as string;
     const lastName = body.get('lastName') as string;
     const email = body.get('email') as string;
@@ -107,17 +108,17 @@ export async function POST(
     if (packageType !== undefined) updateData.packageType = packageType;
     if (days !== undefined) updateData.days = parseInt(days) || 0;
     if (message !== undefined) updateData.message = message;
-    if (status !== undefined) updateData.status = status;
+    if (status !== undefined) updateData.status = status as ContactRequestStatus;
     if (formId !== undefined) updateData.formId = formId;
 
     return await updateContactRequest(id, updateData);
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error processing contact request:',
       'Une erreur est survenue',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -136,7 +137,7 @@ export async function PATCH(
     const body = await request.json();
 
     // Préparer les données de mise à jour
-    const updateData: any = {};
+    const updateData: Prisma.ContactRequestUncheckedUpdateInput = {};
     if (body.firstName !== undefined) updateData.firstName = body.firstName;
     if (body.lastName !== undefined) updateData.lastName = body.lastName;
     if (body.email !== undefined) updateData.email = body.email;
@@ -148,12 +149,12 @@ export async function PATCH(
 
     return await updateContactRequest(id, updateData);
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error updating contact request:',
       'Une erreur est survenue lors de la mise à jour',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -170,12 +171,12 @@ export async function DELETE(
     const { id } = await params;
     return await deleteContactRequest(id);
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error deleting contact request:',
       'Une erreur est survenue lors de la suppression',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { AppointmentStatus, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { serverError } from '@/lib/api';
+import { serverError, devErrorDetail } from '@/lib/api';
 import { createMeetEvent, createCalendarEvent, cancelCalendarEvent } from '@/lib/google';
 import { getEmailConfig } from '@/lib/email';
 import { getPackageLabel } from '@/lib/constants';
-import { doSlotsOverlap, calculateDuration, formatDateForDisplay } from '@/lib/time';
-import { validateAppointmentSlot, type AppointmentSlotData } from '@/lib/validation';
+import { formatDateForDisplay } from '@/lib/time';
+
 
 // ============================================================================
 // Types
@@ -17,23 +18,9 @@ interface CreateAppointmentData {
   contactPreference?: string;
 }
 
-interface ApiResponse {
-  success: boolean;
-  data?: any;
-  error?: string;
-  message?: string;
-  pagination?: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
 // ============================================================================
 // GET /api/appointments
 // ============================================================================
-
 /**
  * Liste tous les rendez-vous avec pagination et filtres
  * Accessible uniquement avec une session valide (dashboard)
@@ -49,7 +36,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Construire la condition de filtrage
-    const where: any = {};
+    const where: Prisma.AppointmentWhereInput = {};
     
     if (contactRequestId) {
       where.contactRequestId = contactRequestId;
@@ -60,7 +47,7 @@ export async function GET(request: NextRequest) {
     }
     
     if (status) {
-      where.status = status;
+      where.status = status as AppointmentStatus;
     }
 
     // Recuperer les rendez-vous avec leurs relations
@@ -131,12 +118,12 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error fetching appointments:',
       'Une erreur est survenue lors de la recuperation des rendez-vous',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -503,7 +490,7 @@ ${contactRequest.message}` : ''}
       { status: 201 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating appointment:', error);
     
     // En cas d'erreur, essayer de remettre le createau comme disponible
@@ -520,7 +507,7 @@ ${contactRequest.message}` : ''}
       'Error creating appointment:',
       'Une erreur est survenue lors de la confirmation du rendez-vous',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -591,12 +578,12 @@ export async function DELETE(request: NextRequest) {
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error canceling appointment:',
       'Une erreur est survenue lors de l\'annulation du rendez-vous',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -675,12 +662,12 @@ export async function GET_BY_ID(request: NextRequest) {
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error fetching appointment:',
       'Une erreur est survenue lors de la recuperation du rendez-vous',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }

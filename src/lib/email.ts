@@ -138,13 +138,6 @@ export function getCustomFormUrl(token: string): string {
   return `${getBaseUrl()}/custom-form/${token}`;
 }
 
-/**
- * Génère l'URL du planning
- */
-export function getScheduleUrl(token: string): string {
-  return `${getBaseUrl()}/schedule/${token}`;
-}
-
 // ============================================================================
 // Helpers pour les emails
 // ============================================================================

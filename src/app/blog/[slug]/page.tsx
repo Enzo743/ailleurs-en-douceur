@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Header, Footer, ContactSection, RichTextDisplay, BlogCard, BotanicalDecoration } from "@/components/layout";
+import { Header, Footer, ContactSection, RichTextDisplay, BlogCard } from "@/components/layout";
 import { PrismaClient } from "@prisma/client";
 import { getSiteContent } from "@/lib/content";
 import { calculateReadingTime, formatDateFr } from "@/lib/utils";

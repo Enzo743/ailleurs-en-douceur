@@ -4,12 +4,13 @@ import Link from "next/link";
 import styles from "./header.module.scss";
 import Image from "next/image";
 import MobileMenu from "./MobileMenu";
+import type { SiteContentMap } from "@/lib/content";
 import { useState } from "react";
 
 interface HeaderProps {
   currentPage?: string;
   transparent?: boolean;
-  siteContent: any;
+  siteContent: SiteContentMap;
 }
 
 export default function Header({ currentPage = "", transparent = false, siteContent }: HeaderProps) {

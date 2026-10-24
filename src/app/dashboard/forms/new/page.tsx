@@ -4,7 +4,7 @@ import { useState, FormEvent, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PACKAGE_TYPE_OPTIONS } from '@/lib/constants';
-import { FormField as FormFieldType, FormSection, CONTACT_PREFERENCE_KEY, CONTACT_PREFERENCE_FIELD } from '@/lib/form-constants';
+import { FormField as FormFieldType, FormSection } from '@/lib/form-constants';
 import { useFormWithSections } from '@/hooks/useFormWithSections';
 import { FormField, FormSection as FormSectionComponent } from '@/components/dashboard';
 import styles from './page.module.scss';
@@ -42,7 +42,6 @@ export default function NewFormPage() {
     sections,
     sectionErrors,
     expandedSections,
-    setFields,
     addField,
     removeField,
     handleFieldChange,
@@ -52,7 +51,6 @@ export default function NewFormPage() {
     moveFieldUp,
     moveFieldDown,
     assignFieldToSection,
-    setSections,
     addSection,
     removeSection,
     handleSectionChange,
@@ -61,9 +59,6 @@ export default function NewFormPage() {
     toggleSectionExpand,
     validateFields,
     validateSections,
-    validateAll,
-    setFieldErrors,
-    setSectionErrors,
     getFieldsForSection,
     getUnassignedFields,
     getSectionById,
@@ -130,7 +125,15 @@ export default function NewFormPage() {
 
     try {
       // Préparer les données à envoyer
-      const dataToSend: any = {
+      const dataToSend: {
+        name: string;
+        packageType?: string;
+        description?: string;
+        successMessage: string;
+        isActive: boolean;
+        fields: Omit<FormFieldType, 'id'>[];
+        sections?: { id: string; name: string; description?: string; order: number }[];
+      } = {
         ...formData,
         fields: fields.map(({ id, ...rest }) => rest), // Supprimer les IDs temporaires
       };
@@ -143,9 +146,9 @@ export default function NewFormPage() {
           description: section.description,
           order: section.order,
         }));
-        
+
         // Ajouter sectionId aux champs
-        dataToSend.fields = dataToSend.fields.map((field: any) => ({
+        dataToSend.fields = dataToSend.fields.map((field) => ({
           ...field,
           sectionId: field.sectionId,
         }));
@@ -179,7 +182,7 @@ export default function NewFormPage() {
         });
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating form:', error);
       setSubmitStatus({
         success: false,
@@ -191,9 +194,9 @@ export default function NewFormPage() {
   };
 
   // Trouver l'erreur pour un champ spécifique
-  const getFieldError = (fieldId: string, property: string): string | undefined => {
+  const getFieldError = useCallback((fieldId: string, property: string): string | undefined => {
     return fieldErrors[`${fieldId}-${property}`];
-  };
+  }, [fieldErrors]);
 
   // Trouver l'erreur pour une section spécifique
   const getSectionError = (sectionId: string, property: string): string | undefined => {
@@ -230,7 +233,6 @@ export default function NewFormPage() {
 
   // Rendre une section
   const renderSection = (section: FormSection, sectionIndex: number) => {
-    const sectionFields = getFieldsForSection(section.id);
     const isExpanded = expandedSections.has(section.id);
 
     return (
@@ -244,7 +246,6 @@ export default function NewFormPage() {
         onMoveUp={() => moveSectionUp(section.id)}
         onMoveDown={() => moveSectionDown(section.id)}
         onRemove={() => removeSection(section.id)}
-        onAssignField={(fieldId) => assignFieldToSection(fieldId, section.id)}
         onUnassignField={(fieldId) => assignFieldToSection(fieldId, null)}
         canMoveUp={sectionIndex > 0}
         canMoveDown={sectionIndex < sections.length - 1}
@@ -403,7 +404,7 @@ export default function NewFormPage() {
 
             {sections.length === 0 && (
               <div className={styles['empty-state']}>
-                <p>Aucune section créée. Cliquez sur "Ajouter une section" pour commencer.</p>
+                <p>Aucune section créée. Cliquez sur &quot;Ajouter une section&quot; pour commencer.</p>
               </div>
             )}
 
@@ -465,12 +466,12 @@ export default function NewFormPage() {
 
             {fields.length === 0 && (
               <div className={styles['empty-state']}>
-                <p>Aucune question créée. Cliquez sur "Ajouter une question" pour commencer.</p>
+                <p>Aucune question créée. Cliquez sur &quot;Ajouter une question&quot; pour commencer.</p>
               </div>
             )}
 
             <div className={styles['fields-list']}>
-              {fields.map((field, index) => renderField(field))}
+              {fields.map((field) => renderField(field))}
             </div>
           </div>
         )}

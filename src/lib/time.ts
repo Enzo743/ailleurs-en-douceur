@@ -1,14 +1,9 @@
+import type { PrismaClient } from "@prisma/client";
 // import 'server-only';
 
 // ============================================================================
 // Time Helpers
 // ============================================================================
-
-declare global {
-  interface Window {
-    __tempIdCounter?: number;
-  }
-}
 
 /**
  * Vérifie si deux créneaux se chevauchent
@@ -86,7 +81,7 @@ export function isValidTimeFormat(time: string): boolean {
 /**
  * Récupère la date d'aujourd'hui à minuit
  */
-export function getTodayAtMidnight(): Date {
+function getTodayAtMidnight(): Date {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return today;
@@ -149,20 +144,6 @@ export function formatLongDate(dateString: string): string {
 }
 
 /**
- * Formate une date courte en français
- * @param dateString - Date à formater (format YYYY-MM-DD)
- * @returns Date formatée (ex: "15 juin 2026")
- */
-export function formatShortDate(dateString: string): string {
-  const date = new Date(dateString + 'T00:00:00');
-  return date.toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
-
-/**
  * Formate une heure HH:MM (sans conversion de Date)
  * @param timeString - Heure à formater (format HH:MM)
  * @returns Heure formatée HH:MM
@@ -186,22 +167,6 @@ export function calculateEndTime(startTime: string, duration: number): string {
   return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
 }
 
-/**
- * Génère un ID temporaire unique
- * @returns ID temporaire unique
- */
-export function generateTempId(): string {
-  // Utiliser un compteur local pour éviter les collisions dans la même milliseconde
-  if (typeof window !== 'undefined') {
-    if (!window.__tempIdCounter) {
-      window.__tempIdCounter = 0;
-    }
-    return `temp-${Date.now()}-${++window.__tempIdCounter}`;
-  }
-  // Version serveur (moins fiable mais fonctionne)
-  return `temp-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-}
-
 // ============================================================================
 // Cleanup Helpers
 // ============================================================================
@@ -212,7 +177,7 @@ export function generateTempId(): string {
  * @param prisma - Instance Prisma
  * @returns Promise avec le nombre de créneaux supprimés
  */
-export async function cleanupExpiredSlots(prisma: any): Promise<number> {
+export async function cleanupExpiredSlots(prisma: PrismaClient): Promise<number> {
   const now = new Date();
   const today = getTodayAtMidnight();
   const currentTime = now.toTimeString().split(' ')[0]; // Format HH:MM:SS

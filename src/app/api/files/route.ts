@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifySession } from '@/lib/auth';
-import { serverError } from '@/lib/api';
+import { serverError, devErrorDetail } from '@/lib/api';
 import fs from 'fs';
 import path from 'path';
 import { writeFile } from 'fs/promises';
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     await verifySession();
 
     const { searchParams } = new URL(request.url);
-    let dirPath = searchParams.get('path') || '/public';
+    const dirPath = searchParams.get('path') || '/public';
 
     // Normaliser le chemin et s'assurer qu'il est relatif à /public
     let normalizedPath = path.normalize(dirPath);
@@ -114,7 +114,6 @@ export async function GET(request: Request) {
     
     const files = items
       .map((item) => {
-        const itemPath = path.join(absolutePath, item.name);
         // Retourner un chemin relatif depuis /public (ex: /uploads/image.jpg)
         let relativePath = normalizedPath === '/public'
           ? `/${item.name}`
@@ -144,12 +143,12 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, files });
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error listing files:',
       'Erreur lors de la lecture des fichiers',
       error,
-      { details: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { details: devErrorDetail(error) }
     );
   }
 }
@@ -222,12 +221,12 @@ export async function POST(request: Request) {
       { status: 201 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error uploading file:',
       'Erreur lors de l\'upload du fichier',
       error,
-      { details: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { details: devErrorDetail(error) }
     );
   }
 }
@@ -268,7 +267,7 @@ export async function DELETE(request: Request) {
 
     // Chemin absolu du fichier - en production on cherche dans /var/www/uploads, en dev dans public/uploads
     const filename = path.basename(normalizedPath);
-    let absolutePath = process.env.NODE_ENV === 'production'
+    const absolutePath = process.env.NODE_ENV === 'production'
       ? path.join('/var/www/uploads', filename)
       : path.join(ROOT_PATH, normalizedPath.replace('/uploads/', 'uploads/'));
 
@@ -312,12 +311,12 @@ export async function DELETE(request: Request) {
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error deleting file:',
       'Erreur lors de la suppression du fichier',
       error,
-      { details: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { details: devErrorDetail(error) }
     );
   }
 }
@@ -405,7 +404,7 @@ async function checkIfFileIsUsed(filePath: string): Promise<{ isUsed: boolean; u
       articles.forEach((article) => {
         usages.push(`Article "${article.title}" (contenu ou image de couverture)`);
       });
-    } catch (e) {
+    } catch {
       // La table Article n'existe peut-être pas
     }
 

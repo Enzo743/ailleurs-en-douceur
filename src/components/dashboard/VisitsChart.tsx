@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import type { ChartOptions, TooltipItem } from 'chart.js';
 import AnalyticsChart from './AnalyticsChart';
 
 interface VisitData {
@@ -14,7 +15,6 @@ interface VisitsChartProps {
   sessions: VisitData[];
   title?: string;
   height?: number;
-  days?: number;
 }
 
 export default function VisitsChart({
@@ -23,7 +23,6 @@ export default function VisitsChart({
   sessions,
   title = 'Évolution des visites',
   height = 350,
-  days = 30,
 }: VisitsChartProps) {
   // Formater les dates pour l'axe X
   const labels = pageviews.map(data => {
@@ -79,7 +78,7 @@ export default function VisitsChart({
       },
       tooltip: {
         callbacks: {
-          label: (context: any) => {
+          label: (context: TooltipItem<"line">) => {
             const label = context.dataset.label || '';
             const value = context.parsed.y || 0;
             return `${label}: ${value.toLocaleString('fr-FR')}`;
@@ -91,8 +90,8 @@ export default function VisitsChart({
       y: {
         beginAtZero: true,
         ticks: {
-          callback: (value: number) => {
-            if (value >= 1000) {
+          callback: (value: string | number) => {
+            if (typeof value === "number" && value >= 1000) {
               return (value / 1000).toFixed(1) + 'k';
             }
             return value.toLocaleString('fr-FR');
@@ -100,7 +99,7 @@ export default function VisitsChart({
         },
       },
     },
-  };
+  } as unknown as ChartOptions;
 
   return (
     <AnalyticsChart

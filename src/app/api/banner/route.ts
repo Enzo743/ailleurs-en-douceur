@@ -1,8 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { apiSuccess, serverError } from '@/lib/api';
+import { apiSuccess, serverError, devErrorDetail } from '@/lib/api';
 
-export async function GET(request: Request) {
+export async function GET() {
     try {
         // Récupérer tous les paramètres du bandeau
         const bannerContent = await prisma.siteContent.findMany({
@@ -24,12 +24,12 @@ export async function GET(request: Request) {
 
         return apiSuccess(bannerSettings);
 
-    } catch (error: any) {
+    } catch (error) {
         return serverError(
             'Erreur lors de la récupération des paramètres du bandeau:',
             'Une erreur est survenue lors de la récupération des paramètres du bandeau',
             error,
-            { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+            { message: devErrorDetail(error) }
         );
     }
 }
@@ -103,12 +103,12 @@ export async function POST(request: Request) {
 
         return apiSuccess({ message: 'Bandeau mis à jour avec succès' });
 
-    } catch (error: any) {
+    } catch (error) {
         return serverError(
             'Erreur lors de la mise à jour du bandeau:',
             'Une erreur est survenue lors de la mise à jour du bandeau',
             error,
-            { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+            { message: devErrorDetail(error) }
         );
     }
 }

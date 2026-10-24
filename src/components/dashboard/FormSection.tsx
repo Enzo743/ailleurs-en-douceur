@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { FormSection as FormSectionType, FormField as FormFieldType } from '@/lib/form-constants';
 import styles from './form-section.module.scss';
 
@@ -13,7 +12,6 @@ interface FormSectionProps {
   onMoveUp: () => void;
   onMoveDown: () => void;
   onRemove: () => void;
-  onAssignField: (fieldId: string) => void;
   onUnassignField: (fieldId: string) => void;
   canMoveUp: boolean;
   canMoveDown: boolean;
@@ -33,7 +31,6 @@ export default function FormSection({
   onMoveUp,
   onMoveDown,
   onRemove,
-  onAssignField,
   onUnassignField,
   canMoveUp,
   canMoveDown,
@@ -44,7 +41,6 @@ export default function FormSection({
   sectionId,
 }: FormSectionProps) {
   // Filtrer les champs qui ne sont pas encore assignés à une section
-  const unassignedFields = allFields.filter(field => !field.sectionId);
   
   // Champs assignés à cette section
   const assignedFields = allFields.filter(field => field.sectionId === section.id);

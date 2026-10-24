@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Header, Footer, BotanicalDecoration, ContactSection } from "@/components/layout";
+import { Header, Footer, ContactSection } from "@/components/layout";
 import { getSiteContent } from "@/lib/content";
 import styles from "./page.module.scss";
 import RichTextDisplay from "@/components/layout/RichTextDisplay";
@@ -129,7 +129,7 @@ export default async function OffersPage() {
       <section className={styles.offersGridSection}>
         <div className={styles.container}>
           <div className={styles.offersGrid}>
-            {offers.map((offer, index) => (
+            {offers.map((offer) => (
               <article key={offer.id} className={styles.offerCard}>
                 {/* Card Background */}
                 <div className={styles.offerCardBg} />

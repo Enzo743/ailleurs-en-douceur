@@ -148,7 +148,7 @@ export default function ContactForm() {
           message: result.error || "Une erreur est survenue. Veuillez réessayer.",
         });
       }
-    } catch (error) {
+    } catch {
       setSubmitStatus({
         success: false,
         message: "Impossible de soumettre le formulaire. Veuillez vérifier votre connexion.",

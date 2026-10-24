@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import Image from 'next/image';
-import { uploadArticleImage } from '@/app/actions/articles';
+
 import styles from './content-row.module.scss';
 import FileManager from './FileManager';
 
@@ -14,8 +14,8 @@ type Props = {
 
 export default function CoverImageUpload({ value, onChange, disabled = false }: Props) {
     const [status, setStatus] = useState<'idle' | 'saved' | 'error'>('idle');
-    const [errorMsg, setErrorMsg] = useState('');
-    const [isPending, startTransition] = useTransition();
+
+    const [isPending] = useTransition();
     const [showFileManager, setShowFileManager] = useState(false);
 
     // Gérer la sélection d'une image depuis le gestionnaire de fichiers
@@ -23,34 +23,6 @@ export default function CoverImageUpload({ value, onChange, disabled = false }: 
         onChange(filePath);
         setStatus('saved');
         setTimeout(() => setStatus('idle'), 3000);
-    }
-
-    function handleUpload() {
-        // Cette fonction n'est plus utilisée directement, mais on la garde au cas où
-        // (elle est appelée par le bouton d'upload si on veut le conserver)
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.onchange = async (e) => {
-            const file = (e.target as HTMLInputElement).files?.[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            startTransition(async () => {
-                const result = await uploadArticleImage(formData);
-                if (result.success && result.url) {
-                    onChange(result.url);
-                    setStatus('saved');
-                } else {
-                    setErrorMsg(result.error ?? 'Erreur inconnue.');
-                    setStatus('error');
-                }
-                setTimeout(() => setStatus('idle'), 3000);
-            });
-        };
-        fileInput.click();
     }
 
     return (
@@ -105,7 +77,6 @@ export default function CoverImageUpload({ value, onChange, disabled = false }: 
 
             <div className={styles.footer}>
                 {status === 'saved' && <span className={styles.statusOk}>✓ Image mise à jour</span>}
-                {status === 'error'  && <span className={styles.statusErr}>✗ {errorMsg}</span>}
             </div>
         </div>
     );

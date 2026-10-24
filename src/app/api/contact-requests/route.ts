@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from 'crypto';
 import { verifySession } from "@/lib/auth";
+import { ContactRequestStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { serverError } from '@/lib/api';
+import { serverError, devErrorDetail } from '@/lib/api';
+import type { FormValues } from '@/lib/field-utils';
 import { getEmailConfig, getCustomFormUrl, formatDays } from '@/lib/email';
 import { getPackageLabel } from '@/lib/constants';
-import nodemailer from 'nodemailer';
+
 
 // Types pour les requêtes et réponses
 interface ContactRequestQueryParams {
@@ -35,7 +38,7 @@ interface ContactRequestWithRelations {
   formResponses?: {
     id: string;
     createdAt: Date;
-    values: Record<string, any>;
+    values: FormValues;
   }[];
   appointment?: {
     id: string;
@@ -88,10 +91,10 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Construire la condition de filtrage
-    const where: any = {};
+    const where: Prisma.ContactRequestWhereInput = {};
     
     if (query.status) {
-      where.status = query.status;
+      where.status = query.status as ContactRequestStatus;
     }
     
     if (query.packageType) {
@@ -168,7 +171,7 @@ export async function GET(request: NextRequest) {
       formResponses: cr.formResponses.map((fr) => ({
         id: fr.id,
         createdAt: fr.createdAt,
-        values: (fr.values as Record<string, any>) || {},
+        values: (fr.values as FormValues) || {},
       })),
       appointment: cr.appointment ? {
         id: cr.appointment.id,
@@ -190,12 +193,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error fetching contact requests:',
       'Une erreur est survenue lors de la récupération des demandes de contact',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -232,7 +235,7 @@ export async function POST(request: NextRequest) {
         packageType: body.packageType,
         days: parseInt(body.days) || 0,
         message: body.message || '',
-        token: body.token || `cr-${require('crypto').randomUUID()}`,
+        token: body.token || `cr-${randomUUID()}`,
         formId: body.formId,
         status: body.status || 'PENDING',
       },
@@ -268,12 +271,12 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error creating contact request:',
       'Une erreur est survenue lors de la création de la demande de contact',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -312,8 +315,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Mise à jour des champs autorisés
-    const updateData: any = {};
-    if (body.status !== undefined) updateData.status = body.status;
+    const updateData: Prisma.ContactRequestUncheckedUpdateInput = {};
+    if (body.status !== undefined) updateData.status = body.status as ContactRequestStatus;
     if (body.formId !== undefined) updateData.formId = body.formId;
     if (body.firstName !== undefined) updateData.firstName = body.firstName;
     if (body.lastName !== undefined) updateData.lastName = body.lastName;
@@ -362,7 +365,7 @@ export async function PATCH(request: NextRequest) {
     // Envoyer un email au client si un formulaire a été associé
     if (isAssigningForm && updatedRequest.form && updatedRequest.token) {
       try {
-        const { emailFrom, recipientEmail, transporter } = await getEmailConfig();
+        const { emailFrom, transporter } = await getEmailConfig();
         const customFormUrl = getCustomFormUrl(updatedRequest.token);
         const packageLabel = getPackageLabel(updatedRequest.packageType);
         
@@ -481,7 +484,7 @@ Date: ${new Date().toLocaleString('fr-FR')}
           formResponses: updatedRequest.formResponses.map((fr) => ({
             id: fr.id,
             createdAt: fr.createdAt,
-            values: (fr.values as Record<string, any>) || {},
+            values: (fr.values as FormValues) || {},
           })),
           appointment: updatedRequest.appointment,
         },
@@ -489,12 +492,12 @@ Date: ${new Date().toLocaleString('fr-FR')}
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error updating contact request:',
       'Une erreur est survenue lors de la mise à jour de la demande de contact',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -542,12 +545,12 @@ export async function DELETE(request: NextRequest) {
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error deleting contact request:',
       'Une erreur est survenue lors de la suppression de la demande de contact',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }

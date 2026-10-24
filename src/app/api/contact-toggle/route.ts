@@ -1,9 +1,9 @@
 import { prisma } from '@/lib/prisma';
 import { getSiteContent } from '@/lib/content';
 import { revalidatePath } from 'next/cache';
-import { apiSuccess, serverError } from '@/lib/api';
+import { apiSuccess, serverError, devErrorDetail } from '@/lib/api';
 
-export async function POST(request: Request) {
+export async function POST() {
     try {
         // Lire l'état actuel
         const content = await getSiteContent();
@@ -28,12 +28,12 @@ export async function POST(request: Request) {
 
         return apiSuccess({ newState });
 
-    } catch (error: any) {
+    } catch (error) {
         return serverError(
             'Erreur lors du basculement du formulaire de contact:',
             'Une erreur est survenue lors de la mise à jour du formulaire de contact',
             error,
-            { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+            { message: devErrorDetail(error) }
         );
     }
 }

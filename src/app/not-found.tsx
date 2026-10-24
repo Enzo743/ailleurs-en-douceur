@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Header, Footer, ContactSection, BotanicalDecoration } from "@/components/layout";
+import { Header, Footer, ContactSection } from "@/components/layout";
 import { getSiteContent } from "@/lib/content";
 import styles from "./page.module.scss";
 
@@ -18,7 +18,7 @@ export default async function NotFound() {
         <div className={styles.notFoundContent}>
           <h1 className={styles.notFoundTitle}>Page introuvable</h1>
           <p className={styles.notFoundSubtitle}>
-            Désolé, la page que vous cherchez n'existe pas ou n'est plus disponible.
+            Désolé, la page que vous cherchez n&apos;existe pas ou n&apos;est plus disponible.
           </p>
           
           <div className={styles.heroDividerContainer}>
@@ -32,12 +32,12 @@ export default async function NotFound() {
         <div className={styles.container}>
           <div className={styles.notFoundActionsContent}>
             <p className={styles.notFoundMessage}>
-              La page demandée n'a pas été trouvée. Elle a peut-être été supprimée ou le lien est incorrect.
+              La page demandée n&apos;a pas été trouvée. Elle a peut-être été supprimée ou le lien est incorrect.
             </p>
             
             <div className={styles.notFoundButtons}>
               <Link href="/" className={styles.notFoundButtonPrimary}>
-                Retour à l'accueil
+                Retour à l&apos;accueil
               </Link>
               
               <Link href="/contact" className={styles.notFoundButtonSecondary}>

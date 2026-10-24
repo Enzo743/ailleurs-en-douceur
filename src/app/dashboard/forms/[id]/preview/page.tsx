@@ -299,7 +299,7 @@ export default function PreviewFormPage({ params }: { params: Promise<{ id: stri
 
       {/* Pied de page */}
       <div className={styles['pdf-footer']}>
-        <p>Merci d'avoir rempli ce formulaire.</p>
+        <p>Merci d&apos;avoir rempli ce formulaire.</p>
         <p className={styles['pdf-date']}>Formulaire généré le : {new Date().toLocaleDateString('fr-FR')}</p>
       </div>
     </div>
@@ -530,7 +530,7 @@ export default function PreviewFormPage({ params }: { params: Promise<{ id: stri
         <div className={styles.container}>
           <div className={styles['error-box']}>
             <h2>Formulaire non trouvé</h2>
-            <p>Le formulaire que vous cherchez n'existe pas ou a été supprimé.</p>
+            <p>Le formulaire que vous cherchez n&apos;existe pas ou a été supprimé.</p>
             <Link href="/dashboard/forms" className={styles['back-link']}>
               Retour à la liste des formulaires
             </Link>

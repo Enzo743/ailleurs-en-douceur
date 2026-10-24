@@ -1,19 +1,14 @@
 "use client";
 
-import { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './section-card.module.scss';
 
 function ContactSettings({ initialState }: { initialState: boolean }) {
     const [isEnabled, setIsEnabled] = useState(initialState);
-    const [isPending, startTransition] = useTransition();
+    const [isPending] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-
-    // Synchroniser l'état avec les props si elles changent (après un refresh)
-    useEffect(() => {
-        setIsEnabled(initialState);
-    }, [initialState]);
 
     const toggleContactForm = async () => {
         try {
@@ -82,6 +77,7 @@ interface ContactSettingsWrapperProps {
 }
 
 // Composant serveur qui passe les données au composant client
+// La key force un remontage quand l'état initial change après un refresh
 export function ContactSettingsWrapper({ initialState }: ContactSettingsWrapperProps) {
-    return <ContactSettings initialState={initialState} />;
+    return <ContactSettings key={String(initialState)} initialState={initialState} />;
 }

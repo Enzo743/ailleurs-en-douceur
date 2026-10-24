@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createPdfDownloadUrl, PdfOptions } from '@/lib/pdf';
+import { createPdfDownloadUrl } from '@/lib/pdf';
 import styles from './DownloadPdfButton.module.scss';
 
 interface DownloadPdfButtonProps {
@@ -50,7 +50,7 @@ export default function DownloadPdfButton({
       targetElement.style.visibility = 'visible';
 
       // Forcer le reflow
-      document.body.offsetHeight;
+      void document.body.offsetHeight;
 
       const result = await createPdfDownloadUrl(
         targetElement as HTMLElement,
@@ -88,9 +88,9 @@ export default function DownloadPdfButton({
         throw new Error(result.error || 'Impossible de générer le PDF');
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error downloading PDF:', error);
-      setError(error.message || 'Une erreur est survenue lors de la génération du PDF');
+      setError((error as Error).message || 'Une erreur est survenue lors de la génération du PDF');
     } finally {
       setIsGenerating(false);
     }

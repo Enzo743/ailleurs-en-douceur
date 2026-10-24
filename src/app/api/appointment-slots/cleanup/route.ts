@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { verifySession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { cleanupExpiredSlots } from '@/lib/time';
-import { apiError, apiSuccess, serverError } from '@/lib/api';
+import { apiError, apiSuccess, serverError, devErrorDetail } from '@/lib/api';
 
 /**
  * POST /api/appointment-slots/cleanup
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     // Verification de la session (optionnel pour un cron job, mais on la garde pour securite)
     try {
       await verifySession();
-    } catch (e) {
+    } catch {
       // Si pas de session valide, on verifie une cle secreta pour les cron jobs
       const { searchParams } = new URL(request.url);
       const secret = searchParams.get('secret');
@@ -35,12 +35,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error cleaning up appointment slots:',
       'Une erreur est survenue lors du nettoyage des createaux',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }

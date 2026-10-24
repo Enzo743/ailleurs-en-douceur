@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import styles from "./mobileMenu.module.scss";
-import Image from "next/image";
+
+import type { SiteContentMap } from "@/lib/content";
 
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
   currentPage?: string;
-  siteContent: any;
+  siteContent: SiteContentMap;
 }
 
 export default function MobileMenu({ isOpen, onClose, currentPage = "", siteContent }: MobileMenuProps) {

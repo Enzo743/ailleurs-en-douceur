@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { apiError, apiSuccess, serverError } from "@/lib/api";
+import { apiError, apiSuccess, serverError, devErrorDetail } from "@/lib/api";
 
 /**
  * Logique commune de suppression d'un formulaire
@@ -60,12 +60,12 @@ export async function POST(
 
     return await deleteForm(id);
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error deleting form:',
       'Une erreur est survenue lors de la suppression du formulaire',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -82,12 +82,12 @@ export async function DELETE(
     const { id } = await params;
     return await deleteForm(id);
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error deleting form:',
       'Une erreur est survenue lors de la suppression du formulaire',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }

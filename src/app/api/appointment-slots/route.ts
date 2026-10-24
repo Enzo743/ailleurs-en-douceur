@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/auth';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { serverError } from '@/lib/api';
-import { doSlotsOverlap, cleanupExpiredSlots, getTodayAtMidnight, calculateDuration, isValidTimeFormat } from '@/lib/time';
-import { getEmailConfig, getScheduleUrl } from '@/lib/email';
+import { serverError, devErrorDetail } from '@/lib/api';
+import { doSlotsOverlap, cleanupExpiredSlots, calculateDuration, isValidTimeFormat } from '@/lib/time';
+
 import { validateAppointmentSlot, type AppointmentSlotData } from '@/lib/validation';
 
 // ============================================================================
@@ -19,7 +20,7 @@ interface AppointmentSlotQueryParams {
 
 interface ApiResponse {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
   message?: string;
   pagination?: {
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Construire la condition de filtrage
-    const where: any = {};
+    const where: Prisma.AppointmentSlotWhereInput = {};
     
     if (query.date) {
       // Filtrer par date (format: YYYY-MM-DD)
@@ -130,12 +131,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error fetching appointment slots:',
       'Une erreur est survenue lors de la recuperation des createaux',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -260,12 +261,12 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error creating appointment slot:',
       'Une erreur est survenue lors de la creation du createau',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
@@ -340,12 +341,12 @@ export async function DELETE(request: NextRequest) {
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error deleting appointment slot:',
       'Une erreur est survenue lors de la suppression du createau',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }

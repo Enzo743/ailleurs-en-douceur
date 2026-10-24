@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { serverError } from '@/lib/api';
+import { serverError, devErrorDetail } from '@/lib/api';
 import fs from 'fs';
 import path from 'path';
 
@@ -91,12 +91,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       },
     });
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error serving file:',
       'Erreur lors du service du fichier',
       error,
-      { details: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { details: devErrorDetail(error) }
     );
   }
 }

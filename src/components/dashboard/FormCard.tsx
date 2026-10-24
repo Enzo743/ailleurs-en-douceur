@@ -80,7 +80,7 @@ export default function FormCard({ form }: FormCardProps) {
         });
       }
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error:', error);
       setSubmitStatus({
         success: false,

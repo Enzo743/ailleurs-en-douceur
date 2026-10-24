@@ -1,12 +1,16 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { 
   FormField, 
   FormSection, 
   DEFAULT_FIELD, 
   DEFAULT_SECTION,
 } from '@/lib/form-constants';
+
+// Compteurs au niveau du module pour générer des IDs uniques de manière stable
+let moduleFieldIdCounter = 0;
+let moduleSectionIdCounter = 0;
 
 interface UseFormWithSectionsProps {
   initialFields?: FormField[];
@@ -69,19 +73,38 @@ export function useFormWithSections({
   initialFields = [],
   initialSections = [],
 }: UseFormWithSectionsProps = {}): UseFormWithSectionsReturn {
-  // Compteurs locaux pour générer des IDs uniques de manière stable
-  const fieldIdCounter = useRef(0);
-  const sectionIdCounter = useRef(0);
-
-  // Générer un ID de champ de manière stable
+  // Compteurs au niveau du module pour générer des IDs uniques
+  // (hors du rendu React, cf. clôtures du compilateur)
   const generateLocalFieldId = useCallback(() => {
-    return `field-${++fieldIdCounter.current}`;
+    return `field-${++moduleFieldIdCounter}`;
   }, []);
 
-  // Générer un ID de section de manière stable
   const generateLocalSectionId = useCallback(() => {
-    return `section-${++sectionIdCounter.current}`;
+    return `section-${++moduleSectionIdCounter}`;
   }, []);
+
+  // État initial des sections : sections fournies, sinon une section par défaut
+  // regroupant les champs initiaux s'il y en a
+  const initialSectionsState = (): FormSection[] => {
+    if (initialSections.length > 0) {
+      return initialSections;
+    }
+    if (initialFields.length > 0) {
+      // Si on a des champs initiaux mais pas de sections, créer une section par défaut
+      return [{
+        ...DEFAULT_SECTION,
+        id: generateLocalSectionId(),
+        order: 0,
+        fieldIds: initialFields.map(f => f.id),
+      }];
+    }
+    return [{
+      ...DEFAULT_SECTION,
+      id: generateLocalSectionId(),
+      order: 0,
+      fieldIds: [],
+    }];
+  };
 
   // États pour les champs
   const [fields, setFields] = useState<FormField[]>(() => {
@@ -98,35 +121,12 @@ export function useFormWithSections({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // États pour les sections
-  const [sections, setSections] = useState<FormSection[]>(() => {
-    if (initialSections.length > 0) {
-      return initialSections;
-    }
-    return [{
-      ...DEFAULT_SECTION,
-      id: generateLocalSectionId(),
-      order: 0,
-      fieldIds: [],
-    }];
-  });
+  const [sections, setSections] = useState<FormSection[]>(initialSectionsState);
 
   const [sectionErrors, setSectionErrors] = useState<Record<string, string>>({});
   
   // Sections expandées
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-
-  // Synchroniser les sections avec les champs au chargement
-  useEffect(() => {
-    if (initialFields.length > 0 && initialSections.length === 0) {
-      // Si on a des champs initiaux mais pas de sections, créer une section par défaut
-      setSections([{
-        ...DEFAULT_SECTION,
-        id: generateLocalSectionId(),
-        order: 0,
-        fieldIds: initialFields.map(f => f.id),
-      }]);
-    }
-  }, [initialFields, initialSections]);
 
   // ============================================================================
   // Actions pour les champs
@@ -151,7 +151,7 @@ export function useFormWithSections({
         )
       );
     }
-  }, [fields.length, sections]);
+  }, [fields.length, generateLocalFieldId]);
 
   const removeField = useCallback(
     (fieldId: string, minFields: number = 1) => {
@@ -303,7 +303,7 @@ export function useFormWithSections({
     };
     setSections((prev) => [...prev, newSection]);
     setExpandedSections((prev) => new Set(prev).add(newSection.id));
-  }, [sections.length]);
+  }, [sections.length, generateLocalSectionId]);
 
   const removeSection = useCallback(
     (sectionId: string): boolean => {

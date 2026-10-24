@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Header, Footer, BotanicalDecoration, ContactSection, RichTextDisplay } from "./index";
+import type { SiteContentMap } from "@/lib/content";
 import styles from "./offerpagetemplate.module.scss";
 
 interface Formula {
@@ -38,7 +39,7 @@ interface OfferPageProps {
     asteriskNote?: string;
   };
   currentPage?: string;
-  siteContent: any;
+  siteContent: SiteContentMap;
 }
 
 export default function OfferPageTemplate({ content, currentPage, siteContent }: OfferPageProps) {

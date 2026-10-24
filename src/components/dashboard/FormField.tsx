@@ -182,7 +182,7 @@ export default function FormField({
                 className={styles.checkbox}
                 disabled={disabled}
               />
-              Autoriser l'option "Autre" avec texte libre
+              Autoriser l&apos;option &quot;Autre&quot; avec texte libre
             </label>
           </div>
         )}
@@ -231,7 +231,7 @@ export default function FormField({
             <input
               type={field.type === 'RANGE_NUMBER' ? 'number' : 'date'}
               id={`minValue-${field.id}`}
-              value={(field as any).minValue || ''}
+              value={field.minValue || ""}
               onChange={(e) => onChange('minValue', e.target.value)}
               className={styles.input}
               disabled={disabled}
@@ -244,7 +244,7 @@ export default function FormField({
             <input
               type={field.type === 'RANGE_NUMBER' ? 'number' : 'date'}
               id={`maxValue-${field.id}`}
-              value={(field as any).maxValue || ''}
+              value={field.maxValue || ""}
               onChange={(e) => onChange('maxValue', e.target.value)}
               className={styles.input}
               disabled={disabled}

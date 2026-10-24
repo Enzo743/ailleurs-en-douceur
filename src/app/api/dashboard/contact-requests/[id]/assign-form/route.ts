@@ -3,7 +3,7 @@ import { verifySession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getEmailConfig, getCustomFormUrl, formatDays } from '@/lib/email';
 import { getPackageLabel } from '@/lib/constants';
-import { apiError, apiSuccess, serverError } from '@/lib/api';
+import { apiError, apiSuccess, serverError, devErrorDetail } from '@/lib/api';
 
 /**
  * POST /api/dashboard/contact-requests/[id]/assign-form
@@ -164,12 +164,12 @@ Date: ${new Date().toLocaleString('fr-FR')}
       },
     });
 
-  } catch (error: any) {
+  } catch (error) {
     return serverError(
       'Error assigning form:',
       'Une erreur est survenue lors de l\'association du formulaire',
       error,
-      { message: process.env.NODE_ENV === 'development' ? error.message : undefined }
+      { message: devErrorDetail(error) }
     );
   }
 }
