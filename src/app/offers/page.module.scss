@@ -1,92 +1,19 @@
 @use "../../styles/_variables" as *;
 @use "../../styles/_mixins" as *;
+@use "../../styles/_page-base" as *;
 
 // Page Container
 .offersPage {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  width: 100%;
-  background-color: $color-creme;
-  font-family: $font-family-base;
+  @include page-root;
 }
 
 // Container
 .container {
-  display: flex;
-  margin: 0 auto;
-  padding: 0 $spacing-lg;
-  width: 100%;
-  max-width: 1440px;
-  flex-direction: column;
+  @include page-container;
 }
 
 // Hero Section
-.heroSection {
-  position: relative;
-  width: 100%;
-  min-height: 542px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 113px $spacing-xl 80px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  color: white;
-
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba($color-brun, 0.5);
-    z-index: 0;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 0;
-  }
-}
-
-.heroContent {
-  position: relative;
-  z-index: 1;
-  max-width: 600px;
-}
-
-.heroTitle {
-  color: $color-creme;
-  text-shadow: 0 4px 4px rgba(30, 30, 30, 0.20);
-  font-family: $font-family-title;
-  font-size: 48px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-  margin-bottom: 38px;
-}
-
-.heroDivider {
-  width: 72px;
-  height: 2px;
-  margin: $spacing-sm 0;
-  background: $color-caramel;
-}
-
-.heroSubtitle {
-  font-family: $font-family-base;
-  font-size: 22px;
-  font-weight: 600;
-  line-height: 28px;
-  text-shadow: 0 4px 4px rgba(30, 30, 30, 0.2);
-  color: $color-creme;
-  margin-bottom: 44px;
-  max-width: 320px;
-}
+@include page-hero(320px);
 
 // Introduction Section
 .introSection {

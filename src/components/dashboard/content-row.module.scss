@@ -1,5 +1,6 @@
 @use "../../styles/_variables" as *;
 @use "../../styles/_mixins" as *;
+@use "../../styles/_forms" as *;
 
 // ── Ligne de contenu ──────────────────────────────────────────────────────────
 
@@ -58,33 +59,11 @@
 
 .input,
 .textarea {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  font-family: $font-family-base;
-  font-size: 0.9375rem;
-  color: #111827;
-  background-color: #f9fafb;
-  border: 1.5px solid #d1d5db;
-  border-radius: 8px;
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-
-  &:focus {
-    border-color: $color-caramel;
-    box-shadow: 0 0 0 3px rgba($color-caramel, 0.15);
-    background-color: #ffffff;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+  @include form-control;
 }
 
 .textarea {
-  resize: vertical;
-  min-height: 96px;
-  line-height: 1.6;
+  @include form-control-textarea;
 }
 
 // ── Aperçu image ──────────────────────────────────────────────────────────────
@@ -170,51 +149,11 @@
 }
 
 .saveButton {
-  padding: 0.5rem 1.125rem;
-  font-family: $font-family-title;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #ffffff;
-  background-color: $color-caramel;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.15s ease, opacity 0.15s ease;
-
-  @include hover-capable {
-    &:hover:not(:disabled) {
-      background-color: $color-brun;
-    }
-  }
-
-  &:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-  }
+  @include form-button(0.5rem 1.125rem);
 }
 
 .selectButton {
-  padding: 0.5rem 1.125rem;
-  font-family: $font-family-title;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: $color-brun;
-  background-color: #fdf3e7;
-  border: 1.5px solid $color-caramel;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.15s ease, opacity 0.15s ease;
-
-  @include hover-capable {
-    &:hover:not(:disabled) {
-      background-color: #fce8cc;
-    }
-  }
-
-  &:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-  }
+  @include form-button(0.5rem 1.125rem, $color: $color-brun, $background: #fdf3e7, $border: 1.5px solid $color-caramel, $hover-background: #fce8cc);
 }
 
 .statusOk {

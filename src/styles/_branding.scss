@@ -1,0 +1,20 @@
+@use "variables" as *;
+
+// Logo texte du site (header + footer)
+@mixin brand-logo {
+  .logoTitle {
+    font-family: $font-family-title;
+    font-size: 24px;
+    font-weight: 400;
+    color: $color-brun;
+    line-height: normal;
+  }
+
+  .logoSubtitle {
+    font-family: $font-family-secondary;
+    font-size: 20px;
+    color: $color-caramel;
+    line-height: normal;
+    font-style: italic;
+  }
+}

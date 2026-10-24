@@ -1,0 +1,66 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+// Champ de formulaire du dashboard (input / textarea)
+@mixin form-control {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-family: $font-family-base;
+  font-size: 0.9375rem;
+  color: #111827;
+  background-color: #f9fafb;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus {
+    border-color: $color-caramel;
+    box-shadow: 0 0 0 3px rgba($color-caramel, 0.15);
+    background-color: #ffffff;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Variantes textarea du champ de formulaire
+@mixin form-control-textarea {
+  resize: vertical;
+  min-height: 96px;
+  line-height: 1.6;
+}
+
+// Bouton du dashboard (primaire caramel par défaut,
+// surchargez les paramètres pour les variantes grise et outline)
+@mixin form-button(
+  $padding,
+  $color: #ffffff,
+  $background: $color-caramel,
+  $border: none,
+  $hover-background: $color-brun
+) {
+  padding: $padding;
+  font-family: $font-family-title;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color;
+  background-color: $background;
+  border: $border;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+
+  @include hover-capable {
+    &:hover:not(:disabled) {
+      background-color: $hover-background;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}

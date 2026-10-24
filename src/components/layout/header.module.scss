@@ -1,4 +1,5 @@
 @use "../../styles/variables" as *;
+@use "../../styles/_branding" as *;
 @use "../../styles/mixins" as *;
 
 .header {
@@ -75,21 +76,7 @@
   }
 }
 
-.logoTitle {
-  font-family: $font-family-title;
-  font-size: 24px;
-  font-weight: 400;
-  color: $color-brun;
-  line-height: normal;
-}
-
-.logoSubtitle {
-  font-family: $font-family-secondary;
-  font-size: 20px;
-  color: $color-caramel;
-  line-height: normal;
-  font-style: italic;
-}
+@include brand-logo;
 
 .navMenu {
   position: relative;

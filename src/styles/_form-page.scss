@@ -1,0 +1,117 @@
+@use "variables" as *;
+
+// Carte blanche centrée des pages de formulaire public
+// (custom-form, schedule)
+@mixin form-card($max-width: 800px) {
+  max-width: $max-width;
+  width: 100%;
+  background: $color-background;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+}
+
+// En-tête de la carte : titre h1 + sous-titre centrés
+@mixin form-card-header {
+  margin-bottom: 30px;
+
+  h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: $color-brun;
+    margin: 0 0 10px 0;
+    text-align: center;
+  }
+
+  .subtitle {
+    font-size: 16px;
+    color: $color-text-secondary;
+    text-align: center;
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+
+// Spinner de chargement
+@mixin form-loading-spinner {
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid $color-background-light;
+    border-top: 4px solid $color-brun;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+}
+
+// Bouton d'action principal (soumettre, confirmer)
+@mixin form-action-button($padding: 14px 40px, $font-size: 16px) {
+  background: $color-brun;
+  color: $color-background;
+  border: none;
+  padding: $padding;
+  font-size: $font-size;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+
+  &:hover {
+    background: #3a3228;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    background: $color-border-dark;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+// Bouton de retour
+@mixin form-back-button {
+  background: $color-brun;
+  color: $color-background;
+  border: none;
+  padding: 12px 30px;
+  font-size: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: #3a3228;
+  }
+}
+
+// Encart d'erreur
+@mixin form-error-box {
+  .error-box {
+    text-align: center;
+    padding: 40px;
+    background: #ffebee;
+    border-radius: 12px;
+    border: 2px solid #d32f2f;
+
+    h2 {
+      color: #b71c1c;
+      margin: 0 0 15px 0;
+      font-size: 24px;
+    }
+
+    p {
+      color: #880e4f;
+      margin: 0 0 20px 0;
+      line-height: 1.6;
+    }
+  }
+}
